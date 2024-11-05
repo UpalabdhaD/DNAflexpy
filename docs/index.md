@@ -4,7 +4,6 @@
 
 This documentation provides an overview of installation, usage, and API references to help you get started quickly.
 
----
 
 ## Features
 
