@@ -32,7 +32,6 @@ nav:
 # Plugins
 plugins:
   - search  # Adds search functionality
-  - mkdocs-material-extensions  # Extra features for Material theme (optional)
   - glightbox  # Adds lightbox support for images (optional)
 
 # Markdown Extensions
