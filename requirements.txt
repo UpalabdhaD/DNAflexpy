@@ -1,0 +1,10 @@
+# Core
+pandas>=1.0
+pyyaml>=5.4
+
+# Testing
+pytest>=6.0
+
+# Documentation
+mkdocs>=1.2
+mkdocs-material>=7.0
