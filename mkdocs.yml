@@ -1,12 +1,73 @@
+# Project Information
 site_name: "DNAflexpy"
-theme:
-  name: "material"
+site_description: "A tool for trinucleotide feature profiling in DNA sequences"
+site_author: "Aditya Kumar"
+site_url: "https://<your-github-username>.github.io/DNAflexpy/"  # Replace with your GitHub Pages URL
 
+# Theme Configuration
+theme:
+  name: "material"  # Using the Material for MkDocs theme
+  logo: "images/logo.png"  # Optional: Add a custom logo
+  favicon: "images/favicon.ico"  # Optional: Add a custom favicon
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+
+# Navigation Structure
 nav:
   - Home: index.md
   - Installation: installation.md
-  - Usage: usage.md
-  - API Reference: api_reference.md
-  - FAQ: faq.md
+  - Usage:
+      - Command-Line Usage: usage.md
+      - API Reference: api_reference.md
   - Citation: citation.md
-  - Changelog: changelog.md
+  - FAQ: faq.md
+
+# Plugins
+plugins:
+  - search  # Adds search functionality
+  - mkdocs-material-extensions  # Extra features for Material theme (optional)
+  - glightbox  # Adds lightbox support for images (optional)
+
+# Markdown Extensions
+markdown_extensions:
+  - toc:
+      permalink: true
+  - footnotes
+  - pymdownx.arithmatex  # For LaTeX support (if needed)
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.magiclink
+  - pymdownx.betterem
+  - pymdownx.tilde
+
+# Extra CSS and JavaScript (Optional)
+# extra_css:
+#   - stylesheets/custom.css  # Add custom styles if needed
+# extra_javascript:
+#   - javascripts/custom.js   # Add custom JavaScript if needed
+
+# Repository URL for Edit Links
+repo_url: "https://github.com/<your-github-username>/DNAflexpy"
+repo_name: "GitHub"
+
+# Optional: Custom 404 Page
+extra:
+  social:
+    - icon: "fontawesome/brands/github"
+      link: "https://github.com/<your-github-username>/DNAflexpy"
+  copyright: "Copyright &copy; 2024 Aditya Kumar"
+
+# GitHub Pages Config (if deploying manually)
+# Uncomment if deploying without GitHub Actions
+# extra_css:
+#   - css/extra.css
+# plugins:
+#   - mkdocs-git-revision-date-localized
