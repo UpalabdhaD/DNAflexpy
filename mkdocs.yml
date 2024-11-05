@@ -2,3 +2,11 @@ site_name: "DNAflexpy"
 theme:
   name: "material"
 
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - API Reference: api_reference.md
+  - FAQ: faq.md
+  - Citation: citation.md
+  - Changelog: changelog.md

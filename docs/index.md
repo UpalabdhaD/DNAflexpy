@@ -1,17 +1,23 @@
-# Welcome to MkDocs
+# DNAflexpy
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+**DNAflexpy** is a python package designed to calculate bendability of DNA sequences using trinucleotide feature values, helping researchers analyze and understand sequence properties.
 
-## Commands
+This documentation provides an overview of installation, usage, and API references to help you get started quickly.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+---
 
-## Project layout
+## Features
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+- **Feature Profiling**: Analyze DNA sequences based on trinucleotide or dinucleotide features.
+- **Customizable**: Specify feature types and window sizes for in-depth analysis.
+- **Command-line Interface**: Run DNAflexpy from the command line for quick calculations.
+- **Python Library**: Import DNAflexpy as a library in Jupyter notebooks or other scripts.
+
+---
+
+## Table of Contents
+
+- [Installation](installation.md)
+- [Usage](usage.md)
+- [API Reference](api_reference.md)
+- [FAQ](faq.md)
