@@ -32,7 +32,6 @@ nav:
 # Plugins
 plugins:
   - search  # Adds search functionality
-  - glightbox  # Adds lightbox support for images (optional)
 
 # Markdown Extensions
 markdown_extensions:
