@@ -48,3 +48,5 @@ markdown_extensions:
 plugins:
   - search
 #   - mkdocs-material
+repo_url: https://github.com/upalabdhaD/dnaflexpy
+repo_name: GitHub
