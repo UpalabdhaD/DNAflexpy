@@ -12,7 +12,7 @@ feature-profiler input.fasta --window-size 10 --kmer-len 3 --feature DNaseI --ou
 
 ## Run by importing as library
 
-```python
+```py
 
 from DNAflexpy.core import calculate_features
 
