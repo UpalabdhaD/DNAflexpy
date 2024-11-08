@@ -1,33 +1,38 @@
 import pandas as pd
-
 import multiprocessing
 import logging
 from typing import Optional
-from .utils import read_fasta, load_feature_data, seq_to_numeric_profile
+from .utils import read_fasta, get_kmer_len, load_feature_data, seq_to_numeric_profile
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def process_sequence(record, 
-                    window_size, 
-                    kmer_len, 
-                    feature, 
-                    feature_lookup):
+def DNAflexpy(seqid:str, record:str, window_size:int, feature:str, feature_lookup: str):
     """
         Takes a sequence, 
         window size,
         kmer length,
         feature,
         feature_lookup
-        
     """
+    try:
+        kmer_len = get_kmer_len(feature)
+        feature_value = seq_to_numeric_profile(seqid, record, kmer_len, window_size, feature, feature_lookup)
+        return feature_value
+    
+    except Exception as e:
+        print(f"Error occured while processing sequence: {e}")
 
-    feature_value = seq_to_numeric_profile(record, window_size, kmer_len, feature, feature_lookup)
-    return feature_value
 
 
-def calculate_bendability(input_file: str, window_size: int, prop: str, kmer_len: int, feature: str, feature_file: str, threads: int, outfile: Optional[str] = None) -> Optional[pd.DataFrame]:
+def calculate_bendability(input_file: str, 
+                          window_size: int, 
+                          prop: str, 
+                          feature: str, 
+                          feature_file: str, 
+                          threads: int, 
+                          outfile: Optional[str] = None) -> Optional[pd.DataFrame]:
     """
-    Main function to calculate feature profiles from a FASTA file.
+    Main function to calculate feature profilesß from a FASTA file.
 
     Args:
         input_file (str): Path to the input multifasta file.
@@ -45,10 +50,15 @@ def calculate_bendability(input_file: str, window_size: int, prop: str, kmer_len
         # Load feature data
         feature_lookup = load_feature_data(prop, feature_file)
         
+        # Read the FASTA file and get sequence IDs and sequences
+        sequence_data = list(read_fasta(input_file))  # List of tuples (id, seq)
+        
         # Parse the fasta file and process sequences
-#         records = list(read_fasta(input_file))
         with multiprocessing.Pool(processes=threads) as pool:
-            results = pool.starmap(process_sequence, [(seq, window_size, kmer_len, feature, feature_lookup) for _, seq in read_fasta(input_file)])
+            processed_results = pool.starmap(process_sequence, [(seq, window_size, feature, feature_lookup) for _, seq in sequence_data])
+
+        # Map sequence IDs to processed results
+        results = {sequence_data[i][0]: processed_results[i] for i in range(len(sequence_data))}
 
         # Create DataFrame from results
         df = pd.DataFrame(results)

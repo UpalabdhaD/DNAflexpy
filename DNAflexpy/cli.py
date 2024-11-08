@@ -1,7 +1,7 @@
 import argparse
 import multiprocessing
 import os
-from .core import calculate_features
+from .core import calculate_bendability
 
 
 def main():
@@ -9,7 +9,7 @@ def main():
     Command-line interface for the feature profiling tool.
     """
     parser = argparse.ArgumentParser(description="Process a multifasta file and calculate bendability of DNA sequence")
-    
+
     parser.add_argument("input_file", help="Path to the input multifasta file")
     parser.add_argument("--window-size", type=int, default=10, help="Size of the processing window [default: 10]")
     parser.add_argument("--kmer-len", type=int, default=3, help="Length of k-mers [default: 3]")
@@ -25,7 +25,7 @@ def main():
     output_filename = args.outfile or f"{out_base_name}_w{args.window_size}nt_{args.feature}.tsv"
 
     # Run the calculation
-    calculate_features(
+    calculate_bendability(
         input_file=args.input_file,
         window_size=args.window_size,
         kmer_len=args.kmer_len,
