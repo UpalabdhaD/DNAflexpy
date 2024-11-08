@@ -31,7 +31,7 @@ extra:
 
 nav:
   - Home: index.md
-  - Usgae: usage.md
+  - Usage: usage.md
   - FAQ: faq.md
   - Installation: installation.md
   - Citation: citation.md
