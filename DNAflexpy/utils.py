@@ -2,20 +2,20 @@ import yaml
 from typing import Generator, Tuple, Dict
 
        
-def process_sequence(seqid:str, record:str, window_size:int, feature:str, feature_lookup: str):
-    """
-        Takes a sequence, 
-        window size,
-        kmer length,
-        feature,
-        feature_lookup
-    """
-    try:
-        kmer_len = get_kmer_len(feature)
-        feature_value = seq_to_numeric_profile(seqid, record, kmer_len, window_size, feature, feature_lookup)
-        return feature_value
-    except Exception as e:
-        print(f"Error occured while processing sequence: {e}")
+# def process_sequence(seqid:str, record:str, window_size:int, feature:str, feature_lookup: str):
+#     """
+#         Takes a sequence, 
+#         window size,
+#         kmer length,
+#         feature,
+#         feature_lookup
+#     """
+#     try:
+#         kmer_len = get_kmer_len(feature)
+#         feature_value = seq_to_numeric_profile(seqid, record, kmer_len, window_size, feature, feature_lookup)
+#         return feature_value
+#     except Exception as e:
+#         print(f"Error occured while processing sequence: {e}")
 
 
 

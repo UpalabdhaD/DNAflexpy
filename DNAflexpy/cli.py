@@ -1,7 +1,8 @@
 import argparse
 import multiprocessing
 import os
-from .core import calculate_bendability
+from .core import DNAflexpyMP
+
 
 
 def main():
@@ -11,12 +12,11 @@ def main():
     parser = argparse.ArgumentParser(description="Process a multifasta file and calculate bendability of DNA sequence")
 
     parser.add_argument("input_file", help="Path to the input multifasta file")
-    parser.add_argument("--window-size", type=int, default=10, help="Size of the processing window [default: 10]")
-    parser.add_argument("--kmer-len", type=int, default=3, help="Length of k-mers [default: 3]")
+    parser.add_argument("--window-size", type=int, default=0, help="Size of the processing window [default: 10]")
     parser.add_argument("--feature", default="DNaseI", help="Feature(s) to calculate ('DNaseI', 'NPP') [default: DNaseI]")
     parser.add_argument("--threads", type=int, default=multiprocessing.cpu_count(), help="Number of threads")
     parser.add_argument("--outfile", help="Output file name [optional]")
-    parser.add_argument("--feature-file", default="data/lookup.yaml", help="Path to the YAML file containing feature data")
+    parser.add_argument("--feature-file", default="data/lookupNEW.yaml", help="Path to the YAML file containing feature data")
 
     args = parser.parse_args()
 
@@ -25,10 +25,9 @@ def main():
     output_filename = args.outfile or f"{out_base_name}_w{args.window_size}nt_{args.feature}.tsv"
 
     # Run the calculation
-    calculate_bendability(
+    DNAflexpyMP(
         input_file=args.input_file,
         window_size=args.window_size,
-        kmer_len=args.kmer_len,
         feature=args.feature,
         feature_file=args.feature_file,
         threads=args.threads,
