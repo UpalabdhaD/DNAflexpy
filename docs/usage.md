@@ -25,7 +25,6 @@ from DNAflexpy.core import DNAflexpy
 df = DNAflexpy(
     input_file="input.fasta",
     window_size=10,
-    kmer_len=3,
     feature="DNaseI",
     threads=4
 )

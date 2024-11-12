@@ -10,12 +10,10 @@ Ensure that Python 3.8 or later is installed on your system. You can check your 
 - pandas
 - pyyaml
 
-
 ```bash
-
 python --version
-
 ```
+
 ## Installation with pip
 
 - Directly use pip to install from github
@@ -31,6 +29,7 @@ OR
 ```bash
 # create env with pip installation
 conda create -n DNAflexpy_env pip -c conda-forge
+conda activate DNAflexpy_env
 
 # git clone 
 git clone https://github.com/upalabdhaD/DNAflexpy.git
