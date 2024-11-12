@@ -15,13 +15,13 @@ def DNAflexpy(seqid:str, record:str, window_size:int, feature:str, feature_looku
         feature_lookup
     """
     try:
+        feature_lookup = load_feature_data()
         kmer_len = get_kmer_len(feature)
         feature_value = seq_to_numeric_profile(seqid, record, kmer_len, window_size, feature, feature_lookup)
         return feature_value
     
     except Exception as e:
         print(f"Error occured while processing sequence: {e}")
-
 
 
 def DNAflexpy_for_CLI(seqid:str, record:str, kmer_len:int, window_size:int, feature:str, feature_lookup: str):
@@ -42,7 +42,6 @@ def DNAflexpy_for_CLI(seqid:str, record:str, kmer_len:int, window_size:int, feat
 def DNAflexpyMP(input_file: str, 
                           window_size: int, 
                           feature: str,
-                          feature_file: str, 
                           threads: int,
                           outfile: Optional[str] = None) -> Optional[pd.DataFrame]:
     """
@@ -63,7 +62,7 @@ def DNAflexpyMP(input_file: str,
 
     try:
         # Load feature data
-        feature_lookup = load_feature_data(feature_file)
+        feature_lookup = load_feature_data()
         kmer_len = get_kmer_len(feature)
 
         sequence_data = list(read_fasta(input_file))  # List of tuples (id, seq)

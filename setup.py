@@ -5,6 +5,10 @@ setup(
     version="0.1",
     description="A tool for trinucleotide feature profiling in DNA sequences",
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        "DNAflexpy": ['data/*.yaml']
+    },
     install_requires=[
         "pandas>=1.0",
         "pyyaml>=5.4"

@@ -1,6 +1,6 @@
 import yaml
 from typing import Generator, Tuple, Dict
-
+from importlib.resources import files
        
 # def process_sequence(seqid:str, record:str, window_size:int, feature:str, feature_lookup: str):
 #     """
@@ -143,7 +143,7 @@ def get_kmer_len(feature:str):
 
 
 
-def load_feature_data(feature_file: str="data/lookupNEW.yaml") -> Dict[str, float]:
+def load_feature_data() -> Dict[str, float]:
     """
     Loads feature data from a YAML file for a given k-mer length.
 
@@ -155,7 +155,9 @@ def load_feature_data(feature_file: str="data/lookupNEW.yaml") -> Dict[str, floa
         dict: A dictionary of feature data.
     """
     try:
-        with open(feature_file, 'r') as f:
+        yamlfilepath = files("DNAflexpy.data").joinpath("lookupNEW.yaml")
+
+        with open(yamlfilepath, 'r') as f:
             return yaml.safe_load(f)
         
     except FileNotFoundError:
