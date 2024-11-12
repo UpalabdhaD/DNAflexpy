@@ -343,7 +343,7 @@ twistDisp:
   TC: 4.4
   TG: 6.5
   TT: 3.9
-stifness:
+stiffness:
   AA: 1820
   AC: 1660
   AG: 2390
@@ -377,3 +377,20 @@ bendingStiffness:
   TC: 60
   TG: 60
   TT: 35
+mechen:
+  AA: -1.36
+  AC: -2.03
+  AG: -1.60
+  AT: -2.35
+  CA: -0.81
+  CC: -1.64
+  CG: -2.06
+  CT: -1.60
+  GA: -1.39
+  GC: -3.42
+  GG: -1.64
+  GT: -2.03
+  TA: -1.01
+  TC: -1.39
+  TG: -0.81
+  TT: -1.36
