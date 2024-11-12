@@ -7,9 +7,12 @@ This documentation provides an overview of installation, usage, and API referenc
 
 ## Features
 
-- **Feature Profiling**: Analyze DNA sequences based on trinucleotide or dinucleotide features.
+- **Bendability estimation**: Calculate bendability of DNA sequences based on trinucleotide or dinucleotide features.
+
 - **Customizable**: Specify feature types and window sizes for in-depth analysis.
+
 - **Command-line Interface**: Run DNAflexpy from the command line for quick calculations.
+
 - **Python Library**: Import DNAflexpy as a library in Jupyter notebooks or other scripts.
 
 ---

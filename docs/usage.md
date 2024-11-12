@@ -7,22 +7,26 @@ This section includes examples of how to use DNAflexpy both as a command-line to
 Once DNAflexpy is installed, you can run it from the command line:
 
 ```bash
-feature-profiler input.fasta --window-size 10 --kmer-len 3 --feature DNaseI --outfile output.tsv
+
+DNAflexpy "<path/to/nt/fasta/file>" \
+    --window-size 10 \
+    --feature "<DNaseI>/<NPP>" \
+    --outfile "<path/to/output.tsv>"
+
 ```
 
 ## Run by importing as library
 
 ```py
 
-from DNAflexpy.core import calculate_features
+from DNAflexpy.core import DNAflexpy
 
 # Example usage
-df = calculate_bendability(
+df = DNAflexpy(
     input_file="input.fasta",
     window_size=10,
     kmer_len=3,
     feature="DNaseI",
-    feature_file="data/feature_lookup.yaml",
     threads=4
 )
 
