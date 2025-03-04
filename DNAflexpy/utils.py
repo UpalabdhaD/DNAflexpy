@@ -131,7 +131,7 @@ def read_fasta(filepath: str) -> Generator[Tuple[str, str], None, None]:
 def get_kmer_len(feature:str):
     
     kmerlen_to_feature = {3:['DNaseI', 'NPP', 'bendabilityDNase', 'bendabilityConcensus'],
-                          2: ['wedge', 'prop', 'twistDisp', 'stiffness', 'bendingStiffness']}
+                          2: ['wedge', 'prop', 'twistDisp', 'stiffness', 'bendingStiffness', 'trx']}
         
     try:
         for kmer_len, features in kmerlen_to_feature.items():
