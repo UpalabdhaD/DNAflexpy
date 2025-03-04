@@ -91,11 +91,11 @@ def transform_seq_to_feat(sequence, kmer_len, feature, feature_lookup):
             subseq = sequence[i: i + kmer_len]
             value = feature_data.get(subseq, 0)
             # value = feature_data.get(subseq, 0)  # Default to 0 if missing
-            ls_values_w.append(value)
-            # if value is not None:
-            #     ls_values_w.append(value)
-            # else:
-            #     print(f"**Warning** Subsequence {subseq} not found in the dictionary for {feature}")
+            # ls_values_w.append(value)
+            if value is not None:
+                ls_values_w.append(value)
+            else:
+                print(f"**Warning** Subsequence {subseq} not found in the dictionary for {feature}")
     
         return ls_values_w
     
