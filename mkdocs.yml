@@ -32,6 +32,7 @@ extra:
 nav:
   - Home: index.md
   - Usage: usage.md
+  - Window Size Checks: window_size_checks.md
   - FAQ: faq.md
   - Installation: installation.md
   - Citation: citation.md

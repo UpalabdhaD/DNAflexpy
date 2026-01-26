@@ -22,7 +22,9 @@ from importlib.resources import files
 def seq_to_numeric_profile(seqid:str, sequence:str, kmer_len:int, window_size:int, feature:str, feature_lookup:dict):
     """
         Desc:
-            - Operates on a sequence to aggregate average feature value of all the overlapping window
+            - If window_size > 0, builds overlapping windows of that length, computes per-kmer
+              feature values inside each window, and returns the mean value per window.
+            - If window_size == 0, returns the per-kmer feature values for the full sequence.
 
         arguments:
             - sequence
@@ -39,11 +41,24 @@ def seq_to_numeric_profile(seqid:str, sequence:str, kmer_len:int, window_size:in
     try:
         if window_size > 0:
             ls_window_avg_for_seq = [seqid]
+
+            if window_size > len(sequence):
+                print(
+                    f"**Warning** window_size ({window_size}) > sequence length "
+                    f"({len(sequence)}) for {seqid}; no windows generated."
+                )
+                return ls_window_avg_for_seq
+
+            if window_size < kmer_len:
+                print(
+                    f"**Warning** window_size ({window_size}) < kmer_len ({kmer_len}) "
+                    f"for {seqid}; windows will yield 0.0 averages."
+                )
         
             for w_start in range(len(sequence) - window_size + 1):
                 current_w_seq = sequence[w_start : w_start + window_size]
                 w = transform_seq_to_feat(current_w_seq, kmer_len, feature, feature_lookup)
-                avg_w = sum(w) / (len(sequence) - 1) if w else 0
+                avg_w = (sum(w) / len(w)) if w else 0.0
                 ls_window_avg_for_seq.append(round(avg_w, 3))
 
             return ls_window_avg_for_seq
@@ -170,4 +185,3 @@ def load_feature_data() -> Dict[str, float]:
 
     except Exception as e:
         raise RuntimeError(f"An error occurred while loading feature data: {e}")
-

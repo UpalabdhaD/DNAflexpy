@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="DNAflexpy",
-    version="0.1",
+    version="0.2.0",
     description="A tool for trinucleotide feature profiling in DNA sequences",
     packages=find_packages(),
     include_package_data=True,

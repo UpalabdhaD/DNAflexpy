@@ -16,11 +16,17 @@ You can use the following BibTeX entry to cite DNAflexpy:
 
 ```bibtex
 @software{DNAflexpy,
-  author = {Kumar, Aditya},
-  title = {DNAflexpy: A Tool for Trinucleotide Feature Profiling in DNA Sequences},
-  year = {2024},
+  author = {ADD_AUTHOR_LIST},
+  title = {ADD_TITLE},
+  year = {ADD_YEAR},
   publisher = {GitHub},
-  version = {1.0},
+  version = {ADD_VERSION},
   url = {https://github.com/upalabdhaD/DNAflexpy}
 }
+```
+
+You can also print this placeholder from the CLI:
+
+```bash
+DNAflexpy --citation
 ```
