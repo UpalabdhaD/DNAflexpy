@@ -266,6 +266,113 @@ Additional coverage: `FeatureTable` validation units, encoding shape/dtype
 assertions, plotting smoke tests on the Agg backend, and a `from_bed`
 round-trip. The old package's broken `tests/test_utils.py` is not carried over.
 
+## Ambiguous nucleotides — a correctness fix
+
+The old package resolves any k-mer containing `N` or an IUPAC ambiguity code to
+`0` via `.get(subseq, 0)`. Zero is a **legitimate value** in these tables (`gc`
+AA=0.0, `trx` AA=0), so a gap is indistinguishable from a measurement:
+
+```
+ATGCGTACGT -> [0.134, 0.076, -0.077, -0.033, 0.025, ...]
+ATGNGTACGT -> [0.134, 0,      0,      0,     0.025, ...]   <- fabricated
+```
+
+One `N` invents `k` zero-valued measurements and drags window means toward zero.
+Any peak set overlapping an assembly gap hits this, so `from_bed` on a real
+genome would silently produce biased profiles.
+
+The new package resolves unknown k-mers to `NaN`, aggregates with nan-aware
+means, and records what was masked:
+
+```python
+prof.n_masked        # {'chr1:1200-1400': 3}
+prof.frame.mean(skipna=True)
+```
+
+A window is `NaN` only if *every* k-mer in it is masked; otherwise it averages
+the k-mers that resolved. This keeps partial overlap with a gap usable while
+never inventing values.
+
+### Serialisation conflict, resolved
+
+`NaN` and ragged padding would both render as an empty TSV field, making a masked
+position indistinguishable from padding. Masked values are therefore written as
+`NA`, and empty fields keep their existing meaning of ragged padding exclusively.
+
+This does not weaken the byte-equality gate: verified that none of the three test
+FASTAs contains a non-ACGT character, so every differential case is unaffected. A
+new N-containing fixture covers the new behaviour separately.
+
+## Backgrounds and statistics
+
+### Dinucleotide-preserving shuffle
+
+The metaprofile needs a control, and the obvious one is invalid here. Because the
+features *are* dinucleotide and trinucleotide lookups, a mononucleotide shuffle
+destroys the exact quantity being measured and manufactures significance.
+
+`prof.shuffle(method="dinuc", n=1000, seed=0)` implements Altschul–Erikson
+dinucleotide-preserving shuffling, which holds dinucleotide composition fixed so
+the comparison tests for flexibility structure **beyond** base composition — the
+actual scientific claim. `method="mononuc"` is available but documented as
+inappropriate for these features.
+
+Shuffling is seeded and the seed is recorded in the provenance sidecar.
+
+### Per-position testing
+
+```python
+res = prof.test(background=bg, method="mannwhitney")   # or "permutation"
+prof.metaprofile(background=bg, mark_significant=True)
+```
+
+Compares foreground against background at each position, returning effect size,
+p-value, and a Benjamini–Hochberg q-value per position. Positions are correlated
+by construction — overlapping windows share k-mers — so the docs state plainly
+that BH controls FDR across positions but does not undo that dependence, and the
+permutation method is recommended when the correlation matters.
+
+The metaprofile shades regions where `q < 0.05`.
+
+## Scale and provenance
+
+### Streaming input
+
+The old implementation calls `list(read_fasta(input_file))`, materialising every
+sequence before dispatch. Input is instead consumed in chunks and fed to the pool
+with `imap_unordered`, keeping memory flat and independent of input size. Output
+row order is restored to input order before serialisation, so results stay
+deterministic and byte-comparable.
+
+### Provenance sidecar
+
+Every `to_tsv` writes `<output>.meta.json` alongside it:
+
+```json
+{"DNAflexpy_version": "0.3.0", "feature": "DNaseI", "window_size": 10,
+ "kmer_len": 3, "lookup_sha256": "9f2a...", "n_sequences": 4821,
+ "n_masked_positions": 12, "shuffle_seed": null}
+```
+
+The lookup checksum is the point: it makes a result traceable to the exact
+feature table that produced it, which matters when a table is edited or a custom
+one is supplied.
+
+### Feature redundancy
+
+`ProfileSet.correlate()` returns a feature-by-feature correlation matrix for
+dropping redundant features before model fitting. Measured on 5 kb of random
+sequence, only 2 of 36 dinucleotide pairs exceed |r| > 0.9 (`freeen`↔`gc` at
+−0.944, `gc`↔`bendingStiffness` at +0.916), so this is a convenience for feature
+selection rather than a major result.
+
+### Genome-browser export
+
+`to_bigwig(path, genome=...)` and `to_bed(path)` write profiles as tracks for
+IGV/JBrowse. Only meaningful for profiles carrying genomic coordinates, so both
+raise on FASTA- or table-derived input, which has no coordinates to write.
+Requires the optional `DNAflexpy[bigwig]` extra (pyBigWig).
+
 ## ML encoding (`encode.py`)
 
 Modelled on DNAshapeR's `encodeSeqShape`, which is the function that makes that
@@ -425,7 +532,13 @@ BED, `.tsv`/`.csv` → labelled table) and overridable with `--format`.
 - Required: `pandas`, `pyyaml`, `numpy`
 - `DNAflexpy[plot]`: `matplotlib`
 - `DNAflexpy[bed]`: `pyfaidx`
+- `DNAflexpy[stats]`: `scipy` (per-position testing and FDR)
+- `DNAflexpy[bigwig]`: `pyBigWig`
+- `DNAflexpy[all]`: everything above
 - Dev: `pytest`
+
+The container installs `[all]`; the shuffle is implemented in numpy and needs no
+extra.
 
 ## Container
 
@@ -499,19 +612,28 @@ cluster.
 
 Ordered so the performance fix lands early and does not wait on plotting.
 
+0. **Archive** — `git mv DNAflexpy rxv/DNAflexpy`, add `rxv/__init__.py`, fix the
+   forced `files("rxv.DNAflexpy.data")` import path, migrate packaging to
+   `pyproject.toml`, update `scripts/plot_profiles.py`. Gate: the archived
+   package still runs and reproduces the checked-in TSVs. **This must land before
+   any new code, since every later phase is verified against it.**
 1. **Scaffold + FeatureTable** — package skeleton, YAML loading and validation,
    k inference, unit tests.
 2. **Profiling core** — `FlexProfiler`, `FlexProfile`, TSV output, Pool
-   initializer. Gate: differential suite byte-matches the old package on all
-   allowed cases.
+   initializer, `NaN` masking for ambiguous nucleotides. Gate: differential suite
+   byte-matches the archived package on all allowed cases.
 3. **Inputs** — `ProfileSet` for multi-feature runs, user-supplied lookup tables,
    bare-string and list/dict entry points, the memoised module-level one-liner,
    labelled TSV input (`profile_table`, `FlexProfile.y`), and BED/genome input.
 4. **Encoding** — `encode.py` and normalisation.
 5. **Plotting** — heatmap, metaprofile with background, trackplot.
-6. **CLI + docs** — `DNAflexpy` command, populate the empty `docs/api_reference.md`,
+6. **Backgrounds and statistics** — dinucleotide shuffle, per-position testing
+   with BH correction, significance shading on the metaprofile.
+7. **Scale and provenance** — streaming input, provenance sidecar,
+   `ProfileSet.correlate()`, bigWig/BED export.
+8. **CLI + docs** — `DNAflexpy` command, populate the empty `docs/api_reference.md`,
    add it to the mkdocs nav, update `CLAUDE.md` to describe both packages.
-7. **Container** — Dockerfile, Apptainer constraints, smoke test, `Docker/README.md`.
+9. **Container** — Dockerfile, Apptainer constraints, smoke test, `Docker/README.md`.
 
 ## Out of scope
 
