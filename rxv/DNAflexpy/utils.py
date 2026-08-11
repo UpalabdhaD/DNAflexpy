@@ -172,7 +172,7 @@ def load_feature_data() -> Dict[str, float]:
         dict: A dictionary of feature data.
     """
     try:
-        yamlfilepath = files("DNAflexpy.data").joinpath("lookupNEW.yaml")
+        yamlfilepath = files("rxv.DNAflexpy.data").joinpath("lookupNEW.yaml")
 
         with open(yamlfilepath, 'r') as f:
             return yaml.safe_load(f)
