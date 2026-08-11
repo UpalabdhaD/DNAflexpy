@@ -36,6 +36,14 @@ def test_packaged_tables_are_complete():
         assert len(t.table(feature)) == 4 ** t.kmer_len(feature), feature
 
 
+def test_table_is_read_only():
+    """The cached singleton must not be corruptible by a caller."""
+    t = default_table()
+    with pytest.raises(TypeError):
+        t.table("DNaseI")["ZZZ"] = 99.0
+    assert "ZZZ" not in default_table().table("DNaseI")
+
+
 def test_unknown_feature_raises_with_available_names():
     t = default_table()
     with pytest.raises(ValueError, match="DNaseI"):
@@ -61,6 +69,12 @@ def test_non_acgt_keys_rejected():
 def test_non_numeric_values_rejected():
     with pytest.raises(ValueError, match="non-numeric"):
         FeatureTable.from_dict({"f": {"AA": "high"}})
+
+
+def test_bool_values_rejected():
+    """bool is an int subclass; it must not slip through as numeric."""
+    with pytest.raises(ValueError, match="non-numeric"):
+        FeatureTable.from_dict({"f": {"AA": True, "AT": 1.0, "TA": 1.0, "TT": 1.0}})
 
 
 def test_empty_table_rejected():

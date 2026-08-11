@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import functools
 import warnings
+from collections.abc import Mapping
 from importlib.resources import files
 from pathlib import Path
+from types import MappingProxyType
 
 import yaml
 
@@ -32,9 +34,9 @@ class FeatureTable:
         self._require(feature)
         return self._kmer_lens[feature]
 
-    def table(self, feature: str) -> dict[str, float]:
+    def table(self, feature: str) -> Mapping[str, float]:
         self._require(feature)
-        return self._tables[feature]
+        return MappingProxyType(self._tables[feature])
 
     def _require(self, feature: str) -> None:
         if feature not in self._tables:
