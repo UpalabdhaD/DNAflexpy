@@ -7,7 +7,7 @@ name = "DNAflexpy"
 dynamic = ["version"]
 description = "DNA flexibility profiling from sequence using di- and trinucleotide feature tables"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "pandas>=2.2.3",
     "pyyaml>=6.0.2",
