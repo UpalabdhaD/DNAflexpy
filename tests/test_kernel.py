@@ -70,3 +70,20 @@ def test_fully_masked_window_is_nan():
 
 def test_profile_values_window_zero_returns_per_kmer():
     assert profile_values(SEQ, 3, dnase(), 0) == kmer_values(SEQ, 3, dnase())
+
+
+def test_window_zero_bytes_match_the_archive_for_integer_features():
+    """`==` hides 18 == 18.0; only serialisation exposes it."""
+    import contextlib, io
+    import pandas as pd
+    from rxv.DNAflexpy.utils import load_feature_data, seq_to_numeric_profile
+
+    for feature in ("NPP", "stiffness", "trx", "DNaseI"):
+        k = default_table().kmer_len(feature)
+        with contextlib.redirect_stdout(io.StringIO()):
+            legacy = seq_to_numeric_profile("s", SEQ, k, 0, feature, load_feature_data())
+        mine = ["s", *profile_values(SEQ, k, default_table().table(feature), 0)]
+        to_bytes = lambda row: pd.DataFrame([row]).to_csv(
+            index=False, header=False, sep="\t"
+        ).encode()
+        assert to_bytes(mine) == to_bytes(legacy), feature

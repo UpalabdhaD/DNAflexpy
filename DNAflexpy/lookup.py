@@ -85,7 +85,7 @@ def _validate(feature: str, raw) -> tuple[dict[str, float], int]:
             raise ValueError(
                 f"feature {feature!r} has non-numeric value {value!r} for {kmer!r}"
             )
-        table[kmer] = float(value)
+        table[kmer] = value
 
     lengths = {len(k) for k in table}
     if len(lengths) > 1:

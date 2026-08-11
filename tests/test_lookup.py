@@ -91,3 +91,11 @@ def test_incomplete_table_warns_but_loads():
 def test_default_table_is_memoised():
     """The 8 ms YAML parse must happen once, not per call."""
     assert default_table() is default_table()
+
+
+def test_integer_values_keep_their_type():
+    """Coercing to float would write "18.0" where the archive writes "18",
+    breaking byte equality at window_size == 0."""
+    t = default_table()
+    assert isinstance(t.table("NPP")["AAA"], int)
+    assert isinstance(t.table("DNaseI")["AAT"], float)
