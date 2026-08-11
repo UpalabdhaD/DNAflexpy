@@ -221,10 +221,16 @@ convenience and I/O, not a shared k-mer scan. Expect modest CPU gains, not N×.
 
 ### Numerics are frozen
 
-The window loop, `sum(w) / len(w)`, `round(v, 3)`, and `.get(subseq, 0)`
-zero-filling are reproduced exactly. In particular the mean is **not** replaced
-with a numpy reduction: last-bit float differences would flip values at rounding
-boundaries and break byte-comparison against the old output.
+The window loop, `sum(w) / len(w)`, and `round(v, 3)` are reproduced exactly. In
+particular the mean is **not** replaced with a numpy reduction: last-bit float
+differences would flip values at rounding boundaries and break byte-comparison
+against the archive.
+
+The one deliberate divergence is unresolvable k-mers: the archive zero-fills via
+`.get(subseq, 0)`, the new package masks to `NaN` (see below). This cannot affect
+any compared case, because the packaged tables are complete (`4**k` entries) and
+every test FASTA is pure ACGT, so no lookup miss occurs on the differential
+matrix. The divergence is exercised by its own N-containing fixture instead.
 
 ### `to_tsv` byte contract
 
