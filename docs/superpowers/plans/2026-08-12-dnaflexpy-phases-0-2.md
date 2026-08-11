@@ -552,7 +552,10 @@ def _validate(feature: str, raw) -> tuple[dict[str, float], int]:
             raise ValueError(
                 f"feature {feature!r} has non-numeric value {value!r} for {kmer!r}"
             )
-        table[kmer] = float(value)
+        # Store unchanged: the archive preserves YAML-parsed types, and
+        # coercing ints to float writes "18.0" where it writes "18",
+        # breaking byte equality at window_size == 0.
+        table[kmer] = value
 
     lengths = {len(k) for k in table}
     if len(lengths) > 1:
