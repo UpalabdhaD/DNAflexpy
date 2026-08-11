@@ -149,7 +149,7 @@ def main():
             cmd = [
                 sys.executable,
                 "-m",
-                "DNAflexpy.cli",
+                "rxv.DNAflexpy.cli",
                 args.generate_random_fasta,
                 "--window-size",
                 str(w),

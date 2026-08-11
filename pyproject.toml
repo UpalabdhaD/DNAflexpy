@@ -1,3 +1,33 @@
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "DNAflexpy"
+dynamic = ["version"]
+description = "DNA flexibility profiling from sequence using di- and trinucleotide feature tables"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.2.3",
+    "pyyaml>=6.0.2",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=6.0"]
+
+[tool.setuptools]
+# Explicit, never find_packages(): that would sweep the archive into the
+# distribution while shipping none of its package data.
+packages = ["DNAflexpy", "rxv", "rxv.DNAflexpy"]
+
+[tool.setuptools.package-data]
+DNAflexpy = ["data/*.yaml"]
+"rxv.DNAflexpy" = ["data/*.yaml"]
+
+[tool.setuptools.dynamic]
+version = { attr = "DNAflexpy.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
