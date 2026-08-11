@@ -144,9 +144,13 @@ Validation, on load, for both packaged and user tables:
 - reject mixed key lengths within a feature (this is what makes k inference safe)
 - uppercase keys; reject non-ACGT characters
 - reject non-numeric values
-- **warn**, not fail, when a table has fewer than `4**k` entries, because lookup
-  zero-fills missing k-mers via `.get(subseq, 0)` and would otherwise silently
-  bias results toward zero
+- **warn**, not fail, when a table has fewer than `4**k` entries
+
+An incomplete table is usable but flagged, because any valid ACGT k-mer missing
+from it resolves to `NaN` and is masked — the same path as an ambiguous
+nucleotide, described below. This is the single rule for every unresolvable
+k-mer: the old package's `.get(subseq, 0)` zero-fill is not reproduced anywhere,
+since a zero is indistinguishable from a real measurement in these tables.
 
 ### FlexProfiler (`core.py`)
 
@@ -293,15 +297,25 @@ A window is `NaN` only if *every* k-mer in it is masked; otherwise it averages
 the k-mers that resolved. This keeps partial overlap with a gap usable while
 never inventing values.
 
-### Serialisation conflict, resolved
+### Serialisation
 
-`NaN` and ragged padding would both render as an empty TSV field, making a masked
-position indistinguishable from padding. Masked values are therefore written as
-`NA`, and empty fields keep their existing meaning of ragged padding exclusively.
+Masked positions and ragged padding are both `NaN` in the same frame, so a single
+`to_csv(na_rep=...)` cannot distinguish them: `na_rep="NA"` would relabel padding
+too and break byte equality against the archive, while `na_rep=""` collapses the
+distinction. Rather than build rows as pre-formatted strings to control the two
+sources separately, **masked positions serialise as empty fields, exactly like
+padding.**
 
-This does not weaken the byte-equality gate: verified that none of the three test
-FASTAs contains a non-ACGT character, so every differential case is unaffected. A
-new N-containing fixture covers the new behaviour separately.
+Nothing needs to tell them apart by reading the TSV alone: masked counts are
+carried by `prof.n_masked` in memory and by `n_masked_positions` in the
+provenance sidecar, and every downstream path (encoding, plotting, statistics)
+consumes the in-memory frame where `NaN` is unambiguous. Byte equality against
+the archive then falls out for free rather than needing a special case.
+
+Verified that none of the three test FASTAs contains a non-ACGT character, so no
+differential case is affected either way. A new N-containing fixture covers the
+masking behaviour separately, asserting on `n_masked` and the in-memory frame
+rather than on TSV bytes.
 
 ## Backgrounds and statistics
 

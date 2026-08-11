@@ -2,7 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **`DNAflexpy/` is frozen — do not modify it.** It is being replaced by a new `dnaflex/` package written from scratch; see [the design spec](docs/superpowers/specs/2026-08-12-dnaflex-rewrite-design.md). The old package must keep working, because the new one is verified by byte-comparing its output against it. The user will archive `DNAflexpy/` themselves. The rest of this file documents that frozen package. Active work happens on the `dev` branch.
+> **This file documents the LEGACY package, which is frozen — do not modify its logic.**
+>
+> It currently sits at `DNAflexpy/` and moves to `rxv/DNAflexpy/` in Phase 0 of the rewrite. A new package, written from scratch, then takes over the `DNAflexpy/` path and name — so after Phase 0, `DNAflexpy/` means the *new* code and `rxv/DNAflexpy/` means everything described below. See [the design spec](docs/superpowers/specs/2026-08-12-dnaflex-rewrite-design.md).
+>
+> The legacy package must keep running: the new one is verified by byte-comparing its output against it. The only sanctioned edit is the forced import-path fix at `utils.py:175` (`files("DNAflexpy.data")` → `files("rxv.DNAflexpy.data")`), which the move requires. Also in scope for Phase 0: `setup.py` (deleted), `pyproject.toml`, `MANIFEST.in`, and `scripts/plot_profiles.py`.
+>
+> Active work happens on the `dev` branch.
 
 ## Commands
 
