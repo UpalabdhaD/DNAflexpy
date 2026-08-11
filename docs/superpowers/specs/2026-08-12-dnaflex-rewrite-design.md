@@ -1,16 +1,19 @@
-# dnaflex — Greenfield Rewrite Design
+# DNAflexpy — Greenfield Rewrite Design
 
 **Date:** 2026-08-12
 **Status:** Awaiting user review
-**Supersedes:** nothing — `DNAflexpy/` remains untouched and installable
+**Supersedes:** the old `DNAflexpy/`, which is archived to `rxv/DNAflexpy/`
 
 ## Goal
 
-Rewrite DNAflexpy as a new package, `dnaflex`, built from scratch. The existing
-`DNAflexpy/` package is left byte-for-byte untouched and will be archived by the
-user later. The rewrite fixes a measured performance defect, replaces the
-function-based API with classes, and adds ML feature encoding, plotting, and
-genomic input modelled on the R/Bioconductor package DNAshapeR.
+Rewrite DNAflexpy in place. The existing package is archived to `rxv/DNAflexpy/`,
+where its source is preserved verbatim (one import-path line excepted, see below)
+and stays importable. A new package reusing the `DNAflexpy` name is written from
+scratch alongside it.
+
+The rewrite fixes a measured performance defect, replaces the function-based API
+with classes, and adds ML feature encoding, plotting, and genomic input modelled
+on the R/Bioconductor package DNAshapeR.
 
 ## Motivating measurements
 
@@ -37,7 +40,7 @@ keys** (64 3-mers or 16 2-mers), no null values, no non-ACGT keys. Inferring k
 from key length reproduces the hardcoded map exactly on all 10 mapped features
 and correctly yields k=2 for the three unmapped ones.
 
-Therefore `dnaflex` infers k from the table and has no hardcoded map. This single
+Therefore the new package infers k from the table and has no hardcoded map. This single
 change unlocks the 3 dead features and makes arbitrary user-supplied tables work.
 
 ### Consequence for error handling
@@ -58,9 +61,17 @@ warnings that let batch processing continue, matching documented behaviour.
 
 ## Package layout
 
+The old package is archived to `rxv/DNAflexpy/` via `git mv` (history preserved)
+and the new package takes the `DNAflexpy` name and CLI. The name the user cares
+about carries forward to the new code; the archive stays importable, which is
+what keeps differential testing possible.
+
 ```
-DNAflexpy/            <- UNTOUCHED. Still installs, still exposes `DNAflexpy` CLI.
-dnaflex/              <- NEW
+rxv/
+  __init__.py         namespace only
+  DNAflexpy/          <- ARCHIVED old package, importable as rxv.DNAflexpy
+    core.py  utils.py  cli.py  data/
+DNAflexpy/            <- NEW, written from scratch
   __init__.py           FlexProfiler, FlexProfile, ProfileSet, __version__, __all__
   lookup.py             FeatureTable: load + validate + infer k
   io.py                 read_fasta, from_bed
@@ -68,47 +79,51 @@ dnaflex/              <- NEW
   profile.py            FlexProfile / ProfileSet: results, TSV, DataFrame
   encode.py             ML feature matrices
   plotting.py           heatmap / metaprofile / trackplot (lazy matplotlib)
-  cli.py                `dnaflex` command
+  cli.py                `DNAflexpy` command
   data/lookupNEW.yaml   own copy — no shared state with the old package
 ```
 
-Both packages install side by side; import names never collide. When the user
-archives the old package, `dnaflex` is renamed to `DNAflexpy` in one commit.
+Both packages install side by side; import names never collide. `rxv/DNAflexpy/`
+is moved with `git mv` so its history follows it. Its one absolute self-reference
+-- `files("DNAflexpy.data")` at `utils.py:175` -- must become
+`files("rxv.DNAflexpy.data")`, or the archived code would silently read the NEW
+package's lookup table. That single line is the only edit made to old code, and
+it is forced by the rename itself.
 
-Version lives only in `dnaflex/__init__.py.__version__`, read by packaging
+Version lives only in `DNAflexpy/__init__.py.__version__`, read by packaging
 metadata — avoiding the setup.py/requirements.txt drift in the old package.
 
 ### Build configuration — needs user sign-off
 
-Adding a second package to the repo forces a change to **shared build config at
-the repo root**. No file under `DNAflexpy/` is touched, but the root files are
-unavoidable: the existing `setup.py` calls `find_packages()`, which would
-silently sweep `dnaflex` into the *DNAflexpy* distribution while shipping none of
-its `data/*.yaml` and registering no `dnaflex` console script.
+Root build config must change: `setup.py` calls `find_packages()`, which would
+sweep the archive into the distribution while shipping none of its `data/*.yaml`.
 
-Proposed: migrate build metadata into the root `pyproject.toml`, declaring one
-distribution that ships **both** packages explicitly during the transition:
+Build metadata migrates into the root `pyproject.toml`, declaring one
+distribution that ships the new package and the archive:
 
 ```toml
 [project]
 name = "DNAflexpy"
 dynamic = ["version"]
-scripts = { DNAflexpy = "DNAflexpy.cli:main", dnaflex = "dnaflex.cli:main" }
+scripts = { DNAflexpy = "DNAflexpy.cli:main" }   # new package owns the name
 
 [tool.setuptools]
-packages = ["DNAflexpy", "dnaflex"]        # explicit, never find_packages()
-package-data = { DNAflexpy = ["data/*.yaml"], dnaflex = ["data/*.yaml"] }
+packages = ["DNAflexpy", "rxv", "rxv.DNAflexpy"]   # explicit, never find_packages()
+package-data = { DNAflexpy = ["data/*.yaml"], "rxv.DNAflexpy" = ["data/*.yaml"] }
 ```
 
-`setup.py` is then redundant and is deleted — leaving it alongside a `[project]`
-table makes setuptools error on conflicting metadata. One `pip install -e .`
-yields both packages and both CLIs, which is also what makes the differential
-test suite work in a single environment. When the user archives `DNAflexpy/`,
-they drop it from these two lists.
+The archive registers no console script; it stays runnable as
+`python -m rxv.DNAflexpy.cli` for verification runs. `setup.py` is deleted —
+leaving it beside a `[project]` table makes setuptools error on conflicting
+metadata. One `pip install -e .` yields both packages, which is what lets the
+differential suite import old and new in a single environment. Dropping the
+archive later means deleting `rxv/` and its two list entries.
 
-This is the only place the plan modifies a file the user already had. Flagged
-explicitly because "keep my code untouched" clearly covered `DNAflexpy/` source,
-and root build config is a judgement call that belongs to the user.
+Files the plan modifies that the user already had, in full: `setup.py` (deleted,
+superseded), `pyproject.toml`, `MANIFEST.in`, `rxv/DNAflexpy/utils.py:175` (the
+forced import-path fix), and `scripts/plot_profiles.py`, which shells out to
+`python -m DNAflexpy.cli` and would otherwise silently invoke the new CLI with
+old flags.
 
 ## Components
 
@@ -166,15 +181,15 @@ on its argument would cost more in misuse than the extra method name saves.
 For notebooks and quick checks, a module-level one-liner constructs nothing:
 
 ```python
-import dnaflex
-dnaflex.profile("ATGCGTACGT", feature="DNaseI", window_size=10)
+import DNAflexpy
+DNAflexpy.profile("ATGCGTACGT", feature="DNaseI", window_size=10)
 ```
 
 This is the one place the 8 ms defect could sneak back in — a naive
 implementation would build a fresh `FeatureTable` per call. The default table is
 therefore memoised at module level (`functools.lru_cache`), so the first call
 pays 8 ms and every subsequent call pays ~0.1 ms. A regression test asserts that
-1000 calls to `dnaflex.profile()` parse the YAML exactly once.
+1000 calls to `DNAflexpy.profile()` parse the YAML exactly once.
 
 Workers receive the loaded table through `Pool(initializer=...)`. The table is
 **never** passed as a path to be reloaded per worker — that would reintroduce the
@@ -222,7 +237,7 @@ contract — not just the numbers. Verified against the checked-in outputs:
   dropped: `0.01`, never `0.010`.
 
 These are consequences of `pd.DataFrame(ragged_lists)` followed by
-`to_csv(header=False, index=False, sep="\t")`. `dnaflex` reproduces them by
+`to_csv(header=False, index=False, sep="\t")`. The new package reproduces them by
 building output the same way, and the differential tests assert on raw bytes
 rather than on parsed values — parsing would hide exactly these differences.
 
@@ -274,7 +289,7 @@ Requires equal-length sequences; raises otherwise.
 ## Plotting (`plotting.py`)
 
 Separate module with lazy matplotlib import, so core profiling stays testable
-without a plotting stack. matplotlib is an optional extra, `dnaflex[plot]`.
+without a plotting stack. matplotlib is an optional extra, `DNAflexpy[plot]`.
 
 Ragged input **raises** rather than truncating: position-wise comparison is only
 meaningful for aligned sequences. The error message names the offending lengths
@@ -371,7 +386,7 @@ FlexProfiler("DNaseI", window_size=10).from_bed("peaks.bed", genome="TAIR10.fa",
 ```
 
 Extracts fixed-width, centre-anchored sequences from a reference FASTA via
-pyfaidx (optional extra, `dnaflex[bed]`), mirroring `getFasta`. Strand-aware:
+pyfaidx (optional extra, `DNAflexpy[bed]`), mirroring `getFasta`. Strand-aware:
 `-` strand intervals are reverse-complemented.
 
 Fixed width gives alignment by construction **except at contig boundaries**,
@@ -388,18 +403,18 @@ near a chromosome end.
 
 ## CLI
 
-New `dnaflex` command with subcommands. The old `DNAflexpy` command is untouched,
+New `DNAflexpy` command with subcommands. The old `DNAflexpy` command is untouched,
 so `scripts/plot_profiles.py`, which shells out to `python -m DNAflexpy.cli`,
 keeps working unchanged.
 
 ```bash
-dnaflex profile in.fa --feature DNaseI trx --window-size 10 --outfile out.tsv
-dnaflex profile affinity.tsv --seq-col 0 --value-col 1 --feature DNaseI
-dnaflex profile peaks.bed --genome TAIR10.fa --width 200 --feature DNaseI
-dnaflex profile --seq ATGCGTACGT --feature DNaseI       # bare string -> stdout
-dnaflex encode in.fa --features 1-mer 1-flex --out X.npz
-dnaflex plot heatmap out.tsv --nbins 20 --order-rows cv --out hm.png
-dnaflex plot meta out.tsv --background bg.tsv --out meta.png
+DNAflexpy profile in.fa --feature DNaseI trx --window-size 10 --outfile out.tsv
+DNAflexpy profile affinity.tsv --seq-col 0 --value-col 1 --feature DNaseI
+DNAflexpy profile peaks.bed --genome TAIR10.fa --width 200 --feature DNaseI
+DNAflexpy profile --seq ATGCGTACGT --feature DNaseI       # bare string -> stdout
+DNAflexpy encode in.fa --features 1-mer 1-flex --out X.npz
+DNAflexpy plot heatmap out.tsv --nbins 20 --order-rows cv --out hm.png
+DNAflexpy plot meta out.tsv --background bg.tsv --out meta.png
 ```
 
 Input format is inferred from extension (`.fa`/`.fasta`/`.fna` → FASTA, `.bed` →
@@ -408,8 +423,8 @@ BED, `.tsv`/`.csv` → labelled table) and overridable with `--format`.
 ## Dependencies
 
 - Required: `pandas`, `pyyaml`, `numpy`
-- `dnaflex[plot]`: `matplotlib`
-- `dnaflex[bed]`: `pyfaidx`
+- `DNAflexpy[plot]`: `matplotlib`
+- `DNAflexpy[bed]`: `pyfaidx`
 - Dev: `pytest`
 
 ## Container
@@ -430,7 +445,7 @@ Multi-stage: a builder stage compiles wheels, the runtime stage copies only the
 installed packages, keeping the image near ~400 MB rather than carrying build
 toolchains.
 
-`dnaflex` is **not** published to any index, so the image installs it from the
+`DNAflexpy` is **not** published to any index, so the image installs it from the
 build context — never by name from PyPI:
 
 ```dockerfile
@@ -441,12 +456,12 @@ RUN pip wheel --no-cache-dir --wheel-dir=/wheels "/src[plot,bed]"
 FROM python:3.12-slim
 COPY --from=builder /wheels /wheels
 RUN pip install --no-cache-dir --no-index --find-links=/wheels \
-      dnaflex[plot,bed] && rm -rf /wheels
+      DNAflexpy[plot,bed] && rm -rf /wheels
 ENV MPLBACKEND=Agg \
     MPLCONFIGDIR=/tmp/mpl \
     PYTHONDONTWRITEBYTECODE=1
 WORKDIR /data
-ENTRYPOINT ["dnaflex"]
+ENTRYPOINT ["DNAflexpy"]
 ```
 
 ### Apptainer/Singularity compatibility
@@ -468,12 +483,12 @@ painful to retrofit, so it constrains the build:
 
 ```bash
 # Docker, locally
-docker build -t dnaflex:dev -f Docker/Dockerfile .
-docker run --rm -v "$PWD":/data dnaflex:dev profile in.fa --feature DNaseI --outfile out.tsv
+docker build -t dnaflexpy:dev -f Docker/Dockerfile .
+docker run --rm -v "$PWD":/data dnaflexpy:dev profile in.fa --feature DNaseI --outfile out.tsv
 
 # Apptainer, on a cluster, no root
-apptainer build dnaflex.sif docker-daemon://dnaflex:dev
-apptainer exec --bind "$PWD":/data dnaflex.sif dnaflex profile /data/in.fa --feature DNaseI
+apptainer build dnaflexpy.sif docker-daemon://dnaflexpy:dev
+apptainer exec --bind "$PWD":/data dnaflexpy.sif DNAflexpy profile /data/in.fa --feature DNaseI
 ```
 
 A container smoke test runs the CLI end-to-end (profile → encode → plot) on a
@@ -494,7 +509,7 @@ Ordered so the performance fix lands early and does not wait on plotting.
    labelled TSV input (`profile_table`, `FlexProfile.y`), and BED/genome input.
 4. **Encoding** — `encode.py` and normalisation.
 5. **Plotting** — heatmap, metaprofile with background, trackplot.
-6. **CLI + docs** — `dnaflex` command, populate the empty `docs/api_reference.md`,
+6. **CLI + docs** — `DNAflexpy` command, populate the empty `docs/api_reference.md`,
    add it to the mkdocs nav, update `CLAUDE.md` to describe both packages.
 7. **Container** — Dockerfile, Apptainer constraints, smoke test, `Docker/README.md`.
 
