@@ -78,6 +78,38 @@ archives the old package, `dnaflex` is renamed to `DNAflexpy` in one commit.
 Version lives only in `dnaflex/__init__.py.__version__`, read by packaging
 metadata — avoiding the setup.py/requirements.txt drift in the old package.
 
+### Build configuration — needs user sign-off
+
+Adding a second package to the repo forces a change to **shared build config at
+the repo root**. No file under `DNAflexpy/` is touched, but the root files are
+unavoidable: the existing `setup.py` calls `find_packages()`, which would
+silently sweep `dnaflex` into the *DNAflexpy* distribution while shipping none of
+its `data/*.yaml` and registering no `dnaflex` console script.
+
+Proposed: migrate build metadata into the root `pyproject.toml`, declaring one
+distribution that ships **both** packages explicitly during the transition:
+
+```toml
+[project]
+name = "DNAflexpy"
+dynamic = ["version"]
+scripts = { DNAflexpy = "DNAflexpy.cli:main", dnaflex = "dnaflex.cli:main" }
+
+[tool.setuptools]
+packages = ["DNAflexpy", "dnaflex"]        # explicit, never find_packages()
+package-data = { DNAflexpy = ["data/*.yaml"], dnaflex = ["data/*.yaml"] }
+```
+
+`setup.py` is then redundant and is deleted — leaving it alongside a `[project]`
+table makes setuptools error on conflicting metadata. One `pip install -e .`
+yields both packages and both CLIs, which is also what makes the differential
+test suite work in a single environment. When the user archives `DNAflexpy/`,
+they drop it from these two lists.
+
+This is the only place the plan modifies a file the user already had. Flagged
+explicitly because "keep my code untouched" clearly covered `DNAflexpy/` source,
+and root build config is a judgement call that belongs to the user.
+
 ## Components
 
 ### FeatureTable (`lookup.py`)
@@ -107,13 +139,42 @@ Validation, on load, for both packaged and user tables:
 FlexProfiler(feature, window_size=10, lookup=None)
     feature: str | list[str]
     lookup:  None | path | dict | FeatureTable
-.profile(seqid, seq) -> list                      # fast path, ~0.1 ms
+.profile(seq) -> np.ndarray                       # ONE bare string, ~0.1 ms
+.profile_seqs(seqs) -> FlexProfile | ProfileSet   # list[str] | dict[id, str]
 .profile_fasta(path, threads=None) -> FlexProfile | ProfileSet
+.profile_table(path, seq_col=0, value_col=1) -> FlexProfile | ProfileSet
 .from_bed(bed, genome, width=None) -> FlexProfile | ProfileSet
 ```
 
 Features are validated against the table in `__init__`, so a typo fails
 immediately rather than after a full FASTA pass.
+
+**No file is required anywhere.** The old API forced a FASTA round-trip even to
+inspect a single sequence; here `profile()` takes a bare string and returns the
+value array directly — no sequence ID to invent, no result object to unwrap:
+
+```python
+p = FlexProfiler("DNaseI", window_size=10)
+p.profile("ATGCGTACGTAGCTAGCGTAGCTAGT")     # -> array([0.011, -0.003, ...])
+```
+
+Return types stay predictable rather than polymorphic: `profile()` always returns
+a 1-D array for one sequence, and the collection entry points always return
+`FlexProfile`/`ProfileSet`. A single function returning different types depending
+on its argument would cost more in misuse than the extra method name saves.
+
+For notebooks and quick checks, a module-level one-liner constructs nothing:
+
+```python
+import dnaflex
+dnaflex.profile("ATGCGTACGT", feature="DNaseI", window_size=10)
+```
+
+This is the one place the 8 ms defect could sneak back in — a naive
+implementation would build a fresh `FeatureTable` per call. The default table is
+therefore memoised at module level (`functools.lru_cache`), so the first call
+pays 8 ms and every subsequent call pays ~0.1 ms. A regression test asserts that
+1000 calls to `dnaflex.profile()` parse the YAML exactly once.
 
 Workers receive the loaded table through `Pool(initializer=...)`. The table is
 **never** passed as a path to be reloaded per worker — that would reintroduce the
@@ -130,7 +191,7 @@ convenience and I/O, not a shared k-mer scan. Expect modest CPU gains, not N×.
 `.feature`, `.window_size`, `.kmer_len`, and owns output and analysis:
 
 ```python
-.to_tsv(path)                   # identical format to the old package
+.to_tsv(path)                   # byte-identical to the old package; contract below
 .to_frame(tidy=False)
 .zscale(axis="column")          # "column" | "row" | "global"
 .normalize(method="minmax")
@@ -145,6 +206,25 @@ The window loop, `sum(w) / len(w)`, `round(v, 3)`, and `.get(subseq, 0)`
 zero-filling are reproduced exactly. In particular the mean is **not** replaced
 with a numpy reduction: last-bit float differences would flip values at rounding
 boundaries and break byte-comparison against the old output.
+
+### `to_tsv` byte contract
+
+The Phase 2 gate is byte equality, so the exact serialisation is part of the
+contract — not just the numbers. Verified against the checked-in outputs:
+
+- No header, no index, tab-separated; first field is the sequence ID.
+- Ragged rows are **NaN-padded to the widest row**, and NaN renders as an empty
+  field. A sequence shorter than the window therefore emits its ID followed by
+  trailing tabs — literally `'short_seq\t\t\t…\t'` in `w10_mixed.tsv`.
+- When *every* row is ID-only, the frame has one column and there is no padding
+  at all: the line is bare `'short_seq'` with no trailing tab (`w30.tsv`).
+- Values use Python float repr after `round(v, 3)`, so trailing zeros are
+  dropped: `0.01`, never `0.010`.
+
+These are consequences of `pd.DataFrame(ragged_lists)` followed by
+`to_csv(header=False, index=False, sep="\t")`. `dnaflex` reproduces them by
+building output the same way, and the differential tests assert on raw bytes
+rather than on parsed values — parsing would hide exactly these differences.
 
 ## Verification strategy
 
@@ -220,32 +300,91 @@ sequences and then averaging down that column yields exactly 0 at every
 position, by construction. Verified numerically — the line plot would be flat at
 zero.
 
-Resolution, without abandoning the choice:
+Pooling foreground and background before column-wise scaling does **not** rescue
+it. Verified numerically: after standardizing the pooled matrix per column the
+pooled column mean is 0, so `n_fg·mean_fg + n_bg·mean_bg = 0` and therefore
+`mean_bg = −(n_fg/n_bg)·mean_fg`. The two curves correlate at exactly −1.0 — the
+background is a rescaled mirror of the foreground and carries no independent
+information whatsoever.
+
+Resolution, keeping column-wise scaling where it is meaningful:
 
 - **With a background set** (the DNAshapeR `plotShape(background=)` case):
-  z-score the **pooled** foreground+background matrix column-wise, then plot the
-  two group means separately. Column-wise scaling is exactly right here, and the
-  divergence between curves is the finding.
-- **Without a background set**: default to `zscale="global"`, which preserves
+  standardize each column against the **background's** mean and standard
+  deviation — a signal-vs-control z-score. The background then sits flat at ~0
+  and the foreground's departure from it is a real, independently interpretable
+  quantity, in units of background standard deviations. This is the default
+  whenever a background is supplied.
+- **Without a background set**: default to `zscale="global"`, preserving
   cross-position structure. `zscale="column"` raises with an explanation rather
   than silently drawing a flat line.
+
+Binning is applied **before** z-scoring, so statistics are computed on the values
+actually plotted. The two orders give different figures; this one is fixed.
 
 ### Trackplot
 
 Single-sequence view with all requested features stacked on a shared x-axis
 (`trackShape`).
 
-## Genomic input (`io.py`)
+## Input formats (`io.py`)
+
+Four ways in — bare string, FASTA, labelled table, BED. All converge on the same
+`FlexProfile`, so every downstream path is identical regardless of source.
+
+### Labelled TSV — sequence + value
+
+For labelled datasets: first column is the sequence, second a numeric value such
+as binding affinity. This is the natural ML input, carrying `X` and `y` in one
+file.
+
+```python
+prof = FlexProfiler("DNaseI", window_size=10).profile_table(
+    "affinity.tsv", seq_col=0, value_col=1,
+)
+X, y = prof.encode(["1-mer", "1-flex"]), prof.y
+```
+
+- Header row auto-detected (first row's `value_col` failing to parse as a float
+  means it is a header); forceable with `header=True|False`.
+- Columns may be named instead of positional: `seq_col="sequence"`.
+- Rows without an ID column get generated IDs `seq_0, seq_1, …`; an existing one
+  is named via `id_col=`.
+- Non-numeric or missing values **raise**, naming the offending row — silently
+  dropping labelled rows would corrupt a training set.
+- Tab by default; `sep=` allows CSV.
+
+`FlexProfile.y` holds the aligned value vector (`None` for FASTA input) and
+unlocks two things beyond supplying regression targets:
+
+- `heatmap(order_rows="y")` — order sequences by affinity rather than by
+  coefficient of variation, making a flexibility gradient across the affinity
+  range directly visible.
+- `metaprofile(groupby=("y", threshold))` — split into high/low groups and use
+  the low group as the background set. That is the signal-vs-control comparison
+  described above, with a control already matched to the assay.
+
+### BED + reference genome
 
 ```python
 FlexProfiler("DNaseI", window_size=10).from_bed("peaks.bed", genome="TAIR10.fa", width=200)
 ```
 
 Extracts fixed-width, centre-anchored sequences from a reference FASTA via
-pyfaidx (optional extra, `dnaflex[bed]`), mirroring `getFasta`. Fixed width means
-output is aligned by construction, satisfying the equal-length requirement of the
-plotting and encoding paths. Strand-aware: `-` strand intervals are
-reverse-complemented.
+pyfaidx (optional extra, `dnaflex[bed]`), mirroring `getFasta`. Strand-aware:
+`-` strand intervals are reverse-complemented.
+
+Fixed width gives alignment by construction **except at contig boundaries**,
+where a centred window can run past the start or end of a chromosome. Policy is
+explicit via `on_edge=`, defaulting to `"drop"`:
+
+- `"drop"` — discard the interval, reporting how many were dropped
+- `"error"` — raise, naming the offending intervals
+- `"pad"` — pad with `N`, which the lookup zero-fills; permitted but warned
+  about, since padded positions bias profiles toward zero
+
+Without this, "aligned by construction" would quietly be false for any peak set
+near a chromosome end.
 
 ## CLI
 
@@ -255,11 +394,16 @@ keeps working unchanged.
 
 ```bash
 dnaflex profile in.fa --feature DNaseI trx --window-size 10 --outfile out.tsv
+dnaflex profile affinity.tsv --seq-col 0 --value-col 1 --feature DNaseI
 dnaflex profile peaks.bed --genome TAIR10.fa --width 200 --feature DNaseI
+dnaflex profile --seq ATGCGTACGT --feature DNaseI       # bare string -> stdout
 dnaflex encode in.fa --features 1-mer 1-flex --out X.npz
 dnaflex plot heatmap out.tsv --nbins 20 --order-rows cv --out hm.png
 dnaflex plot meta out.tsv --background bg.tsv --out meta.png
 ```
+
+Input format is inferred from extension (`.fa`/`.fasta`/`.fna` → FASTA, `.bed` →
+BED, `.tsv`/`.csv` → labelled table) and overridable with `--format`.
 
 ## Dependencies
 
@@ -286,9 +430,13 @@ Multi-stage: a builder stage compiles wheels, the runtime stage copies only the
 installed packages, keeping the image near ~400 MB rather than carrying build
 toolchains.
 
+`dnaflex` is **not** published to any index, so the image installs it from the
+build context — never by name from PyPI:
+
 ```dockerfile
 FROM python:3.12-slim AS builder
-# build wheels for pandas/numpy/matplotlib/pyfaidx + dnaflex
+COPY . /src
+RUN pip wheel --no-cache-dir --wheel-dir=/wheels "/src[plot,bed]"
 
 FROM python:3.12-slim
 COPY --from=builder /wheels /wheels
@@ -341,8 +489,9 @@ Ordered so the performance fix lands early and does not wait on plotting.
 2. **Profiling core** — `FlexProfiler`, `FlexProfile`, TSV output, Pool
    initializer. Gate: differential suite byte-matches the old package on all
    allowed cases.
-3. **Multi-feature, custom tables, `from_bed`** — `ProfileSet`, user-supplied
-   lookups, BED/genome input.
+3. **Inputs** — `ProfileSet` for multi-feature runs, user-supplied lookup tables,
+   bare-string and list/dict entry points, the memoised module-level one-liner,
+   labelled TSV input (`profile_table`, `FlexProfile.y`), and BED/genome input.
 4. **Encoding** — `encode.py` and normalisation.
 5. **Plotting** — heatmap, metaprofile with background, trackplot.
 6. **CLI + docs** — `dnaflex` command, populate the empty `docs/api_reference.md`,

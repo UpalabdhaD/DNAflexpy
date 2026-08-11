@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **`DNAflexpy/` is frozen — do not modify it.** It is being replaced by a new `dnaflex/` package written from scratch; see [the design spec](docs/superpowers/specs/2026-08-12-dnaflex-rewrite-design.md). The old package must keep working, because the new one is verified by byte-comparing its output against it. The user will archive `DNAflexpy/` themselves. The rest of this file documents that frozen package. Active work happens on the `dev` branch.
+
 ## Commands
 
 ```bash
