@@ -62,6 +62,16 @@ def test_allowlisted_unlocked_features(feature, tmp_path):
 
 
 def test_allowlisted_unknown_feature_now_raises():
+    """Archive: get_kmer_len misses, the TypeError is swallowed, None row.
+    New: raises at construction."""
+    assert get_kmer_len("not_a_feature") is None
+    with contextlib.redirect_stdout(io.StringIO()):
+        archived = seq_to_numeric_profile(
+            "s", "ATGCGTACGT", get_kmer_len("not_a_feature"), 10,
+            "not_a_feature", load_feature_data(),
+        )
+    assert archived is None
+
     with pytest.raises(ValueError, match="unknown feature"):
         FlexProfiler("not_a_feature")
 
