@@ -1818,7 +1818,15 @@ once."
 - [ ] `python -m pytest -q` passes with no failures and no errors.
 - [ ] `tests/test_differential.py` passes on all 210 matrix cases.
 - [ ] `python -m pip install -e .` succeeds and both `import DNAflexpy` and `import rxv.DNAflexpy` work.
-- [ ] `rxv/DNAflexpy/` differs from its pre-move state by exactly one line (`utils.py:175`). Verify: `git diff a9bd674 -- rxv/DNAflexpy | grep -c '^[+-][^+-]'` returns `2`.
+- [ ] `rxv/DNAflexpy/` differs from its pre-move state by exactly one line (`utils.py:175`).
+      `git diff a9bd674 -- rxv/DNAflexpy` does NOT show this: the path did not exist at
+      `a9bd674`, so every line reads as an addition. Compare the trees instead:
+      ```bash
+      mkdir -p /tmp/cmp/old /tmp/cmp/new
+      git archive a9bd674 DNAflexpy | tar -x -C /tmp/cmp/old
+      git archive HEAD rxv/DNAflexpy | tar -x -C /tmp/cmp/new
+      diff -r /tmp/cmp/old/DNAflexpy /tmp/cmp/new/rxv/DNAflexpy   # only utils.py:175
+      ```
 - [ ] Per-sequence profiling is under 1 ms, against the archive's 8.0 ms.
 - [ ] No commit contains a `Co-Authored-By` trailer.
 
