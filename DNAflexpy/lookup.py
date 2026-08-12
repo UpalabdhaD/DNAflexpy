@@ -22,7 +22,7 @@ _ALPHABET = frozenset("ACGT")
 class FeatureTable:
     """A validated collection of k-mer -> value tables, keyed by feature."""
 
-    def __init__(self, tables: dict[str, dict[str, float]], kmer_lens: dict[str, int]):
+    def __init__(self, tables: dict[str, dict[str, float | int]], kmer_lens: dict[str, int]):
         self._tables = tables
         self._kmer_lens = kmer_lens
 
@@ -34,7 +34,7 @@ class FeatureTable:
         self._require(feature)
         return self._kmer_lens[feature]
 
-    def table(self, feature: str) -> Mapping[str, float]:
+    def table(self, feature: str) -> Mapping[str, float | int]:
         self._require(feature)
         return MappingProxyType(self._tables[feature])
 
@@ -46,7 +46,7 @@ class FeatureTable:
 
     @classmethod
     def from_dict(cls, mapping: dict) -> "FeatureTable":
-        tables: dict[str, dict[str, float]] = {}
+        tables: dict[str, dict[str, float | int]] = {}
         kmer_lens: dict[str, int] = {}
         for feature, raw in mapping.items():
             tables[feature], kmer_lens[feature] = _validate(feature, raw)
@@ -68,12 +68,12 @@ class FeatureTable:
         return cls.from_dict(loaded)
 
 
-def _validate(feature: str, raw) -> tuple[dict[str, float], int]:
+def _validate(feature: str, raw) -> tuple[dict[str, float | int], int]:
     """Return an uppercased table and its inferred k-mer length."""
     if not isinstance(raw, dict) or not raw:
         raise ValueError(f"feature {feature!r} has an empty or malformed table")
 
-    table: dict[str, float] = {}
+    table: dict[str, float | int] = {}
     for key, value in raw.items():
         kmer = str(key).upper()
         if set(kmer) - _ALPHABET:

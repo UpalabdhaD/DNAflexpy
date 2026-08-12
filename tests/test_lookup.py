@@ -51,7 +51,10 @@ def test_unknown_feature_raises_with_available_names():
 
 
 def test_keys_are_uppercased():
-    t = FeatureTable.from_dict({"f": {"aa": 1.0, "at": 2.0, "ta": 3.0, "tt": 4.0}})
+    """This 4-entry table is deliberately incomplete for k=2 (needs 16);
+    the resulting UserWarning is expected, not a leak."""
+    with pytest.warns(UserWarning, match="incomplete"):
+        t = FeatureTable.from_dict({"f": {"aa": 1.0, "at": 2.0, "ta": 3.0, "tt": 4.0}})
     assert t.table("f")["AA"] == 1.0
 
 
