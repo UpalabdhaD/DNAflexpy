@@ -2,54 +2,60 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **This file documents the LEGACY package, which is frozen — do not modify its logic.**
+> **This repo contains a new, class-based `DNAflexpy` package plus a frozen archive of the original.**
 >
-> It currently sits at `DNAflexpy/` and moves to `rxv/DNAflexpy/` in Phase 0 of the rewrite. A new package, written from scratch, then takes over the `DNAflexpy/` path and name — so after Phase 0, `DNAflexpy/` means the *new* code and `rxv/DNAflexpy/` means everything described below. See [the design spec](docs/superpowers/specs/2026-08-12-dnaflex-rewrite-design.md).
->
-> The legacy package must keep running: the new one is verified by byte-comparing its output against it. The only sanctioned edit is the forced import-path fix at `utils.py:175` (`files("DNAflexpy.data")` → `files("rxv.DNAflexpy.data")`), which the move requires. Also in scope for Phase 0: `setup.py` (deleted), `pyproject.toml`, `MANIFEST.in`, and `scripts/plot_profiles.py`.
+> `DNAflexpy/` is the new package: rewritten from scratch, class-based, and the one to import in new code. `rxv/DNAflexpy/` is the original package, moved there verbatim and **frozen — never change its logic**. It must keep running because `tests/test_differential.py` byte-compares the new package's output against it; if the archive stops working, or stops reading its own data, that gate stops meaning anything. The only sanctioned edit to the archive is the forced import-path fix at `rxv/DNAflexpy/utils.py:175` (`files("DNAflexpy.data")` → `files("rxv.DNAflexpy.data")`), required by the move. See [the design spec](docs/superpowers/specs/2026-08-12-dnaflex-rewrite-design.md) and [the phase plan](docs/superpowers/plans/2026-08-12-dnaflexpy-phases-0-2.md) for the full rationale.
 >
 > Active work happens on the `dev` branch.
 
 ## Commands
 
 ```bash
-pip install -e .                    # installs the `DNAflexpy` console script
-python -m DNAflexpy.cli <fasta> --window-size 10 --feature DNaseI --outfile out.tsv
-DNAflexpy <fasta> --window-size 10 --feature DNaseI    # same thing, needs the install above
-DNAflexpy --citation
-
-pytest tests/                                                   # see caveat below
-pytest tests/test_utils.py::TestCalculateWindowAverages::test_simple_sequence   # single test
+pip install -e .                    # editable install; see "No console script yet" below
+python -m pytest -q                 # 319 passed (see "Testing" below)
+python -m pytest tests/test_differential.py -k byte_identical -q   # just the byte-equality gate
 
 mkdocs serve                        # docs preview; mkdocs build to render
 python scripts/plot_profiles.py --generate-random-fasta /tmp/r.fa \
   --window-sizes 0 5 10 --feature DNaseI --out /tmp/plot.png   # needs matplotlib (not a declared dep)
 ```
 
-**Testing is currently manual, not automated.** `pytest` fails at collection: [tests/test_utils.py:2](tests/test_utils.py#L2) does `from utils import calculate_window_averages`, a module path and a function name that no longer exist (the function was split into `seq_to_numeric_profile` / `transform_seq_to_feat`). [tests/test_core.py](tests/test_core.py) is empty. CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) only runs `mkdocs gh-deploy` — there is no test job. Verification to date lives in prose plus checked-in expected outputs: [tests/test_verification.md](tests/test_verification.md), [tests/edge_cases_documentation.md](tests/edge_cases_documentation.md), [docs/window_size_checks.md](docs/window_size_checks.md), and the TSVs under [tests/test_outputs/](tests/test_outputs/) and [tests/edge_case_outputs/](tests/edge_case_outputs/). When changing numeric behavior, re-run the commands in those markdown files and diff against the recorded values.
+**No console script yet.** There is no `DNAflexpy` CLI entry point today — `DNAflexpy.cli` does not exist. Phase 8 of the rewrite restores it. Until then the archive's CLI still works: `python -m rxv.DNAflexpy.cli <fasta> --window-size 10 --feature DNaseI --outfile out.tsv`.
+
+## Testing
+
+Tests run and pass: `python -m pytest -q` reports **319 passed**. This includes two byte-equality matrices in `tests/test_differential.py`:
+
+- 210 cases (3 FASTAs x 10 features x 7 window sizes), run with `threads=1`, comparing `FlexProfiler(...).profile_fasta(...).to_tsv(...)` byte-for-byte against the archive's `seq_to_numeric_profile` output.
+- 20 cases forcing the pooled `multiprocessing.Pool` code path (10 features x 2 window sizes on the `edge` FASTA), added because the 210-case matrix alone never exercises `_init_worker`/`_profile_record` in `DNAflexpy/core.py`.
+
+**The byte-equality contract is load-bearing and fragile.** `DNAflexpy/kernel.py` deliberately uses builtin `sum()` over plain Python lists, left to right — never a numpy or `math.fsum` reduction. Those change the last bits of the float and can flip a value at the `round(v, 3)` boundary the archive also rounds to, silently breaking byte equality. If you touch `kernel.py`'s arithmetic, re-run the differential gate, not just `==` comparisons (`test_kernel.py::test_window_zero_bytes_match_the_archive_for_integer_features` explains why `==` can hide a `18 == 18.0` divergence that only serialisation exposes).
+
+`tests/test_archive.py::test_archive_reads_its_own_lookup_table` guards the one thing that would let the differential gate pass while testing nothing: if the archive's import-path fix were ever reverted, it would read the *new* package's lookup table instead of its own. Both YAMLs currently parse identically, so no behavioural test could catch that reversion — only inspecting the archive's source for the exact `files("rxv.DNAflexpy.data")` call site can. Don't weaken that assertion to a loose substring check.
 
 ## Architecture
 
-Call path, CLI to values:
+The new package, `DNAflexpy/`:
 
-[cli.py](DNAflexpy/cli.py) → `DNAflexpyMP` fans records out over a `multiprocessing.Pool` → `DNAflexpy_for_CLI` per record → `seq_to_numeric_profile` (windowing) → `transform_seq_to_feat` (k-mer → float lookup).
+- `DNAflexpy/kernel.py` — pure numeric core, no I/O or pandas: `kmer_values`, `window_means`, `profile_values`. This is where the archive-compatible arithmetic lives.
+- `DNAflexpy/lookup.py` — `FeatureTable`: loads and validates a feature -> k-mer -> value table, infers k-mer length from the keys themselves (no hand-maintained map to keep in sync, unlike the archive's `get_kmer_len`), and rejects mixed-length or non-ACGT keys. `default_table()` is `functools.lru_cache`d so the packaged YAML parses at most once per process.
+- `DNAflexpy/core.py` — `FlexProfiler`: the class-based engine. `.profile(seq)` for one sequence, `.profile_seqs(...)` for a list/dict of sequences, `.profile_fasta(path, threads=...)` for a FASTA file. `_MIN_RECORDS_FOR_POOL` (currently 64) governs when `profile_fasta` actually spawns a `multiprocessing.Pool`: below that record count it always runs serially regardless of `threads`, because process startup dominates at small sizes (~4900x slower measured on a 2-record file). `threads=None` means "decide automatically", not "always spawn a Pool". `threads=1` forces serial on any input size; an explicit `threads > 1` on a large-enough input still forces a Pool.
+- `DNAflexpy/results.py` — `FlexProfile` (and `ProfileSet`, a `{feature: FlexProfile}` dict, defined in `core.py`): holds per-sequence rows and serialises them with `.to_tsv()`, reproducing the archive's exact ragged/NaN-padded TSV format.
+- `DNAflexpy/io.py` — `read_fasta`.
+- `DNAflexpy/__init__.py` — re-exports the above and defines the module-level convenience function `profile(seq, feature="DNaseI", window_size=10)`. **`DNAflexpy.profile` is that function, not the `results` submodule** — the submodule is named `results.py`, not `profile.py`, specifically to avoid the function shadowing it as a package attribute. Import the class directly (`from DNAflexpy.results import FlexProfile`) rather than via `DNAflexpy.profile`.
 
-**Two public entry points with confusingly similar names.** `DNAflexpyMP(input_file, window_size, feature, threads, outfile)` in [core.py:42](DNAflexpy/core.py#L42) is the file-level API and the one the CLI uses. `DNAflexpy(seqid, record, window_size, feature, feature_lookup)` at [core.py:9](DNAflexpy/core.py#L9) is **per-sequence**, reloads the entire YAML on every call, and overwrites the `feature_lookup` argument it was handed. The README and [docs/usage.md](docs/usage.md) show `DNAflexpy(input_file=..., threads=...)`, which does not match either signature and raises `TypeError` — use `DNAflexpyMP` for file-level work.
+The archive, `rxv/DNAflexpy/` (frozen, do not modify logic):
 
-**Feature → k-mer length is a hand-maintained map that must stay in sync with the YAML.** `get_kmer_len` ([utils.py:148](DNAflexpy/utils.py#L148)) hardcodes which features are trinucleotide (k=3: DNaseI, NPP, bendabilityDNase, bendabilityConcensus) vs dinucleotide (k=2: wedge, prop, twistDisp, stiffness, bendingStiffness, trx). Adding a feature to the YAML without adding it here yields `None`, which then fails silently. `lookupNEW.yaml` currently holds 13 top-level features; `freeen`, `gc`, and `mechen` are unmapped and produce all-`None` rows today. The CLI help and docs advertise only 5 of the 10 that work.
-
-**Two YAML lookup tables, only one live.** `load_feature_data` ([utils.py:163](DNAflexpy/utils.py#L163)) reads `DNAflexpy/data/lookupNEW.yaml` via `importlib.resources`, and that is the only file shipped by [MANIFEST.in](MANIFEST.in). Its schema is `feature → kmer → value`. `DNAflexpy/data/lookup.yaml` is legacy, unused, and uses an incompatible schema grouped by `trinucleotide` / `dinucleotide`.
-
-**Error model: exceptions are swallowed, failures surface as data.** Nearly every function wraps its body in a broad `try/except` that prints and returns `None` or `0`. Bad features, unknown k-mers, and malformed input therefore show up as `None`/NaN rows in the output TSV rather than as a raised error. When debugging a wrong-looking profile, suspect a swallowed exception before suspecting the math; the only place that re-raises is `DNAflexpyMP`'s outer handler.
-
-**Row shape drives the output format.** Each record becomes a flat list `[seqid, *values]`. Lists are ragged across records (a sequence shorter than the window yields `[seqid]` alone), so `pd.DataFrame(rows)` NaN-pads to the widest row, then writes with `header=False, index=False, sep="\t"`. This is why short sequences appear as ID-only lines and why trailing empty fields show up in the TSV.
-
-**Windowing semantics** (`seq_to_numeric_profile`, [utils.py:22](DNAflexpy/utils.py#L22)): `window_size == 0` returns per-k-mer values for the whole sequence; `window_size == N` slides overlapping length-N windows with step 1 and emits the mean of the k-mer values inside each, rounded to 3 decimals, giving `len(seq) - N + 1` values. `N == kmer_len` reproduces the `N == 0` output exactly (one k-mer per window) — that identity is the cheapest regression check for the averaging formula, and is what the `a9bd674` window-size fix restored.
+- `rxv/DNAflexpy/utils.py` — `seq_to_numeric_profile` (windowing), `transform_seq_to_feat` (k-mer -> float lookup), `get_kmer_len` (hardcoded feature -> k map), `load_feature_data`, `read_fasta`.
+- `rxv/DNAflexpy/core.py` — `DNAflexpyMP` (file-level, pool-based) and `DNAflexpy` (per-sequence).
+- `rxv/DNAflexpy/cli.py` — the only working CLI right now (see "No console script yet" above).
+- `rxv/DNAflexpy/data/lookupNEW.yaml` — the archive's own copy of the feature table; byte-identical today to `DNAflexpy/data/lookupNEW.yaml`, but the two are loaded through separate `importlib.resources` calls and must stay that way.
 
 ## Conventions
 
-- `DNAflexpy/__init__.py` is empty and exports nothing — always import from the submodule: `from DNAflexpy.core import DNAflexpyMP`.
-- Version is declared only in [setup.py](DNAflexpy/../setup.py) (`0.2.0`); [pyproject.toml](pyproject.toml) carries build-system config only. `setup.py`'s `install_requires` pins (`pandas>=1.0`, `pyyaml>=5.4`) are looser than [requirements.txt](requirements.txt) (`pandas>=2.2.3`, `pyyaml>=6.0.2`) — update both together.
-- `--threads` spawns processes, not threads; the full lookup dict is pickled to every worker.
-- New feature tables belong in `lookupNEW.yaml` **and** `get_kmer_len` **and** the CLI `--feature` help text.
+- Version is declared once, in `DNAflexpy/__init__.py` (`__version__`); `pyproject.toml` resolves it dynamically via `[tool.setuptools.dynamic] version = { attr = "DNAflexpy.__version__" }`. There is no `setup.py` — it was deleted; `setup.py` beside a `[project]` table in `pyproject.toml` makes setuptools error, which `tests/test_packaging.py::test_setup_py_is_gone` guards.
+- `pyproject.toml` explicitly lists `packages = ["DNAflexpy", "rxv", "rxv.DNAflexpy"]` rather than using `find_packages()`, and ships both YAMLs via `package-data`. Keep `requirements.txt` and `pyproject.toml`'s `dependencies` in sync when either changes (`requirements.txt` currently has no floor tighter than `pyproject.toml`'s).
+- New feature tables belong in `lookupNEW.yaml` only — `DNAflexpy/lookup.py` infers k-mer length from the table's own keys, so (unlike the archive's `get_kmer_len`) there is no second place to update by hand.
+- `--threads` (via `profile_fasta(threads=...)`) spawns processes, not threads, via `multiprocessing.Pool` with `spawn` on macOS. Never start a `multiprocessing.Pool` from a `python - <<EOF` stdin heredoc when testing this by hand — `spawn` re-imports the main module, and a heredoc can't be re-imported, causing a runaway respawn loop. Use a real `.py` file with an `if __name__ == "__main__":` guard, or pass `threads=1`.
+- `docs/superpowers/specs/` and `docs/superpowers/plans/` are internal planning docs, not published documentation. `mkdocs.yml` excludes them via `exclude_docs: | superpowers/` so `mkdocs gh-deploy` (run by `.github/workflows/ci.yml` on push to `main`) never publishes them — mkdocs renders every `.md` under `docs/` regardless of what's listed in `nav`, so omitting them from `nav` alone would not have been enough.
 - No Cursor (`.cursor/`, `.cursorrules`) or Copilot instruction files exist in this repo.
