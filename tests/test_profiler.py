@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from DNAflexpy.core import FlexProfiler, ProfileSet
-from DNAflexpy.profile import FlexProfile
+from DNAflexpy.results import FlexProfile
 
 SEQ = "ATGCGTACGTAGCTAGCGTAGCTAGT"
 
@@ -55,8 +55,11 @@ def test_multi_feature_returns_a_profile_set():
 
 
 def test_custom_lookup_from_dict():
-    p = FlexProfiler("mine", window_size=0, lookup={"mine": {"AA": 1.0, "AT": 2.0,
-                                                            "TA": 3.0, "TT": 4.0}})
+    """This 4-entry table is deliberately incomplete for k=2 (needs 16);
+    the resulting UserWarning is expected, not a leak."""
+    with pytest.warns(UserWarning, match="incomplete"):
+        p = FlexProfiler("mine", window_size=0, lookup={"mine": {"AA": 1.0, "AT": 2.0,
+                                                                "TA": 3.0, "TT": 4.0}})
     assert list(p.profile("ATA")) == [2.0, 3.0]
 
 

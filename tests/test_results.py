@@ -1,7 +1,4 @@
-import math
-import pathlib
-
-from DNAflexpy.profile import FlexProfile
+from DNAflexpy.results import FlexProfile
 
 
 def make(rows):

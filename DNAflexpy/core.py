@@ -8,7 +8,15 @@ import pandas as pd
 
 from DNAflexpy.kernel import profile_values
 from DNAflexpy.lookup import FeatureTable, default_table
-from DNAflexpy.profile import FlexProfile
+from DNAflexpy.results import FlexProfile
+
+# Below this many records, process startup dominates: spawning a Pool (macOS
+# uses `spawn`, which forks a fresh interpreter and re-imports the main
+# module) costs far more than just running the records serially. Measured at
+# ~390 ms (Pool) vs ~0.08 ms (serial) for a 2-record FASTA. `threads=None`
+# means "decide automatically", not "always spawn a Pool" -- this constant is
+# how that decision is made regardless of `threads`.
+_MIN_RECORDS_FOR_POOL = 64
 
 
 class ProfileSet(dict):
@@ -73,11 +81,19 @@ class FlexProfiler:
         One read and one pool spawn regardless of how many features are
         requested. With differing k the features cannot share a matrix, so
         the saving is I/O and process startup, not a shared k-mer scan.
+
+        `threads=None` ("decide automatically") does NOT mean "always spawn
+        a Pool". Below `_MIN_RECORDS_FOR_POOL` records, this always runs
+        serially, regardless of `threads` -- process startup dominates at
+        that size, so a Pool would be strictly slower (measured ~4900x on a
+        2-record file). Pass `threads=1` to force serial explicitly on any
+        input size; pass an explicit `threads > 1` to force a Pool once the
+        input is large enough to make it worthwhile.
         """
         from DNAflexpy.io import read_fasta
 
         records = list(read_fasta(path))
-        if threads is not None and threads <= 1 or len(records) < 2:
+        if (threads is not None and threads <= 1) or len(records) < _MIN_RECORDS_FOR_POOL:
             return self._build(records)
 
         import multiprocessing
@@ -97,10 +113,7 @@ class FlexProfiler:
         return self._assemble(rows_by_feature)
 
     def _values(self, feature: str, seq: str) -> list[float]:
-        return profile_values(
-            seq, self._table.kmer_len(feature), self._table.table(feature),
-            self.window_size,
-        )
+        return _feature_values(self._table, feature, seq, self.window_size)
 
     def _build(self, pairs):
         """Turn (seqid, sequence) pairs into a FlexProfile or ProfileSet."""
@@ -129,6 +142,17 @@ class FlexProfiler:
         if len(self._features) == 1:
             return built[self._features[0]]
         return ProfileSet(built)
+
+
+def _feature_values(table: FeatureTable, feature: str, seq: str, window_size: int) -> list[float]:
+    """The one call site both the serial and pooled paths use.
+
+    `FlexProfiler._values` (serial) and `_profile_record` (pooled worker)
+    used to invoke `profile_values` independently; two copies of the same
+    call is exactly the kind of drift that could quietly break byte
+    equality on one path while the other still passes.
+    """
+    return profile_values(seq, table.kmer_len(feature), table.table(feature), window_size)
 
 
 def _resolve_lookup(lookup) -> FeatureTable:
@@ -164,8 +188,6 @@ def _profile_record(record: tuple[str, str]) -> tuple[str, dict[str, list]]:
     table = _WORKER_STATE["table"]
     window_size = _WORKER_STATE["window_size"]
     return seqid, {
-        feature: profile_values(
-            seq, table.kmer_len(feature), table.table(feature), window_size
-        )
+        feature: _feature_values(table, feature, seq, window_size)
         for feature in _WORKER_STATE["features"]
     }

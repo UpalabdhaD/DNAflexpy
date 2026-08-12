@@ -40,6 +40,54 @@ def test_byte_identical_to_archive(fasta_key, feature, window, tmp_path):
     )
 
 
+# Fix 4: the 210 cases above all run with threads=1, so the pooled worker
+# path (_init_worker / _profile_record in DNAflexpy.core, which shares
+# _feature_values with the serial path) has no byte-level coverage of its
+# own. This second, smaller matrix forces the pooled path and checks it
+# against the same archive bytes, on one FASTA at two window sizes rather
+# than multiplying the full 210 by two.
+POOLED_WINDOWS = [0, 10]
+
+
+def pooled_bytes(fasta, feature, window, tmp_path, monkeypatch):
+    """Like `new_bytes`, but forced onto the pooled path.
+
+    `edge` (4 records) is below `_MIN_RECORDS_FOR_POOL` (Fix 3's threshold
+    for skipping Pool creation on small inputs), so the threshold is lowered
+    here via monkeypatch rather than weakened in DNAflexpy.core -- doing the
+    latter would defeat the point of the fix this same wave adds. A spy on
+    `multiprocessing.Pool` proves a Pool was actually constructed: without
+    it, a future regression that silently fell back to serial would still
+    pass this test, comparing the new package against itself the same way
+    Fix 1 worries about for the archive's lookup import.
+    """
+    import multiprocessing as mp
+
+    monkeypatch.setattr("DNAflexpy.core._MIN_RECORDS_FOR_POOL", 1)
+    calls = {"n": 0}
+    original_pool = mp.Pool
+
+    def spying_pool(*args, **kwargs):
+        calls["n"] += 1
+        return original_pool(*args, **kwargs)
+
+    monkeypatch.setattr(mp, "Pool", spying_pool)
+    out = tmp_path / "new_pooled.tsv"
+    FlexProfiler(feature, window_size=window).profile_fasta(fasta, threads=2).to_tsv(out)
+    assert calls["n"] == 1, "pooled differential case did not actually use a Pool"
+    return out.read_bytes()
+
+
+@pytest.mark.parametrize("feature", ARCHIVE_FEATURES)
+@pytest.mark.parametrize("window", POOLED_WINDOWS)
+def test_byte_identical_to_archive_pooled(feature, window, tmp_path, monkeypatch):
+    fasta_key = "edge"
+    fasta = FASTAS[fasta_key]
+    assert pooled_bytes(fasta, feature, window, tmp_path, monkeypatch) == archive_bytes(
+        fasta_key, feature, window
+    )
+
+
 @pytest.mark.parametrize("feature", ["gc", "freeen", "mechen"])
 def test_allowlisted_unlocked_features(feature, tmp_path):
     """Archive: None rows, because get_kmer_len has no entry. New: numbers."""

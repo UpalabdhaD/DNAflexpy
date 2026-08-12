@@ -3,7 +3,7 @@
 from DNAflexpy import lookup
 from DNAflexpy.core import FlexProfiler, ProfileSet
 from DNAflexpy.lookup import FeatureTable, default_table
-from DNAflexpy.profile import FlexProfile
+from DNAflexpy.results import FlexProfile
 
 __version__ = "0.3.0.dev0"
 __all__ = [

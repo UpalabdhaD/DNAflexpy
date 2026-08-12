@@ -4,7 +4,11 @@ from DNAflexpy.core import FlexProfiler
 from DNAflexpy.io import read_fasta
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-FASTA = ROOT / "rxv/DNAflexpy/data/test_fasta.fa"
+# A copy of the archive's fixture (rxv/DNAflexpy/data/test_fasta.fa), kept in
+# sync byte-for-byte so these unit tests of the NEW package don't depend on
+# rxv/ still existing. The differential tests legitimately read the archive's
+# own copy via conftest.FASTAS -- that's the point of that gate.
+FASTA = ROOT / "tests/test_fasta_basic.fa"
 
 
 def test_read_fasta_yields_id_and_sequence():
@@ -38,14 +42,18 @@ def test_profile_fasta_single_threaded():
     assert len(prof.frame.columns) == 17
 
 
-def test_profile_fasta_pooled_matches_single_threaded():
+def test_profile_fasta_pooled_matches_single_threaded(monkeypatch):
+    """2 records is below the Pool threshold; lower it so threads=2 still
+    genuinely spawns a Pool instead of silently falling back to serial."""
+    monkeypatch.setattr("DNAflexpy.core._MIN_RECORDS_FOR_POOL", 1)
     p = FlexProfiler("DNaseI", window_size=10)
     assert p.profile_fasta(FASTA, threads=2).frame.equals(
         p.profile_fasta(FASTA, threads=1).frame
     )
 
 
-def test_pooled_run_preserves_input_order():
+def test_pooled_run_preserves_input_order(monkeypatch):
+    monkeypatch.setattr("DNAflexpy.core._MIN_RECORDS_FOR_POOL", 1)
     p = FlexProfiler("DNaseI", window_size=10)
     assert p.profile_fasta(FASTA, threads=2).seqids == ["sequence1", "sequence2"]
 
@@ -53,3 +61,35 @@ def test_pooled_run_preserves_input_order():
 def test_multi_feature_fasta_returns_profile_set():
     ps = FlexProfiler(["DNaseI", "trx"], window_size=10).profile_fasta(FASTA, threads=1)
     assert set(ps) == {"DNaseI", "trx"}
+
+
+def test_default_threads_stays_serial_for_small_input(monkeypatch):
+    """threads=None must mean "decide automatically", not "always spawn a
+    Pool": a small FASTA on the default call path must never create one."""
+    import multiprocessing
+
+    def no_pool(*args, **kwargs):
+        raise AssertionError("Pool should not be created below the threshold")
+
+    monkeypatch.setattr(multiprocessing, "Pool", no_pool)
+    prof = FlexProfiler("DNaseI", window_size=10).profile_fasta(FASTA)
+    assert prof.seqids == ["sequence1", "sequence2"]
+
+
+def test_explicit_threads_above_one_still_pools_for_large_input(monkeypatch):
+    """A large-enough input with an explicit threads>1 must still use a real
+    Pool -- lowering the threshold must not accidentally disable pooling."""
+    import multiprocessing as mp
+
+    monkeypatch.setattr("DNAflexpy.core._MIN_RECORDS_FOR_POOL", 1)
+    calls = {"n": 0}
+    original_pool = mp.Pool
+
+    def spying_pool(*args, **kwargs):
+        calls["n"] += 1
+        return original_pool(*args, **kwargs)
+
+    monkeypatch.setattr(mp, "Pool", spying_pool)
+    prof = FlexProfiler("DNaseI", window_size=10).profile_fasta(FASTA, threads=2)
+    assert prof.seqids == ["sequence1", "sequence2"]
+    assert calls["n"] == 1
