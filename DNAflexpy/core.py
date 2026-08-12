@@ -67,6 +67,35 @@ class FlexProfiler:
             pairs = [(f"seq_{i}", s) for i, s in enumerate(seqs)]
         return self._build(pairs)
 
+    def profile_fasta(self, path, threads: int | None = None):
+        """Profile every record in a FASTA file.
+
+        One read and one pool spawn regardless of how many features are
+        requested. With differing k the features cannot share a matrix, so
+        the saving is I/O and process startup, not a shared k-mer scan.
+        """
+        from DNAflexpy.io import read_fasta
+
+        records = list(read_fasta(path))
+        if threads is not None and threads <= 1 or len(records) < 2:
+            return self._build(records)
+
+        import multiprocessing
+
+        with multiprocessing.Pool(
+            processes=threads,
+            initializer=_init_worker,
+            initargs=(self._table, self._features, self.window_size),
+        ) as pool:
+            results = pool.map(_profile_record, records)
+
+        # pool.map preserves input order, so output stays deterministic.
+        rows_by_feature = {
+            feature: [[seqid, *values[feature]] for seqid, values in results]
+            for feature in self._features
+        }
+        return self._assemble(rows_by_feature)
+
     def _values(self, feature: str, seq: str) -> list[float]:
         return profile_values(
             seq, self._table.kmer_len(feature), self._table.table(feature),
@@ -114,3 +143,29 @@ def _resolve_lookup(lookup) -> FeatureTable:
     raise TypeError(
         f"lookup must be None, a path, a dict or a FeatureTable, got {type(lookup).__name__}"
     )
+
+
+_WORKER_STATE: dict = {}
+
+
+def _init_worker(table: FeatureTable, features: list[str], window_size: int) -> None:
+    """Seed each worker once with the already-parsed table.
+
+    Deliberately receives the loaded table, not a path: reloading per worker
+    would reintroduce the 8 ms x N cost this design removes.
+    """
+    _WORKER_STATE["table"] = table
+    _WORKER_STATE["features"] = features
+    _WORKER_STATE["window_size"] = window_size
+
+
+def _profile_record(record: tuple[str, str]) -> tuple[str, dict[str, list]]:
+    seqid, seq = record
+    table = _WORKER_STATE["table"]
+    window_size = _WORKER_STATE["window_size"]
+    return seqid, {
+        feature: profile_values(
+            seq, table.kmer_len(feature), table.table(feature), window_size
+        )
+        for feature in _WORKER_STATE["features"]
+    }
