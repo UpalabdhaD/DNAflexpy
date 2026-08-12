@@ -34,7 +34,46 @@ def test_archive_reproduces_checked_in_output(relpath, fasta_key, feature, windo
 
 
 def test_archive_reads_its_own_lookup_table():
-    """Guards the import-path fix: the archive must not read the new package's YAML."""
+    """Guards the import-path fix: the archive must not read the new package's YAML.
+
+    If rxv/DNAflexpy/utils.py:175 were reverted to `files("DNAflexpy.data")`,
+    the archive would silently read the NEW package's lookup table instead
+    of its own -- and this failure mode is invisible to every *other* test
+    in the suite: DNAflexpy/data/lookupNEW.yaml and
+    rxv/DNAflexpy/data/lookupNEW.yaml currently parse to byte-identical
+    content, so a reverted archive would still produce byte-identical
+    output and the 210-case differential gate in test_differential.py would
+    keep reporting every case as passed. It would just be comparing the new
+    package against itself, testing nothing. No behavioural or round-trip
+    check can catch that; only inspecting the archive's own source for the
+    exact call site can. This test is therefore the only thing standing
+    between the gate and silent self-comparison -- if it is ever weakened
+    or deleted, the gate can pass 210/210 while verifying nothing.
+    """
+    import importlib.resources
+
     import rxv.DNAflexpy.utils as archived
 
-    assert "rxv.DNAflexpy.data" in pathlib.Path(archived.__file__).read_text()
+    source = pathlib.Path(archived.__file__).read_text()
+    # Assert the exact call, not just the package string appearing anywhere
+    # in the file: a whole-file substring search for "rxv.DNAflexpy.data"
+    # would also be satisfied by that text sitting in a comment or a
+    # docstring, without the fixed code path actually being in effect.
+    assert 'files("rxv.DNAflexpy.data")' in source
+
+    # Independently confirm the resource genuinely resolves under the
+    # repo's rxv/ tree, and to a different location than the new package's
+    # own data directory. This is a second, independent signal alongside
+    # the source-text check above -- it would catch the two data
+    # directories ever being consolidated into one, which the source-text
+    # check alone would not.
+    # `files()` on a namespace package (no __init__.py in data/) returns a
+    # MultiplexedPath, whose str() is a repr, not a filesystem path -- join
+    # a real file to get back a concrete PosixPath.
+    repo_root = pathlib.Path(__file__).resolve().parent.parent
+    archive_data = importlib.resources.files("rxv.DNAflexpy.data").joinpath("lookupNEW.yaml")
+    new_data = importlib.resources.files("DNAflexpy.data").joinpath("lookupNEW.yaml")
+    archive_path = pathlib.Path(str(archive_data)).resolve()
+    new_path = pathlib.Path(str(new_data)).resolve()
+    assert archive_path.is_relative_to((repo_root / "rxv").resolve())
+    assert archive_path != new_path
