@@ -176,7 +176,12 @@ def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
     if header is None:
         header = _looks_like_header(path, seq_col, value_col, id_col, sep)
 
-    frame = pd.read_csv(path, sep=sep, header=0 if header else None, dtype=str)
+    # pandas raises EmptyDataError on a 0-byte file before it can return a
+    # frame, so `frame.empty` alone would never be reached for that case.
+    try:
+        frame = pd.read_csv(path, sep=sep, header=0 if header else None, dtype=str)
+    except pd.errors.EmptyDataError:
+        raise ValueError(f"table has no data rows: {path}") from None
     if frame.empty:
         raise ValueError(f"table has no data rows: {path}")
 
