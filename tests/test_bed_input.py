@@ -12,6 +12,13 @@ def genome(tmp_path):
     return path
 
 
+@pytest.fixture
+def genome_iupac(tmp_path):
+    path = tmp_path / "iupac.fa"
+    path.write_text(">chrI\nARGT\n")
+    return path
+
+
 def write_bed(tmp_path, text):
     path = tmp_path / "peaks.bed"
     path.write_text(text)
@@ -99,3 +106,30 @@ def test_unknown_on_edge_raises(genome):
 def test_unknown_contig_raises(genome):
     with pytest.raises(ValueError, match="chr99"):
         extract_intervals([("chr99", 0, 4, None, "+")], genome)
+
+
+def test_contig_named_like_a_track_line_is_kept(tmp_path):
+    """A prefix test would silently drop this real interval."""
+    p = write_bed(tmp_path, "trackXYZ\t10\t20\nbrowser1\t30\t40\n")
+    assert [r[0] for r in read_bed(p)] == ["trackXYZ", "browser1"]
+
+
+def test_real_track_and_browser_lines_are_still_skipped(tmp_path):
+    p = write_bed(tmp_path, 'track name="peaks"\nbrowser position chr1\nchr1\t10\t20\n')
+    assert read_bed(p) == [("chr1", 10, 20, None, "+")]
+
+
+def test_bad_line_reports_its_real_file_line(tmp_path):
+    """The number must match what the user sees in an editor."""
+    p = write_bed(tmp_path, "chr1\t10\t20\nchr1\t30\n")
+    with pytest.raises(ValueError, match="line 2"):
+        read_bed(p)
+
+
+def test_minus_strand_complements_iupac_codes(genome_iupac):
+    """R and Y must swap on the minus strand, not pass through unchanged."""
+    plus = extract_intervals([("chrI", 0, 4, None, "+")], genome_iupac)[0][1]
+    minus = extract_intervals([("chrI", 0, 4, None, "-")], genome_iupac)[0][1]
+    assert plus == "ARGT"
+    assert minus == "ACYT"
+    assert plus != minus          # guards against a self-complementary fixture

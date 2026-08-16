@@ -127,14 +127,19 @@ def warn_if_ambiguous(records, source):
     )
 
 
-_COMPLEMENT = str.maketrans("ACGTNacgtn", "TGCANtgcan")
+_COMPLEMENT = str.maketrans(
+    "ACGTUNRYSWKMBDHVacgtunryswkmbdhv",
+    "TGCAANYRSWMKVHDBtgcaanyrswmkvhdb",
+)
 
 
 def read_bed(path):
     """Read a BED file into `(chrom, start, end, name, strand)` tuples.
 
     Coordinates stay exactly as BED defines them: 0-based, half-open.
-    `track`, `browser` and `#` lines are skipped, as are blank lines.
+    Blank lines and `#` comment lines are skipped. A `track` or `browser`
+    line is recognised by its first whitespace token, not by prefix, so a
+    contig genuinely named e.g. `trackXYZ` is kept rather than dropped.
     """
     path = Path(path)
     if not path.exists():
@@ -142,9 +147,11 @@ def read_bed(path):
 
     out = []
     with path.open() as handle:
-        for number, line in enumerate(handle):
+        for number, line in enumerate(handle, 1):
             line = line.strip()
-            if not line or line.startswith(("#", "track", "browser")):
+            if not line or line.startswith("#"):
+                continue
+            if line.split()[0] in ("track", "browser"):
                 continue
             fields = line.split("\t")
             if len(fields) < 3:
