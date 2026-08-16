@@ -151,10 +151,31 @@ def test_reversed_interval_raises(tmp_path):
         read_bed(p)
 
 
-def test_empty_interval_raises(tmp_path):
+def test_zero_length_interval_is_accepted(tmp_path):
+    """start == end is legal BED: it marks a point (a TSS, a motif
+    midpoint) with no width of its own, normally paired with width= in
+    extract_intervals to cut a fixed window centred on it. Only a
+    genuinely reversed interval (start > end) is malformed."""
     p = write_bed(tmp_path, "chr1\t10\t10\n")
-    with pytest.raises(ValueError, match="line 1"):
-        read_bed(p)
+    assert read_bed(p) == [("chr1", 10, 10, None, "+")]
+
+
+def test_zero_length_interval_with_width_gives_a_centred_window(genome):
+    """The motivating use case for allowing start == end: centre a
+    fixed-size window on a point interval, e.g. a TSS."""
+    out = extract_intervals([("chr1", 50, 50, None, "+")], genome, width=8)
+    assert out == [("chr1:46-54", "GTACGTAC")]
+    assert len(out[0][1]) == 8
+
+
+def test_zero_length_interval_without_width_warns_and_keeps_the_row(genome):
+    """Without width=, a point interval has no bases to extract. Rather
+    than silently dropping it or silently emitting an empty sequence, this
+    warns naming the interval and still returns the row -- the same
+    silent-data class the rest of this phase avoids elsewhere."""
+    with pytest.warns(UserWarning, match="zero length"):
+        out = extract_intervals([("chr1", 20, 20, None, "+")], genome)
+    assert out == [("chr1:20-20", "")]
 
 
 def test_minus_strand_complements_iupac_codes(genome_iupac):

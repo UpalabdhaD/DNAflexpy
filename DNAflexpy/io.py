@@ -165,6 +165,11 @@ def read_bed(path):
     Blank lines and `#` comment lines are skipped. A `track` or `browser`
     line is recognised by its first whitespace token, not by prefix, so a
     contig genuinely named e.g. `trackXYZ` is kept rather than dropped.
+
+    A zero-length interval (`start == end`) is accepted: it is the normal
+    way to mark a point such as a TSS or motif midpoint, typically paired
+    with `width=` in `extract_intervals` to cut a fixed-size window centred
+    on it. `start > end` is rejected as malformed.
     """
     path = Path(path)
     if not path.exists():
@@ -193,10 +198,10 @@ def read_bed(path):
                     f"({fields[1]!r}, {fields[2]!r}); a header row would also "
                     "trigger this"
                 ) from None
-            if start >= end:
+            if start > end:
                 raise ValueError(
-                    f"line {number} of {path} has start ({start}) >= end "
-                    f"({end}); BED intervals must have start < end"
+                    f"line {number} of {path} has start ({start}) > end "
+                    f"({end}); BED start must not be greater than end"
                 )
             name = fields[3] if len(fields) > 3 and fields[3] != "." else None
             strand = fields[5] if len(fields) > 5 and fields[5] in ("+", "-") else "+"
@@ -216,6 +221,13 @@ def extract_intervals(intervals, genome, width=None, on_edge="drop"):
     intervals, `"pad"` pads with `N`. Padded positions do not resolve to a
     k-mer, so they are masked as NaN and counted in `FlexProfile.n_masked`
     - they are not silently scored as zero.
+
+    A zero-length interval (`start == end`, e.g. a TSS or motif midpoint)
+    combined with `width` is the normal way to cut a fixed window centred
+    on a point. Without `width`, it has no bases to extract; rather than
+    silently returning an empty sequence, this warns with a count naming
+    the intervals, and still emits the row so no data goes missing without
+    a trace.
     """
     if on_edge not in ("drop", "error", "pad"):
         raise ValueError(
@@ -230,7 +242,7 @@ def extract_intervals(intervals, genome, width=None, on_edge="drop"):
         ) from None
 
     fasta = Fasta(str(genome))
-    out, dropped, padded = [], [], []
+    out, dropped, padded, zero_length = [], [], [], []
 
     for chrom, start, end, name, strand in intervals:
         if chrom not in fasta:
@@ -263,6 +275,8 @@ def extract_intervals(intervals, genome, width=None, on_edge="drop"):
             padded.append(seqid)
         else:
             sequence = str(fasta[chrom][start:end])
+            if width is None and start == end:
+                zero_length.append(seqid)
 
         if strand == "-":
             sequence = sequence.translate(_COMPLEMENT)[::-1]
@@ -281,6 +295,16 @@ def extract_intervals(intervals, genome, width=None, on_edge="drop"):
             f"{len(padded)} interval(s) padded with N at a contig boundary. "
             "Padded positions do not resolve to a k-mer and are masked as "
             "NaN, so those windows average fewer values.",
+            UserWarning,
+            stacklevel=2,
+        )
+    if zero_length:
+        warnings.warn(
+            f"{len(zero_length)} interval(s) have zero length and produced "
+            f"an empty sequence: {', '.join(zero_length[:5])}"
+            + (" ..." if len(zero_length) > 5 else "")
+            + ". Pass width= to centre a fixed-size window on a point "
+            "interval such as a TSS or motif midpoint instead.",
             UserWarning,
             stacklevel=2,
         )
