@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import warnings
 from pathlib import Path
 from typing import Iterator
 
@@ -73,6 +74,7 @@ def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
             ) from None
         seqid = str(ids.iloc[i]) if ids is not None else f"seq_{i}"
         out.append((seqid, str(seqs.iloc[i]), value))
+    warn_if_ambiguous([(sid, seq) for sid, seq, _ in out], path)
     return out
 
 
@@ -92,10 +94,47 @@ def _pick_column(frame, col, argname):
     return frame[col]
 
 
+_IUPAC = frozenset("ACGTURYSWKMBDHVN")
+
+
 def _looks_like_dna(text):
-    """True when a cell could be a DNA sequence."""
+    """True when a cell could be a nucleotide sequence.
+
+    Accepts the full IUPAC alphabet, not just ACGTN: a real sequence may
+    carry ambiguity codes, and treating one as a header would silently
+    drop a data row.
+    """
     text = text.strip().upper()
-    return bool(text) and not set(text) - set("ACGTN")
+    return bool(text) and not set(text) - _IUPAC
+
+
+_ACGTN = frozenset("ACGTN")
+
+
+def warn_if_ambiguous(records, source):
+    """Warn when sequences carry IUPAC codes beyond ACGTN.
+
+    The feature tables hold only ACGT k-mers, so any k-mer covering one of
+    these resolves to NaN and is masked. N is an ordinary placeholder and
+    is not worth warning about; the rarer codes usually are.
+    """
+    found = {}
+    for seqid, sequence in records:
+        odd = sorted(set(sequence.upper()) - _ACGTN)
+        if odd:
+            found[seqid] = odd
+    if not found:
+        return
+    letters = sorted({c for codes in found.values() for c in codes})
+    examples = ", ".join(list(found)[:3])
+    warnings.warn(
+        f"{len(found)} sequence(s) in {source} contain non-ACGTN letters "
+        f"({', '.join(letters)}), for example {examples}. The feature tables "
+        "hold only ACGT k-mers, so every k-mer covering one of these resolves "
+        "to NaN and is masked. See FlexProfile.n_masked.",
+        UserWarning,
+        stacklevel=3,
+    )
 
 
 def _looks_like_header(path, seq_col, value_col, id_col, sep):

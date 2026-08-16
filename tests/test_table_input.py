@@ -103,3 +103,35 @@ def test_header_only_file_raises(tmp_path):
     p = write(tmp_path, "ho.tsv", "sequence\taffinity\n")
     with pytest.raises(ValueError, match="no data rows"):
         read_table(p)
+
+
+def test_iupac_first_row_is_data_not_a_header(tmp_path):
+    """A real sequence may carry ambiguity codes; dropping it would be silent."""
+    p = write(tmp_path, "iu.tsv", "ATGR\t1.5\nGGTT\t2.5\n")
+    with pytest.warns(UserWarning, match="non-ACGTN"):
+        rows = read_table(p)
+    assert len(rows) == 2
+    assert rows[0] == ("seq_0", "ATGR", 1.5)
+
+
+def test_warns_about_letters_the_tables_cannot_resolve(tmp_path):
+    p = write(tmp_path, "w.tsv", "ATGY\t1.5\n")
+    with pytest.warns(UserWarning, match="Y"):
+        read_table(p)
+
+
+def test_plain_n_does_not_warn(tmp_path):
+    """N is an ordinary placeholder, not worth a warning."""
+    import warnings as _w
+    p = write(tmp_path, "n.tsv", "ATGN\t1.5\n")
+    with _w.catch_warnings():
+        _w.simplefilter("error")
+        assert len(read_table(p)) == 1
+
+
+def test_clean_sequences_do_not_warn(tmp_path):
+    import warnings as _w
+    p = write(tmp_path, "c2.tsv", "ATGC\t1.5\n")
+    with _w.catch_warnings():
+        _w.simplefilter("error")
+        assert len(read_table(p)) == 1
