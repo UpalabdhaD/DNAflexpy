@@ -137,3 +137,51 @@ def test_header_false_keeps_the_first_row(tmp_path):
     """The case that used to be guessed wrong: a header made of DNA letters."""
     p = write(tmp_path, "hf.tsv", "TAG\t1.5\nATGC\t2.5\n")
     assert read_table(p, header=False) == [("seq_0", "TAG", 1.5), ("seq_1", "ATGC", 2.5)]
+
+
+import numpy as np
+
+from DNAflexpy import FlexProfiler
+from DNAflexpy.core import ProfileSet
+from DNAflexpy.results import FlexProfile
+
+SEQ_A = "ATGCGTACGTAGCTAGCGTAGCTAGT"
+SEQ_B = "CGTAGCTAGTACGATCGTACGTAGCT"
+
+
+def test_profile_table_returns_a_profile_with_y(tmp_path):
+    p = write(tmp_path, "t.tsv", f"{SEQ_A}\t1.5\n{SEQ_B}\t2.5\n")
+    prof = FlexProfiler("DNaseI", window_size=10).profile_table(p, header=False)
+    assert isinstance(prof, FlexProfile)
+    assert prof.y == [1.5, 2.5]
+    assert prof.seqids == ["seq_0", "seq_1"]
+
+
+def test_y_is_aligned_to_seqids(tmp_path):
+    p = write(tmp_path, "t.tsv", f"name\tseq\tv\na\t{SEQ_A}\t9.0\nb\t{SEQ_B}\t8.0\n")
+    prof = FlexProfiler("DNaseI", window_size=10).profile_table(
+        p, seq_col="seq", value_col="v", id_col="name", header=True
+    )
+    assert dict(zip(prof.seqids, prof.y)) == {"a": 9.0, "b": 8.0}
+
+
+def test_fasta_input_still_has_no_y():
+    """y is only meaningful for labelled input."""
+    prof = FlexProfiler("DNaseI", window_size=10).profile_seqs([SEQ_A])
+    assert prof.y is None
+
+
+def test_values_match_the_plain_sequence_path(tmp_path):
+    """Reading via a table must not change the numbers."""
+    p = write(tmp_path, "t.tsv", f"{SEQ_A}\t1.5\n")
+    viafile = FlexProfiler("DNaseI", window_size=10).profile_table(p, header=False)
+    direct = FlexProfiler("DNaseI", window_size=10).profile_seqs([SEQ_A])
+    assert np.array_equal(viafile.frame.to_numpy(), direct.frame.to_numpy())
+
+
+def test_multi_feature_table_gives_every_profile_the_same_y(tmp_path):
+    p = write(tmp_path, "t.tsv", f"{SEQ_A}\t1.5\n{SEQ_B}\t2.5\n")
+    ps = FlexProfiler(["DNaseI", "trx"], window_size=10).profile_table(p, header=False)
+    assert isinstance(ps, ProfileSet)
+    assert ps["DNaseI"].y == [1.5, 2.5]
+    assert ps["trx"].y == [1.5, 2.5]

@@ -112,23 +112,43 @@ class FlexProfiler:
         }
         return self._assemble(rows_by_feature)
 
+    def profile_table(self, path, seq_col=0, value_col=1, id_col=None,
+                      header=None, sep="\t"):
+        """Profile every sequence in a labelled table.
+
+        The table's numeric column becomes `FlexProfile.y`, aligned to
+        `.seqids`, so one file supplies both the features and the targets.
+        """
+        from DNAflexpy.io import read_table
+
+        records = read_table(
+            path, seq_col=seq_col, value_col=value_col, id_col=id_col,
+            header=header, sep=sep,
+        )
+        pairs = [(seqid, seq) for seqid, seq, _ in records]
+        y = [value for _, _, value in records]
+        return self._build(pairs, y=y)
+
     def _values(self, feature: str, seq: str) -> list[float]:
         return _feature_values(self._table, feature, seq, self.window_size)
 
-    def _build(self, pairs):
+    def _build(self, pairs, y=None):
         """Turn (seqid, sequence) pairs into a FlexProfile or ProfileSet."""
         rows_by_feature = {
             feature: [[sid, *self._values(feature, seq)] for sid, seq in pairs]
             for feature in self._features
         }
-        return self._assemble(rows_by_feature)
+        return self._assemble(rows_by_feature, y=y)
 
-    def _assemble(self, rows_by_feature: dict[str, list[list]]):
+    def _assemble(self, rows_by_feature: dict[str, list[list]], y=None):
         """Turn per-feature row lists into a FlexProfile or ProfileSet.
 
         Factored out of `_build` so Task 7's `profile_fasta` can reuse this
         same final step when starting from worker-pool results instead of
         sequences.
+
+        `y` is the aligned label vector from labelled input, or None. Every
+        profile in a multi-feature set shares the same labels.
         """
         built = {
             feature: FlexProfile(
@@ -136,6 +156,7 @@ class FlexProfiler:
                 feature=feature,
                 window_size=self.window_size,
                 kmer_len=self._table.kmer_len(feature),
+                y=y,
             )
             for feature, rows in rows_by_feature.items()
         }
