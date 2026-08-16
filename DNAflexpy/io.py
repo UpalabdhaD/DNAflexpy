@@ -125,3 +125,119 @@ def warn_if_ambiguous(records, source):
         UserWarning,
         stacklevel=3,
     )
+
+
+_COMPLEMENT = str.maketrans("ACGTNacgtn", "TGCANtgcan")
+
+
+def read_bed(path):
+    """Read a BED file into `(chrom, start, end, name, strand)` tuples.
+
+    Coordinates stay exactly as BED defines them: 0-based, half-open.
+    `track`, `browser` and `#` lines are skipped, as are blank lines.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"BED file not found: {path}")
+
+    out = []
+    with path.open() as handle:
+        for number, line in enumerate(handle):
+            line = line.strip()
+            if not line or line.startswith(("#", "track", "browser")):
+                continue
+            fields = line.split("\t")
+            if len(fields) < 3:
+                raise ValueError(
+                    f"line {number} of {path} has {len(fields)} column(s); "
+                    "BED needs at least 3 (chrom, start, end)"
+                )
+            chrom, start, end = fields[0], int(fields[1]), int(fields[2])
+            name = fields[3] if len(fields) > 3 and fields[3] != "." else None
+            strand = fields[5] if len(fields) > 5 and fields[5] in ("+", "-") else "+"
+            out.append((chrom, start, end, name, strand))
+    return out
+
+
+def extract_intervals(intervals, genome, width=None, on_edge="drop"):
+    """Pull sequences for BED intervals out of a reference genome FASTA.
+
+    With `width`, every interval is re-centred on its midpoint and cut to
+    exactly that many bases, so all outputs are the same length. That is
+    what makes position-wise comparison downstream meaningful.
+
+    A centred window can run off the end of a contig. `on_edge` decides:
+    `"drop"` skips it and warns with a count, `"error"` raises naming the
+    intervals, `"pad"` pads with `N`. Padded positions do not resolve to a
+    k-mer, so they are masked as NaN and counted in `FlexProfile.n_masked`
+    - they are not silently scored as zero.
+    """
+    if on_edge not in ("drop", "error", "pad"):
+        raise ValueError(
+            f"on_edge must be 'drop', 'error' or 'pad', got {on_edge!r}"
+        )
+    try:
+        from pyfaidx import Fasta
+    except ImportError:
+        raise ImportError(
+            "reading BED input needs pyfaidx, which is an optional extra. "
+            "Install it with: pip install 'DNAflexpy[bed]'"
+        ) from None
+
+    fasta = Fasta(str(genome))
+    out, dropped, padded = [], [], []
+
+    for chrom, start, end, name, strand in intervals:
+        if chrom not in fasta:
+            raise ValueError(
+                f"contig {chrom!r} is not in {genome}; "
+                f"it has {len(fasta.keys())} contig(s)"
+            )
+        length = len(fasta[chrom])
+
+        if width is not None:
+            centre = (start + end) // 2
+            start = centre - width // 2
+            end = start + width
+
+        seqid = name if name is not None else f"{chrom}:{start}-{end}"
+
+        if start < 0 or end > length:
+            if on_edge == "error":
+                raise ValueError(
+                    f"interval {seqid} runs past the bounds of {chrom} "
+                    f"(length {length}); pass on_edge='drop' or 'pad'"
+                )
+            if on_edge == "drop":
+                dropped.append(seqid)
+                continue
+            left = "N" * max(0, -start)
+            right = "N" * max(0, end - length)
+            body = str(fasta[chrom][max(0, start):min(end, length)])
+            sequence = left + body + right
+            padded.append(seqid)
+        else:
+            sequence = str(fasta[chrom][start:end])
+
+        if strand == "-":
+            sequence = sequence.translate(_COMPLEMENT)[::-1]
+        out.append((seqid, sequence))
+
+    if dropped:
+        warnings.warn(
+            f"{len(dropped)} interval(s) dropped for running past a contig "
+            f"boundary: {', '.join(dropped[:5])}"
+            + (" ..." if len(dropped) > 5 else ""),
+            UserWarning,
+            stacklevel=2,
+        )
+    if padded:
+        warnings.warn(
+            f"{len(padded)} interval(s) padded with N at a contig boundary. "
+            "Padded positions do not resolve to a k-mer and are masked as "
+            "NaN, so those windows average fewer values.",
+            UserWarning,
+            stacklevel=2,
+        )
+    warn_if_ambiguous(out, genome)
+    return out
