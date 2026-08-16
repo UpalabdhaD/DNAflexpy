@@ -12,7 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 pip install -e .                    # editable install; see "No console script yet" below
-python -m pytest -q                 # 319 passed (see "Testing" below)
+pip install -e '.[dev]'             # test deps; BED tests need pyfaidx, included here
+python -m pytest -q                 # 369 passed (see "Testing" below)
 python -m pytest tests/test_differential.py -k byte_identical -q   # just the byte-equality gate
 
 mkdocs serve                        # docs preview; mkdocs build to render
@@ -24,7 +25,7 @@ python scripts/plot_profiles.py --generate-random-fasta /tmp/r.fa \
 
 ## Testing
 
-Tests run and pass: `python -m pytest -q` reports **319 passed**. This includes two byte-equality matrices in `tests/test_differential.py`:
+Tests run and pass: `python -m pytest -q` reports **369 passed**. This includes two byte-equality matrices in `tests/test_differential.py`:
 
 - 210 cases (3 FASTAs x 10 features x 7 window sizes), run with `threads=1`, comparing `FlexProfiler(...).profile_fasta(...).to_tsv(...)` byte-for-byte against the archive's `seq_to_numeric_profile` output.
 - 20 cases forcing the pooled `multiprocessing.Pool` code path (10 features x 2 window sizes on the `edge` FASTA), added because the 210-case matrix alone never exercises `_init_worker`/`_profile_record` in `DNAflexpy/core.py`.

@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=6.0"]
+dev = ["pytest>=6.0", "pyfaidx>=0.7"]
 bed = ["pyfaidx>=0.7"]
 
 [tool.setuptools]
