@@ -165,9 +165,27 @@ def test_y_is_aligned_to_seqids(tmp_path):
     assert dict(zip(prof.seqids, prof.y)) == {"a": 9.0, "b": 8.0}
 
 
-def test_fasta_input_still_has_no_y():
+def test_profile_seqs_has_no_y():
     """y is only meaningful for labelled input."""
     prof = FlexProfiler("DNaseI", window_size=10).profile_seqs([SEQ_A])
+    assert prof.y is None
+
+
+def test_profile_fasta_has_no_y(tmp_path):
+    """The real FASTA path, serial branch."""
+    fa = tmp_path / "small.fa"
+    fa.write_text(f">a\n{SEQ_A}\n>b\n{SEQ_B}\n")
+    prof = FlexProfiler("DNaseI", window_size=10).profile_fasta(fa, threads=1)
+    assert prof.seqids == ["a", "b"]
+    assert prof.y is None
+
+
+def test_profile_fasta_pooled_has_no_y(tmp_path):
+    """The pooled branch, which builds its rows separately from _build."""
+    fa = tmp_path / "many.fa"
+    fa.write_text("".join(f">s{i}\n{SEQ_A}\n" for i in range(70)))
+    prof = FlexProfiler("DNaseI", window_size=10).profile_fasta(fa, threads=2)
+    assert len(prof.seqids) == 70
     assert prof.y is None
 
 
