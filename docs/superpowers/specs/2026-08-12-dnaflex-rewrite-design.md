@@ -487,8 +487,10 @@ prof = FlexProfiler("DNaseI", window_size=10).profile_table(
 X, y = prof.encode(["1-mer", "1-flex"]), prof.y
 ```
 
-- Header row auto-detected (first row's `value_col` failing to parse as a float
-  means it is a header); forceable with `header=True|False`.
+- `header=True|False` is **required**, not guessed. Row 1 cannot be classified
+  from its content: `dna`, `rna`, `tag` and `cat` are all made only of
+  nucleotide letters, so a header can look exactly like a sequence. Omitting it
+  raises rather than risking a fabricated training row.
 - Columns may be named instead of positional: `seq_col="sequence"`.
 - Rows without an ID column get generated IDs `seq_0, seq_1, …`; an existing one
   is named via `id_col=`.

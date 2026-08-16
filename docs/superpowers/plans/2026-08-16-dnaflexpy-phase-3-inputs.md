@@ -44,7 +44,7 @@
 - Produces: `read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t") -> list[tuple[str, str, float]]`, returning `(seqid, sequence, value)` triples in file order. Task 2 consumes it.
 
 Behaviour required by the spec:
-- Header row auto-detected: if the first row's `value_col` cannot be parsed as a float, it is a header. Forceable with `header=True|False`.
+- `header=True|False` is **required**. It is not guessed: words like `dna`, `rna` and `tag` are made only of nucleotide letters, so row 1 cannot be classified reliably from its content. Omitting it raises.
 - Columns addressable by position (`seq_col=0`) or by name (`seq_col="sequence"`). Named columns imply a header.
 - Rows get generated IDs `seq_0, seq_1, …` unless `id_col=` names one.
 - Non-numeric or missing values **raise**, naming the offending row. Silently dropping labelled rows would corrupt a training set.
@@ -301,7 +301,7 @@ SEQ_B = "CGTAGCTAGTACGATCGTACGTAGCT"
 
 def test_profile_table_returns_a_profile_with_y(tmp_path):
     p = write(tmp_path, "t.tsv", f"{SEQ_A}\t1.5\n{SEQ_B}\t2.5\n")
-    prof = FlexProfiler("DNaseI", window_size=10).profile_table(p)
+    prof = FlexProfiler("DNaseI", window_size=10).profile_table(p, header=False)
     assert isinstance(prof, FlexProfile)
     assert prof.y == [1.5, 2.5]
     assert prof.seqids == ["seq_0", "seq_1"]
@@ -310,7 +310,7 @@ def test_profile_table_returns_a_profile_with_y(tmp_path):
 def test_y_is_aligned_to_seqids(tmp_path):
     p = write(tmp_path, "t.tsv", f"name\tseq\tv\na\t{SEQ_A}\t9.0\nb\t{SEQ_B}\t8.0\n")
     prof = FlexProfiler("DNaseI", window_size=10).profile_table(
-        p, seq_col="seq", value_col="v", id_col="name"
+        p, seq_col="seq", value_col="v", id_col="name", header=True
     )
     assert dict(zip(prof.seqids, prof.y)) == {"a": 9.0, "b": 8.0}
 
@@ -324,14 +324,14 @@ def test_fasta_input_still_has_no_y():
 def test_values_match_the_plain_sequence_path(tmp_path):
     """Reading via a table must not change the numbers."""
     p = write(tmp_path, "t.tsv", f"{SEQ_A}\t1.5\n")
-    viafile = FlexProfiler("DNaseI", window_size=10).profile_table(p)
+    viafile = FlexProfiler("DNaseI", window_size=10).profile_table(p, header=False)
     direct = FlexProfiler("DNaseI", window_size=10).profile_seqs([SEQ_A])
     assert np.array_equal(viafile.frame.to_numpy(), direct.frame.to_numpy())
 
 
 def test_multi_feature_table_gives_every_profile_the_same_y(tmp_path):
     p = write(tmp_path, "t.tsv", f"{SEQ_A}\t1.5\n{SEQ_B}\t2.5\n")
-    ps = FlexProfiler(["DNaseI", "trx"], window_size=10).profile_table(p)
+    ps = FlexProfiler(["DNaseI", "trx"], window_size=10).profile_table(p, header=False)
     assert isinstance(ps, ProfileSet)
     assert ps["DNaseI"].y == [1.5, 2.5]
     assert ps["trx"].y == [1.5, 2.5]
