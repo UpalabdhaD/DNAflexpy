@@ -862,3 +862,33 @@ since it is only needed for this one entry point."
 ## Deferred to later phases
 
 Phase 4 onward: `encode.py` (ML feature matrices), plotting, dinucleotide shuffle and per-position statistics, streaming input, the provenance sidecar, `ProfileSet.correlate()`, bigWig/BED export, the `DNAflexpy` CLI, and the container. The spec also lists `heatmap(order_rows="y")` and `metaprofile(groupby=("y", threshold))` as things `.y` unlocks — both belong to the plotting phase, not here.
+
+---
+
+## Known issues left open at the end of Phase 3
+
+Recorded here so they are not rediscovered from scratch. None blocks the phase;
+all were surfaced by review and consciously deferred.
+
+1. **A line of only delimiters is silently dropped by `read_table`.** A row such
+   as `"\t\n"` — both the sequence and the value cell empty — is now
+   indistinguishable from a genuinely blank line and is dropped without an
+   error. Before the blank-line line-numbering fix it raised
+   `"has a missing value in value_col"`. This is a regression in exactly the
+   silent-data-loss class the rest of the phase removed, but it is narrow: it
+   needs *both* cells empty on the same physical line. Fixing it means reading
+   the raw lines alongside the parsed frame so "physically blank" and "all
+   delimiters" can be told apart.
+
+2. **Unnamed BED intervals can collide into one `seqid`.** Two distinct
+   intervals that re-centre onto the same window both become
+   `chrom:start-end`, e.g. `("chr1",10,20)` and `("chr1",12,18)` at `width=8`
+   both give `chr1:11-19`. `FlexProfile.frame` indexes by seqid and pandas
+   permits duplicate index labels, so `.loc[seqid]` returns several rows and
+   `n_masked` collapses to one entry. Named intervals (BED column 4) are
+   unaffected.
+
+3. **`extract_intervals` writes a `.fai` beside the genome and never closes the
+   handle.** pyfaidx builds its index on first open. A read-only reference
+   directory therefore makes `from_bed` fail with a pyfaidx error the docstring
+   does not anticipate.
