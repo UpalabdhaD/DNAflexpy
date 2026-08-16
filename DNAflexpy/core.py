@@ -129,6 +129,20 @@ class FlexProfiler:
         y = [value for _, _, value in records]
         return self._build(pairs, y=y)
 
+    def from_bed(self, bed, genome, width=None, on_edge="drop"):
+        """Profile intervals from a BED file against a reference genome.
+
+        With `width`, intervals are re-centred and cut to that many bases,
+        so every row is the same length. `on_edge` decides what happens to
+        an interval whose centred window runs past a contig boundary.
+        """
+        from DNAflexpy.io import extract_intervals, read_bed
+
+        pairs = extract_intervals(
+            read_bed(bed), genome, width=width, on_edge=on_edge
+        )
+        return self._build(pairs)
+
     def _values(self, feature: str, seq: str) -> list[float]:
         return _feature_values(self._table, feature, seq, self.window_size)
 

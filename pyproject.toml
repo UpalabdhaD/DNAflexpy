@@ -16,6 +16,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=6.0"]
+bed = ["pyfaidx>=0.7"]
 
 [tool.setuptools]
 # Explicit, never find_packages(): that would sweep the archive into the

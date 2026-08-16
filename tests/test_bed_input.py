@@ -1,6 +1,9 @@
 import pytest
 
+from DNAflexpy import FlexProfiler
+from DNAflexpy.core import ProfileSet
 from DNAflexpy.io import extract_intervals, read_bed
+from DNAflexpy.results import FlexProfile
 
 GENOME = ">chr1\n" + "ACGT" * 25 + "\n>chr2\n" + "AAAACCCCGGGGTTTT" + "\n"
 
@@ -133,3 +136,41 @@ def test_minus_strand_complements_iupac_codes(genome_iupac):
     assert plus == "ARGT"
     assert minus == "ACYT"
     assert plus != minus          # guards against a self-complementary fixture
+
+
+def test_from_bed_returns_a_profile(genome, tmp_path):
+    bed = write_bed(tmp_path, "chr1\t10\t30\tpeakA\t0\t+\n")
+    prof = FlexProfiler("DNaseI", window_size=10).from_bed(bed, genome)
+    assert isinstance(prof, FlexProfile)
+    assert prof.seqids == ["peakA"]
+
+
+def test_from_bed_with_width_gives_equal_length_rows(genome, tmp_path):
+    """Fixed width is the point: rows line up for position-wise work."""
+    bed = write_bed(tmp_path, "chr1\t10\t12\ta\t0\t+\nchr1\t40\t60\tb\t0\t+\n")
+    prof = FlexProfiler("DNaseI", window_size=10).from_bed(bed, genome, width=20)
+    assert prof.frame.notna().all().all()
+    assert prof.frame.shape == (2, 11)
+
+
+def test_from_bed_has_no_y(genome, tmp_path):
+    """BED input carries no label column."""
+    bed = write_bed(tmp_path, "chr1\t10\t30\ta\t0\t+\n")
+    assert FlexProfiler("DNaseI", window_size=10).from_bed(bed, genome).y is None
+
+
+def test_from_bed_multi_feature(genome, tmp_path):
+    bed = write_bed(tmp_path, "chr1\t10\t30\ta\t0\t+\n")
+    ps = FlexProfiler(["DNaseI", "trx"], window_size=10).from_bed(bed, genome)
+    assert isinstance(ps, ProfileSet)
+    assert set(ps) == {"DNaseI", "trx"}
+
+
+def test_padded_bases_are_masked_not_zeroed(genome, tmp_path):
+    """The N padding must show up as masked, never as a real 0 measurement."""
+    bed = write_bed(tmp_path, "chr1\t0\t2\ta\t0\t+\n")
+    with pytest.warns(UserWarning, match="padded"):
+        prof = FlexProfiler("DNaseI", window_size=0).from_bed(
+            bed, genome, width=20, on_edge="pad"
+        )
+    assert prof.n_masked["a"] > 0
