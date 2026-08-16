@@ -1,4 +1,7 @@
 import pathlib
+import warnings
+
+import pytest
 
 from DNAflexpy.core import FlexProfiler
 from DNAflexpy.io import read_fasta
@@ -93,3 +96,18 @@ def test_explicit_threads_above_one_still_pools_for_large_input(monkeypatch):
     prof = FlexProfiler("DNaseI", window_size=10).profile_fasta(FASTA, threads=2)
     assert prof.seqids == ["sequence1", "sequence2"]
     assert calls["n"] == 1
+
+
+def test_profile_fasta_warns_on_ambiguous_sequence(tmp_path):
+    """read_fasta never calls warn_if_ambiguous itself; profile_fasta must,
+    so this path warns the same as profile_table already does."""
+    fa = tmp_path / "amb.fa"
+    fa.write_text(">a\nATGRGTACGTAGCTAGCGTAGCTAGT\n")
+    with pytest.warns(UserWarning, match="non-ACGTN"):
+        FlexProfiler("DNaseI", window_size=10).profile_fasta(fa, threads=1)
+
+
+def test_profile_fasta_does_not_warn_on_a_clean_fasta():
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        FlexProfiler("DNaseI", window_size=10).profile_fasta(FASTA, threads=1)

@@ -54,9 +54,18 @@ def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
         )
 
     try:
-        frame = pd.read_csv(path, sep=sep, header=0 if header else None, dtype=str)
+        # skip_blank_lines=False keeps every physical line as a row (as NaN
+        # in every column), so the row's positional index stays the file's
+        # real line offset. Dropping blank rows ourselves afterwards, rather
+        # than letting pandas skip them before indexing, is what keeps
+        # line_no below accurate when the file has blank lines in it.
+        frame = pd.read_csv(
+            path, sep=sep, header=0 if header else None, dtype=str,
+            skip_blank_lines=False,
+        )
     except pd.errors.EmptyDataError:
         raise ValueError(f"table has no data rows: {path}") from None
+    frame = frame[~frame.isna().all(axis=1)]
     if frame.empty:
         raise ValueError(f"table has no data rows: {path}")
 
@@ -64,11 +73,21 @@ def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
     values = _pick_column(frame, value_col, "value_col")
     ids = _pick_column(frame, id_col, "id_col") if id_col is not None else None
 
+    def _is_missing(cell):
+        return (
+            cell is None
+            or (isinstance(cell, float) and math.isnan(cell))
+            or str(cell).strip() == ""
+        )
+
     out = []
-    for i in range(len(frame)):
+    for pos, i in enumerate(frame.index):
         line_no = i + 1 + (1 if header else 0)
-        raw = values.iloc[i]
-        if raw is None or (isinstance(raw, float) and math.isnan(raw)) or str(raw).strip() == "":
+        seq_raw = seqs.loc[i]
+        if _is_missing(seq_raw):
+            raise ValueError(f"line {line_no} of {path} has a missing sequence in seq_col")
+        raw = values.loc[i]
+        if _is_missing(raw):
             raise ValueError(f"line {line_no} of {path} has a missing value in value_col")
         try:
             value = float(raw)
@@ -76,8 +95,12 @@ def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
             raise ValueError(
                 f"line {line_no} of {path} has non-numeric value {raw!r} in value_col"
             ) from None
-        seqid = str(ids.iloc[i]) if ids is not None else f"seq_{i}"
-        out.append((seqid, str(seqs.iloc[i]), value))
+        if not math.isfinite(value):
+            raise ValueError(
+                f"line {line_no} of {path} has a non-finite value {value!r} in value_col"
+            )
+        seqid = str(ids.loc[i]) if ids is not None else f"seq_{pos}"
+        out.append((seqid, str(seq_raw), value))
     warn_if_ambiguous([(sid, seq) for sid, seq, _ in out], path)
     return out
 
@@ -120,8 +143,10 @@ def warn_if_ambiguous(records, source):
     warnings.warn(
         f"{len(found)} sequence(s) in {source} contain non-ACGTN letters "
         f"({', '.join(letters)}), for example {examples}. The feature tables "
-        "hold only ACGT k-mers, so every k-mer covering one of these resolves "
-        "to NaN and is masked. See FlexProfile.n_masked.",
+        "hold only ACGT k-mers, so windows containing these letters are "
+        "averaged over fewer k-mers. FlexProfile.n_masked only counts a "
+        "window as NaN when none of its k-mers resolve, so above "
+        "window_size=0 it under-reports how many windows are affected.",
         UserWarning,
         stacklevel=3,
     )
@@ -159,7 +184,20 @@ def read_bed(path):
                     f"line {number} of {path} has {len(fields)} column(s); "
                     "BED needs at least 3 (chrom, start, end)"
                 )
-            chrom, start, end = fields[0], int(fields[1]), int(fields[2])
+            chrom = fields[0]
+            try:
+                start, end = int(fields[1]), int(fields[2])
+            except ValueError:
+                raise ValueError(
+                    f"line {number} of {path} has a non-integer start or end "
+                    f"({fields[1]!r}, {fields[2]!r}); a header row would also "
+                    "trigger this"
+                ) from None
+            if start >= end:
+                raise ValueError(
+                    f"line {number} of {path} has start ({start}) >= end "
+                    f"({end}); BED intervals must have start < end"
+                )
             name = fields[3] if len(fields) > 3 and fields[3] != "." else None
             strand = fields[5] if len(fields) > 5 and fields[5] in ("+", "-") else "+"
             out.append((chrom, start, end, name, strand))

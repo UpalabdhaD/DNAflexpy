@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 
@@ -5,6 +7,7 @@ from DNAflexpy.core import FlexProfiler, ProfileSet
 from DNAflexpy.results import FlexProfile
 
 SEQ = "ATGCGTACGTAGCTAGCGTAGCTAGT"
+AMBIGUOUS_SEQ = "ATGRGTACGTAGCTAGCGTAGCTAGT"
 
 
 def test_bare_string_returns_an_array():
@@ -65,3 +68,27 @@ def test_custom_lookup_from_dict():
 
 def test_short_sequence_yields_no_values():
     assert len(FlexProfiler("DNaseI", window_size=30).profile("ATGC")) == 0
+
+
+def test_profile_warns_on_ambiguous_sequence():
+    """read_table warns via its own reader; profile() must warn too, since
+    read_fasta never calls warn_if_ambiguous itself."""
+    with pytest.warns(UserWarning, match="non-ACGTN"):
+        FlexProfiler("DNaseI", window_size=10).profile(AMBIGUOUS_SEQ)
+
+
+def test_profile_does_not_warn_on_a_clean_sequence():
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        FlexProfiler("DNaseI", window_size=10).profile(SEQ)
+
+
+def test_profile_seqs_warns_on_ambiguous_sequence():
+    with pytest.warns(UserWarning, match="non-ACGTN"):
+        FlexProfiler("DNaseI", window_size=10).profile_seqs([SEQ, AMBIGUOUS_SEQ])
+
+
+def test_profile_seqs_does_not_warn_on_clean_sequences():
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        FlexProfiler("DNaseI", window_size=10).profile_seqs([SEQ, SEQ])

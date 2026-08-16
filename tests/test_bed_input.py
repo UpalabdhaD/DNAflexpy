@@ -55,9 +55,15 @@ def test_extract_uses_the_interval_as_is_without_width(genome):
 
 
 def test_extract_recentres_to_a_fixed_width(genome):
-    """A 2bp interval widened to 8 stays centred on the same midpoint."""
+    """A 2bp interval widened to 8 stays centred on the same midpoint.
+
+    A length-only assertion cannot tell `start = centre - width // 2` (correct)
+    apart from a bug like `start = start - width // 2` (shifts the window):
+    on this "ACGT"*25 fixture, ref[7:15], ref[6:14] and ref[10:18] are all
+    length 8, so pin the actual seqid and bases too.
+    """
     out = extract_intervals([("chr1", 10, 12, None, "+")], genome, width=8)
-    assert len(out[0][1]) == 8
+    assert out == [("chr1:7-15", "TACGTACG")]
 
 
 def test_extract_uses_the_bed_name_as_the_id(genome):
@@ -126,6 +132,28 @@ def test_bad_line_reports_its_real_file_line(tmp_path):
     """The number must match what the user sees in an editor."""
     p = write_bed(tmp_path, "chr1\t10\t20\nchr1\t30\n")
     with pytest.raises(ValueError, match="line 2"):
+        read_bed(p)
+
+
+def test_header_row_raises_naming_the_file_and_line(tmp_path):
+    """A column-header line ('chrom\\tstart\\tend') is not skipped -- only
+    track/browser/# lines are -- so int('start') must raise something that
+    names the file and line, not a bare int() ValueError."""
+    p = write_bed(tmp_path, "chrom\tstart\tend\nchr1\t10\t20\n")
+    with pytest.raises(ValueError, match="line 1"):
+        read_bed(p)
+
+
+def test_reversed_interval_raises(tmp_path):
+    """start > end must not silently yield an empty extracted sequence."""
+    p = write_bed(tmp_path, "chr1\t30\t10\n")
+    with pytest.raises(ValueError, match="line 1"):
+        read_bed(p)
+
+
+def test_empty_interval_raises(tmp_path):
+    p = write_bed(tmp_path, "chr1\t10\t10\n")
+    with pytest.raises(ValueError, match="line 1"):
         read_bed(p)
 
 

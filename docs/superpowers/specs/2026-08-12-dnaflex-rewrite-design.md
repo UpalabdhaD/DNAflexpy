@@ -161,7 +161,7 @@ FlexProfiler(feature, window_size=10, lookup=None)
 .profile(seq) -> np.ndarray                       # ONE bare string, ~0.1 ms
 .profile_seqs(seqs) -> FlexProfile | ProfileSet   # list[str] | dict[id, str]
 .profile_fasta(path, threads=None) -> FlexProfile | ProfileSet
-.profile_table(path, seq_col=0, value_col=1) -> FlexProfile | ProfileSet
+.profile_table(path, seq_col=0, value_col=1, header=...) -> FlexProfile | ProfileSet
 .from_bed(bed, genome, width=None) -> FlexProfile | ProfileSet
 ```
 
@@ -482,7 +482,7 @@ file.
 
 ```python
 prof = FlexProfiler("DNaseI", window_size=10).profile_table(
-    "affinity.tsv", seq_col=0, value_col=1,
+    "affinity.tsv", seq_col=0, value_col=1, header=False,
 )
 X, y = prof.encode(["1-mer", "1-flex"]), prof.y
 ```

@@ -65,6 +65,9 @@ class FlexProfiler:
                 "profile() requires a single feature; use profile_seqs() for "
                 f"multi-feature profilers (has {len(self._features)})"
             )
+        from DNAflexpy.io import warn_if_ambiguous
+
+        warn_if_ambiguous([("sequence", seq)], "the given sequence")
         return np.asarray(self._values(self._features[0], seq), dtype=float)
 
     def profile_seqs(self, seqs):
@@ -73,6 +76,9 @@ class FlexProfiler:
             pairs = list(seqs.items())
         else:
             pairs = [(f"seq_{i}", s) for i, s in enumerate(seqs)]
+        from DNAflexpy.io import warn_if_ambiguous
+
+        warn_if_ambiguous(pairs, "the given sequences")
         return self._build(pairs)
 
     def profile_fasta(self, path, threads: int | None = None):
@@ -90,9 +96,10 @@ class FlexProfiler:
         input size; pass an explicit `threads > 1` to force a Pool once the
         input is large enough to make it worthwhile.
         """
-        from DNAflexpy.io import read_fasta
+        from DNAflexpy.io import read_fasta, warn_if_ambiguous
 
         records = list(read_fasta(path))
+        warn_if_ambiguous(records, path)
         if (threads is not None and threads <= 1) or len(records) < _MIN_RECORDS_FOR_POOL:
             return self._build(records)
 
@@ -118,6 +125,9 @@ class FlexProfiler:
 
         The table's numeric column becomes `FlexProfile.y`, aligned to
         `.seqids`, so one file supplies both the features and the targets.
+        `header` must be passed explicitly as `True` or `False`; omitting it
+        raises, because row 1 cannot be reliably classified as data or
+        column names from its content alone.
         """
         from DNAflexpy.io import read_table
 

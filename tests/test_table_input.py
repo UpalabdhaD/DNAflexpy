@@ -1,6 +1,12 @@
+import warnings
+
+import numpy as np
 import pytest
 
+from DNAflexpy import FlexProfiler
+from DNAflexpy.core import ProfileSet
 from DNAflexpy.io import read_table
+from DNAflexpy.results import FlexProfile
 
 
 def write(tmp_path, name, text):
@@ -52,6 +58,38 @@ def test_missing_value_raises(tmp_path):
         read_table(p, header=False)
 
 
+def test_missing_sequence_cell_raises(tmp_path):
+    """An empty sequence cell must not fabricate a 3-base 'nan' sequence:
+
+    pandas turns a missing cell into np.nan even under dtype=str, and
+    str(np.nan) == "nan", which is entirely inside the allowed ACGTN
+    alphabet and would otherwise slip through as a silent fake row.
+    """
+    p = write(tmp_path, "ms.tsv", "ATGC\t1.5\n\t2.5\n")
+    with pytest.raises(ValueError, match="line 2"):
+        read_table(p, header=False)
+
+
+def test_whitespace_only_sequence_cell_raises(tmp_path):
+    p = write(tmp_path, "ws.tsv", "ATGC\t1.5\n   \t2.5\n")
+    with pytest.raises(ValueError, match="line 2"):
+        read_table(p, header=False)
+
+
+def test_infinite_value_raises(tmp_path):
+    """float('inf') parses as a float and would otherwise pass the numeric
+    check silently."""
+    p = write(tmp_path, "inf.tsv", "ATGC\tinf\n")
+    with pytest.raises(ValueError, match="line 1"):
+        read_table(p, header=False)
+
+
+def test_negative_infinite_value_raises(tmp_path):
+    p = write(tmp_path, "ninf.tsv", "ATGC\t-inf\n")
+    with pytest.raises(ValueError, match="line 1"):
+        read_table(p, header=False)
+
+
 def test_out_of_range_column_raises(tmp_path):
     p = write(tmp_path, "o.tsv", "ATGC\t1.5\n")
     with pytest.raises(ValueError, match="value_col"):
@@ -82,6 +120,23 @@ def test_error_line_number_accounts_for_the_header(tmp_path):
         read_table(p, header=True)
 
 
+def test_error_line_number_is_not_thrown_off_by_blank_lines(tmp_path):
+    """pandas' default skip_blank_lines=True drops blank lines before the
+    row index is computed, so a naive `i + 1` would report line 2 for what
+    is physically line 4 in this file."""
+    p = write(tmp_path, "bl.tsv", "ATGC\t1.5\n\n\nGGTT\thigh\n")
+    with pytest.raises(ValueError, match="line 4"):
+        read_table(p, header=False)
+
+
+def test_blank_lines_do_not_disturb_good_rows(tmp_path):
+    p = write(tmp_path, "bl2.tsv", "ATGC\t1.5\n\nGGTT\t2.5\n")
+    assert read_table(p, header=False) == [
+        ("seq_0", "ATGC", 1.5),
+        ("seq_1", "GGTT", 2.5),
+    ]
+
+
 def test_header_only_file_raises(tmp_path):
     """Covers the frame.empty branch, which the 0-byte test does not reach."""
     p = write(tmp_path, "ho.tsv", "sequence\taffinity\n")
@@ -106,18 +161,16 @@ def test_warns_about_letters_the_tables_cannot_resolve(tmp_path):
 
 def test_plain_n_does_not_warn(tmp_path):
     """N is an ordinary placeholder, not worth a warning."""
-    import warnings as _w
     p = write(tmp_path, "n.tsv", "ATGN\t1.5\n")
-    with _w.catch_warnings():
-        _w.simplefilter("error")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         assert len(read_table(p, header=False)) == 1
 
 
 def test_clean_sequences_do_not_warn(tmp_path):
-    import warnings as _w
     p = write(tmp_path, "c2.tsv", "ATGC\t1.5\n")
-    with _w.catch_warnings():
-        _w.simplefilter("error")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         assert len(read_table(p, header=False)) == 1
 
 
@@ -138,12 +191,6 @@ def test_header_false_keeps_the_first_row(tmp_path):
     p = write(tmp_path, "hf.tsv", "TAG\t1.5\nATGC\t2.5\n")
     assert read_table(p, header=False) == [("seq_0", "TAG", 1.5), ("seq_1", "ATGC", 2.5)]
 
-
-import numpy as np
-
-from DNAflexpy import FlexProfiler
-from DNAflexpy.core import ProfileSet
-from DNAflexpy.results import FlexProfile
 
 SEQ_A = "ATGCGTACGTAGCTAGCGTAGCTAGT"
 SEQ_B = "CGTAGCTAGTACGATCGTACGTAGCT"

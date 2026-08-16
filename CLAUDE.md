@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 pip install -e .                    # editable install; see "No console script yet" below
 pip install -e '.[dev]'             # test deps; BED tests need pyfaidx, included here
-python -m pytest -q                 # 369 passed (see "Testing" below)
+python -m pytest -q                 # 384 passed (see "Testing" below)
 python -m pytest tests/test_differential.py -k byte_identical -q   # just the byte-equality gate
 
 mkdocs serve                        # docs preview; mkdocs build to render
@@ -25,7 +25,7 @@ python scripts/plot_profiles.py --generate-random-fasta /tmp/r.fa \
 
 ## Testing
 
-Tests run and pass: `python -m pytest -q` reports **369 passed**. This includes two byte-equality matrices in `tests/test_differential.py`:
+Tests run and pass: `python -m pytest -q` reports **384 passed**. This includes two byte-equality matrices in `tests/test_differential.py`:
 
 - 210 cases (3 FASTAs x 10 features x 7 window sizes), run with `threads=1`, comparing `FlexProfiler(...).profile_fasta(...).to_tsv(...)` byte-for-byte against the archive's `seq_to_numeric_profile` output.
 - 20 cases forcing the pooled `multiprocessing.Pool` code path (10 features x 2 window sizes on the `edge` FASTA), added because the 210-case matrix alone never exercises `_init_worker`/`_profile_record` in `DNAflexpy/core.py`.
@@ -40,7 +40,7 @@ The new package, `DNAflexpy/`:
 
 - `DNAflexpy/kernel.py` — pure numeric core, no I/O or pandas: `kmer_values`, `window_means`, `profile_values`. This is where the archive-compatible arithmetic lives.
 - `DNAflexpy/lookup.py` — `FeatureTable`: loads and validates a feature -> k-mer -> value table, infers k-mer length from the keys themselves (no hand-maintained map to keep in sync, unlike the archive's `get_kmer_len`), and rejects mixed-length or non-ACGT keys. `default_table()` is `functools.lru_cache`d so the packaged YAML parses at most once per process.
-- `DNAflexpy/core.py` — `FlexProfiler`: the class-based engine. `.profile(seq)` for one sequence, `.profile_seqs(...)` for a list/dict of sequences, `.profile_fasta(path, threads=...)` for a FASTA file, `.profile_table(path, seq_col=..., value_col=...)` for a labelled table (fills `FlexProfile.y`), `.from_bed(bed, genome, width=..., on_edge=...)` for BED intervals against a reference genome. `_MIN_RECORDS_FOR_POOL` (currently 64) governs when `profile_fasta` actually spawns a `multiprocessing.Pool`: below that record count it always runs serially regardless of `threads`, because process startup dominates at small sizes (~4900x slower measured on a 2-record file). `threads=None` means "decide automatically", not "always spawn a Pool". `threads=1` forces serial on any input size; an explicit `threads > 1` on a large-enough input still forces a Pool.
+- `DNAflexpy/core.py` — `FlexProfiler`: the class-based engine. `.profile(seq)` for one sequence, `.profile_seqs(...)` for a list/dict of sequences, `.profile_fasta(path, threads=...)` for a FASTA file, `.profile_table(path, seq_col=..., value_col=..., header=...)` for a labelled table (`header` is required, not guessed; fills `FlexProfile.y`), `.from_bed(bed, genome, width=..., on_edge=...)` for BED intervals against a reference genome. `_MIN_RECORDS_FOR_POOL` (currently 64) governs when `profile_fasta` actually spawns a `multiprocessing.Pool`: below that record count it always runs serially regardless of `threads`, because process startup dominates at small sizes (~4900x slower measured on a 2-record file). `threads=None` means "decide automatically", not "always spawn a Pool". `threads=1` forces serial on any input size; an explicit `threads > 1` on a large-enough input still forces a Pool.
 - `DNAflexpy/results.py` — `FlexProfile` (and `ProfileSet`, a `{feature: FlexProfile}` dict, defined in `core.py`): holds per-sequence rows and serialises them with `.to_tsv()`, reproducing the archive's exact ragged/NaN-padded TSV format.
 - `DNAflexpy/io.py` — `read_fasta`, `read_table`, `read_bed`, `extract_intervals`. `extract_intervals` imports `pyfaidx` lazily, since it is only needed by this one entry point and ships as the optional `DNAflexpy[bed]` extra.
 - `DNAflexpy/__init__.py` — re-exports the above and defines the module-level convenience function `profile(seq, feature="DNaseI", window_size=10)`. **`DNAflexpy.profile` is that function, not the `results` submodule** — the submodule is named `results.py`, not `profile.py`, specifically to avoid the function shadowing it as a package attribute. Import the class directly (`from DNAflexpy.results import FlexProfile`) rather than via `DNAflexpy.profile`.
