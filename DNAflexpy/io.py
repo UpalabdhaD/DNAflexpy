@@ -47,7 +47,11 @@ def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
         raise FileNotFoundError(f"table not found: {path}")
 
     if header is None:
-        header = _looks_like_header(path, seq_col, value_col, id_col, sep)
+        raise ValueError(
+            f"pass header=True or header=False for {path}: whether row 1 holds "
+            "column names or data cannot be guessed reliably, because words "
+            "like 'dna', 'rna' and 'tag' are made only of nucleotide letters"
+        )
 
     try:
         frame = pd.read_csv(path, sep=sep, header=0 if header else None, dtype=str)
@@ -94,20 +98,6 @@ def _pick_column(frame, col, argname):
     return frame[col]
 
 
-_IUPAC = frozenset("ACGTURYSWKMBDHVN")
-
-
-def _looks_like_dna(text):
-    """True when a cell could be a nucleotide sequence.
-
-    Accepts the full IUPAC alphabet, not just ACGTN: a real sequence may
-    carry ambiguity codes, and treating one as a header would silently
-    drop a data row.
-    """
-    text = text.strip().upper()
-    return bool(text) and not set(text) - _IUPAC
-
-
 _ACGTN = frozenset("ACGTN")
 
 
@@ -135,29 +125,3 @@ def warn_if_ambiguous(records, source):
         UserWarning,
         stacklevel=3,
     )
-
-
-def _looks_like_header(path, seq_col, value_col, id_col, sep):
-    """True when the first non-blank row looks like column names.
-
-    Two independent signals, because either alone is fooled: a header whose
-    label column is numeric ("sequence\t2024") parses fine as a value, and a
-    sequence column is never plain text in real data.
-    """
-    if any(isinstance(c, str) for c in (seq_col, value_col, id_col) if c is not None):
-        return True
-    with Path(path).open() as handle:
-        for line in handle:
-            if line.strip():
-                fields = line.rstrip("\n").split(sep)
-                break
-        else:
-            return False
-    if value_col < len(fields):
-        try:
-            float(fields[value_col])
-        except ValueError:
-            return True
-    if seq_col < len(fields) and not _looks_like_dna(fields[seq_col]):
-        return True
-    return False
