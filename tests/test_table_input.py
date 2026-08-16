@@ -52,13 +52,13 @@ def test_csv_via_sep(tmp_path):
 def test_non_numeric_value_raises_naming_the_row(tmp_path):
     """Dropping the row instead would silently corrupt a training set."""
     p = write(tmp_path, "b.tsv", "ATGC\t1.5\nGGTT\thigh\n")
-    with pytest.raises(ValueError, match="row 1"):
+    with pytest.raises(ValueError, match="line 2"):
         read_table(p)
 
 
 def test_missing_value_raises(tmp_path):
     p = write(tmp_path, "m.tsv", "ATGC\t1.5\nGGTT\t\n")
-    with pytest.raises(ValueError, match="row 1"):
+    with pytest.raises(ValueError, match="line 2"):
         read_table(p)
 
 
@@ -81,5 +81,25 @@ def test_missing_file_raises(tmp_path):
 
 def test_empty_file_raises(tmp_path):
     p = write(tmp_path, "e.tsv", "")
+    with pytest.raises(ValueError, match="no data rows"):
+        read_table(p)
+
+
+def test_numeric_looking_header_is_still_detected(tmp_path):
+    """A header whose label column is a number must not become a data row."""
+    p = write(tmp_path, "nh.tsv", "sequence\t2024\nATGC\t1.5\n")
+    assert read_table(p) == [("seq_0", "ATGC", 1.5)]
+
+
+def test_error_line_number_accounts_for_the_header(tmp_path):
+    """The number must match what the user sees in an editor."""
+    p = write(tmp_path, "hl.tsv", "sequence\taffinity\nATGC\t1.5\nGGTT\thigh\n")
+    with pytest.raises(ValueError, match="line 3"):
+        read_table(p)
+
+
+def test_header_only_file_raises(tmp_path):
+    """Covers the frame.empty branch, which the 0-byte test does not reach."""
+    p = write(tmp_path, "ho.tsv", "sequence\taffinity\n")
     with pytest.raises(ValueError, match="no data rows"):
         read_table(p)

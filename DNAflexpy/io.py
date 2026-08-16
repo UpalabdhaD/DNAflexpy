@@ -61,14 +61,15 @@ def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
 
     out = []
     for i in range(len(frame)):
+        line_no = i + 1 + (1 if header else 0)
         raw = values.iloc[i]
         if raw is None or (isinstance(raw, float) and math.isnan(raw)) or str(raw).strip() == "":
-            raise ValueError(f"row {i} of {path} has a missing value in value_col")
+            raise ValueError(f"line {line_no} of {path} has a missing value in value_col")
         try:
             value = float(raw)
         except (TypeError, ValueError):
             raise ValueError(
-                f"row {i} of {path} has non-numeric value {raw!r} in value_col"
+                f"line {line_no} of {path} has non-numeric value {raw!r} in value_col"
             ) from None
         seqid = str(ids.iloc[i]) if ids is not None else f"seq_{i}"
         out.append((seqid, str(seqs.iloc[i]), value))
@@ -91,11 +92,18 @@ def _pick_column(frame, col, argname):
     return frame[col]
 
 
+def _looks_like_dna(text):
+    """True when a cell could be a DNA sequence."""
+    text = text.strip().upper()
+    return bool(text) and not set(text) - set("ACGTN")
+
+
 def _looks_like_header(path, seq_col, value_col, id_col, sep):
     """True when the first non-blank row looks like column names.
 
-    Named columns require a header by definition. Otherwise the test is
-    whether the first row's value column parses as a float.
+    Two independent signals, because either alone is fooled: a header whose
+    label column is numeric ("sequence\t2024") parses fine as a value, and a
+    sequence column is never plain text in real data.
     """
     if any(isinstance(c, str) for c in (seq_col, value_col, id_col) if c is not None):
         return True
@@ -106,10 +114,11 @@ def _looks_like_header(path, seq_col, value_col, id_col, sep):
                 break
         else:
             return False
-    if value_col >= len(fields):
-        return False
-    try:
-        float(fields[value_col])
-    except ValueError:
+    if value_col < len(fields):
+        try:
+            float(fields[value_col])
+        except ValueError:
+            return True
+    if seq_col < len(fields) and not _looks_like_dna(fields[seq_col]):
         return True
     return False
