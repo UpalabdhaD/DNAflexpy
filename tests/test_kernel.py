@@ -87,3 +87,33 @@ def test_window_zero_bytes_match_the_archive_for_integer_features():
             index=False, header=False, sep="\t"
         ).encode()
         assert to_bytes(mine) == to_bytes(legacy), feature
+
+
+def test_builtin_sum_is_compensated_on_this_interpreter():
+    """The package's numbers depend on how builtin `sum()` adds floats.
+
+    Python 3.12 gave `sum()` compensated (Neumaier) summation for floats.
+    Before that it added naively, left to right, and produced a different
+    result for the same input:
+
+        [0.134, 0.076, -0.077, -0.033, 0.025, 0.025, -0.033, -0.033]
+        3.11 -> 0.08399999999999999      3.12 -> 0.084
+
+    Divided by 8 and rounded to three places that is 0.01 against 0.011, so a
+    published profile would differ in its last digit. The checked-in expected
+    outputs are 3.12 values, which is why `requires-python` is `>=3.12`.
+
+    If this ever fails, the interpreter's summation changed again and every
+    recorded expected output needs revisiting.
+    """
+    import math
+
+    values = [0.134, 0.076, -0.077, -0.033, 0.025, 0.025, -0.033, -0.033]
+
+    naive = 0.0
+    for v in values:
+        naive += v
+
+    assert sum(values) == math.fsum(values), "sum() is no longer compensated"
+    assert sum(values) != naive, "sum() now matches naive addition"
+    assert round(sum(values) / len(values), 3) == 0.011
