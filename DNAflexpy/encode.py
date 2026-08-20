@@ -252,12 +252,6 @@ def encode(profiles, feature_names, normalize: bool = True) -> FeatureMatrix:
     requests = list(feature_names)
     if not requests:
         raise ValueError("at least one feature name is required, e.g. ['1-mer']")
-    duplicates = {n for n in requests if requests.count(n) > 1}
-    if duplicates:
-        raise ValueError(
-            f"duplicate feature name(s) {sorted(duplicates)}; each name "
-            "would produce identically named columns"
-        )
 
     reference = next(iter(by_feature.values()))
     for name, profile in by_feature.items():
@@ -268,6 +262,16 @@ def encode(profiles, feature_names, normalize: bool = True) -> FeatureMatrix:
             )
 
     parsed = [_parse(request, by_feature) for request in requests]
+    # Deduplicate on what each name resolves to, not on the string: "1-gc"
+    # and "01-gc" are different strings that build identical columns.
+    duplicates = {
+        requests[i] for i, block in enumerate(parsed) if parsed.count(block) > 1
+    }
+    if duplicates:
+        raise ValueError(
+            f"duplicate feature name(s) {sorted(duplicates)}; each name "
+            "would produce identically named columns"
+        )
     if any(kind == "mer" for kind, _, _ in parsed):
         _require_equal_lengths(reference)
 

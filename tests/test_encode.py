@@ -379,3 +379,9 @@ def test_blocks_may_differ_in_width_at_window_size_zero():
     profiles = FlexProfiler(["gc", "DNaseI"], window_size=0).profile_seqs(SEQS)
     fm = profiles.encode(["1-gc", "1-DNaseI"], normalize=False)
     assert fm.shape == (2, 7 + 6)
+
+
+def test_a_leading_zero_still_counts_as_a_duplicate():
+    """'1-gc' and '01-gc' are different strings but the same block."""
+    with pytest.raises(ValueError, match="duplicate"):
+        _gc().encode(["1-gc", "01-gc"])
