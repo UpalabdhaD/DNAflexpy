@@ -39,7 +39,9 @@ extra:
 nav:
   - Home: index.md
   - Usage: usage.md
+  - API Reference: api_reference.md
   - Window Size Checks: window_size_checks.md
+  - Window Size Checks (long): window_size_long_checks.md
   - FAQ: faq.md
   - Installation: installation.md
   - Citation: citation.md

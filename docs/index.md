@@ -13,9 +13,16 @@ Repository: https://github.com/upalabdhaD/DNAflexpy.git
 
 - **Customizable**: Specify feature types and window sizes for in-depth analysis.
 
-- **Command-line Interface**: Run DNAflexpy from the command line for quick calculations.
+- **Five ways in**: a single sequence, a list, a FASTA file, a labelled table of
+  sequences and values, or a BED file read against a reference genome.
+
+- **Built for model fitting**: a labelled table gives you the features and the
+  targets from one file.
 
 - **Python Library**: Import DNAflexpy as a library in Jupyter notebooks or other scripts.
+
+> The rewritten package has no command-line tool yet. The original one still
+> works: `python -m rxv.DNAflexpy.cli`.
 
 ---
 

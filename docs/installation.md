@@ -4,11 +4,20 @@ Follow these steps to install DNAflexpy and its dependencies.
 
 ## Prerequisites
 
-Ensure that Python 3.8 or later is installed on your system. You can check your Python version by running:
+Python 3.11 or later. Check yours with:
 
 ## Dependencies
+
+Installed for you:
+
 - pandas
 - pyyaml
+- numpy
+
+Optional extras:
+
+- `pip install -e '.[bed]'` adds **pyfaidx**, needed only for BED input
+- `pip install -e '.[dev]'` adds **pytest** and the BED extra, for running the tests
 
 ```bash
 python --version

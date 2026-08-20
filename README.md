@@ -33,8 +33,11 @@ pip install .
 
 ## Quick start (CLI)
 
+There is no command-line tool for the rewritten package yet. The original one
+still works and ships with the repository:
+
 ```bash
-DNAflexpy "<path/to/nt/fasta/file>" \
+python -m rxv.DNAflexpy.cli "<path/to/fasta>" \
   --window-size 10 \
   --feature "DNaseI" \
   --outfile "<path/to/output.tsv>"
@@ -51,27 +54,35 @@ DNAflexpy "<path/to/nt/fasta/file>" \
 ## Python API
 
 ```py
-from DNAflexpy.core import DNAflexpy
+from DNAflexpy import FlexProfiler
 
-df = DNAflexpy(
-    input_file="input.fasta",
-    window_size=10,
-    feature="DNaseI",
-    threads=4
-)
+p = FlexProfiler(feature="DNaseI", window_size=10)
 
-print(df.head())
+p.profile("ATGCGTACGTAGCTAGCGTAGCTAGT")   # one sequence -> array of values
+prof = p.profile_fasta("input.fasta")      # a whole file
+prof.to_tsv("out.tsv")
 ```
+
+Or for a single sequence, without building anything:
+
+```py
+import DNAflexpy
+
+DNAflexpy.profile("ATGCGTACGTAGCTAGCGTAGCTAGT", feature="DNaseI", window_size=10)
+```
+
+Sequences can also come from a labelled table or from a BED file plus a
+reference genome. See [docs/usage.md](docs/usage.md).
 
 ## Supported features
 
-The `feature` argument accepts the following values:
+Thirteen features. Four use 3-mers:
 
-- DNaseI
-- NPP
-- twistDisp
-- trx
-- stiffness
+- DNaseI, NPP, bendabilityDNase, bendabilityConcensus
+
+Nine use 2-mers:
+
+- wedge, prop, freeen, gc, twistDisp, stiffness, bendingStiffness, mechen, trx
 
 ## Window-size behavior
 
