@@ -58,7 +58,7 @@ These were settled during planning. Each is recorded here with its reason so the
 
 There is no memory objection: `profile_fasta` already does `records = list(read_fasta(path))`, so the sequences are resident either way.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `tests/test_profiler.py`:
 
@@ -114,7 +114,7 @@ def test_profile_fasta_retains_sequences_through_the_pool(tmp_path):
 
 Run it and confirm it fails with `AttributeError` / `None` before writing any implementation.
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 In `results.py`, add `seqs=None` as the last keyword of `FlexProfile.__init__`, store `self._seqs = list(seqs) if seqs is not None else None`, and expose:
 
@@ -134,7 +134,7 @@ In `core.py`:
 - `_assemble(self, rows_by_feature, y=None, seqs=None)` → pass `seqs=seqs` into every `FlexProfile(...)` it constructs.
 - **The pooled branch of `profile_fasta`** → `return self._assemble(rows_by_feature, seqs=[s for _, s in records])`.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 ```bash
 python -m pytest tests/test_profiler.py -q
@@ -171,7 +171,7 @@ The differential run is not optional here: this task changes a signature on the 
 - `k < 1` raises. `k > L` raises naming `L`, rather than emitting a zero-column block.
 - Unequal sequence lengths are **not** checked here — Task 4 owns that check, so its error message can be raised once for the whole request.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import numpy as np
@@ -226,11 +226,11 @@ def test_one_hot_rejects_k_below_one():
         _one_hot(["ACGT"], 0)
 ```
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 Build the index map once (`{kmer: offset}`) and fill a preallocated `np.zeros((n_seqs, width), dtype=float)`. Use `float`, not `int` or `bool`: the block is concatenated with float feature blocks, and a dtype promotion at concat time would be a second place for a surprise.
 
-- [ ] **Step 3: Verify** — `python -m pytest tests/test_encode.py -q`
+- [x] **Step 3: Verify** — `python -m pytest tests/test_encode.py -q`
 
 ---
 
@@ -263,7 +263,7 @@ Edge cases, all of which must be tested:
 - An all-`NaN` block: return it unchanged; do not let `np.nanmin` raise or emit its own `RuntimeWarning`. Guard with an explicit finite check before calling `nanmin`/`nanmax`.
 - One-hot blocks are **never** normalised — they are already 0/1. Task 4 enforces this; `_minmax` itself is agnostic.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 The numbers below are real — computed from the packaged table with `FlexProfiler("wedge", window_size=0)` on these two sequences. `wedge` was chosen because its range (0.9 … 8.4) is not already `[0, 1]`, so a no-op normaliser would fail.
 
@@ -342,11 +342,11 @@ def test_minmax_of_an_all_nan_block_is_unchanged_and_silent():
     assert np.isnan(scaled).all()
 ```
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 `_feature_block` reads `profile._rows`, builds `V = np.array([r[1:] for r in rows], dtype=float)`, and raises if the rows are not all the same width (message must name the distinct widths). Order *n* is `np.prod(sliding_window_view(V, n, axis=1), axis=-1)` or an explicit loop of `n` multiplications — either is fine; there is no byte contract here.
 
-- [ ] **Step 3: Verify** — `python -m pytest tests/test_encode.py -q`
+- [x] **Step 3: Verify** — `python -m pytest tests/test_encode.py -q`
 
 ---
 
@@ -403,7 +403,7 @@ class FeatureMatrix:
 - `NaN` marks a position that could not be resolved; use `sklearn.impute.SimpleImputer` if the model needs it filled.
 - `DNAflexpy.profile()` returns a bare array, so encoding starts from `profile_seqs`, `profile_fasta`, `profile_table` or `from_bed`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 def test_encode_concatenates_blocks_in_the_order_requested():
@@ -511,7 +511,7 @@ def test_encode_needs_sequences_for_a_kmer_term():
     assert bare.encode(["1-gc"], normalize=False).shape == (1, 2)
 ```
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 Add `encode` and `FeatureMatrix` to `encode.py`; add thin wrappers:
 
@@ -526,11 +526,11 @@ and the same on `ProfileSet` in `core.py`. Import inside the method, matching ho
 
 Re-export from `__init__.py`: add `encode` and `FeatureMatrix` to the imports and to `__all__`. Note `DNAflexpy.encode` will then be the **function**, not the submodule — exactly the situation `results.py` was named to avoid for `profile`. Add a one-line comment there saying so, and document `from DNAflexpy.encode import FeatureMatrix` as the way to reach the module.
 
-- [ ] **Step 3: Documentation**
+- [x] **Step 3: Documentation**
 
 Add an "Encoding for machine learning" section to `docs/usage.md` with a runnable end-to-end example — `profile_table` → `encode` → a scikit-learn-shaped `X`/`y` handoff — written so it **does not import sklearn** (not a dependency); print the shapes instead. Add the `encode` / `FeatureMatrix` entries to `docs/api_reference.md`.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 ```bash
 python -m pytest -q                                                # all green
@@ -542,15 +542,15 @@ python scripts/check_doc_examples.py                               # docs exampl
 
 ## Definition of done
 
-- [ ] `FlexProfile.seqs` is populated by `profile_seqs`, `profile_fasta` (serial **and** pooled), `profile_table` and `from_bed`, each with a test.
-- [ ] `encode.py` exists with `encode`, `FeatureMatrix`, `_one_hot`, `_feature_block`, `_minmax`.
-- [ ] `1-mer` / `2-mer` / `3-mer` one-hot and `n-<feature>` order terms both work, and can be mixed in one request.
-- [ ] `normalize=True` min-max scales feature blocks and leaves one-hot blocks alone.
-- [ ] `NaN` survives encoding; no `fill=` parameter exists.
-- [ ] Unequal sequence lengths raise, pointing at `from_bed(width=...)`.
-- [ ] `y` rides through from `profile_table` to `FeatureMatrix.y`.
-- [ ] `python -m pytest -q` is green and the 230 byte-equality cases still pass.
-- [ ] `scripts/check_doc_examples.py` passes.
+- [x] `FlexProfile.seqs` is populated by `profile_seqs`, `profile_fasta` (serial **and** pooled), `profile_table` and `from_bed`, each with a test.
+- [x] `encode.py` exists with `encode`, `FeatureMatrix`, `_one_hot`, `_feature_block`, `_minmax`.
+- [x] `1-mer` / `2-mer` / `3-mer` one-hot and `n-<feature>` order terms both work, and can be mixed in one request.
+- [x] `normalize=True` min-max scales feature blocks and leaves one-hot blocks alone.
+- [x] `NaN` survives encoding; no `fill=` parameter exists.
+- [x] Unequal sequence lengths raise, pointing at `from_bed(width=...)`.
+- [x] `y` rides through from `profile_table` to `FeatureMatrix.y`.
+- [x] `python -m pytest -q` is green and the 230 byte-equality cases still pass.
+- [x] `scripts/check_doc_examples.py` passes.
 
 ## Deferred to later phases
 
@@ -558,3 +558,42 @@ python scripts/check_doc_examples.py                               # docs exampl
 - Dinucleotide-shuffle backgrounds and per-position statistics (Phase 6).
 - Feature-redundancy reporting and `ProfileSet.correlate()` (Phase 7). Highly correlated feature blocks are a real concern for a linear model built on this matrix, but the reporting belongs with the rest of the statistics work.
 - The CLI (Phase 8) — no `--encode` flag until then.
+
+## Outcome
+
+Landed on `dev` in four commits. `python -m pytest -q` reports **448 passed**
+(387 before, 61 new); the 230 byte-equality cases are unchanged and green.
+`scripts/check_doc_examples.py` runs 29/29 clean and `mkdocs build --strict`
+passes.
+
+### Deviations from the plan, and why
+
+- **The `encode` function is not re-exported from `DNAflexpy/__init__.py`.**
+  The plan said to export it with a comment noting that `DNAflexpy.encode`
+  would then be the function rather than the submodule. On implementation that
+  is the exact trap `results.py` is named to avoid for `profile`, and here it
+  is avoidable at no cost: `FeatureMatrix` is exported, the function is reached
+  as `prof.encode([...])` or `from DNAflexpy.encode import encode`, and
+  `DNAflexpy.encode` stays unambiguously the module.
+- **`_one_hot` also guards against mixed sequence lengths.** The plan gave that
+  check to `encode()` alone so the message could be raised once. It still is —
+  but a direct call to `_one_hot` would otherwise have silently truncated every
+  sequence to the shortest, so the helper raises a terser version of its own.
+- **One planned test asserted the wrong position.** `ACNTACGT` masks the two
+  k-mers covering the `N` (`CN` and `NT`), so the order-2 products `p1`, `p2`
+  *and* `p3` are all NaN — not just `p2` as drafted. The test now pins the full
+  NaN pattern, which is the stronger assertion.
+
+### Known issues left open at the end of Phase 4
+
+- **`FeatureMatrix.__repr__` reports `y='no'` for an all-zero label vector.**
+  It tests `if self.y`, so `y=[0.0, 0.0]` prints as absent. Cosmetic — `.y`
+  itself is correct — but it should test `is not None`.
+- **A one-hot block ignores `normalize` entirely, including when the caller
+  wanted it.** That is deliberate (the columns are already 0/1), but there is
+  no signal that part of the request was skipped. Fine today; worth a note if
+  a future block type is ever both binary and scalable.
+- **Order-*n* products of an unnormalised block can be very large.**
+  `3-stiffness` reaches ~1.7e11. With `normalize=True` it scales to `[0, 1]`,
+  but with `normalize=False` the magnitudes will dominate an unregularised
+  linear model. Documented behaviour, not a bug, but users will hit it.
