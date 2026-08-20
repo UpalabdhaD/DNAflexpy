@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(python -m pytest tests/)",
-      "Read(//Users/upalabdha/.codex/**)",
-      "Bash(python -m DNAflexpy.cli DNAflexpy/data/test_fasta.fa --window-size 5 --feature DNaseI --outfile /private/tmp/claude-501/-Users-upalabdha-Documents-GH-DNAflexpy/398eaeb7-2323-4eea-9ff1-98aafb931a50/scratchpad/t.tsv)"
-    ]
-  }
-}

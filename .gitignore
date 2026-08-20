@@ -79,3 +79,7 @@ dmypy.json
 # Optional
 tests/__pycache__/
 tests/*.log
+
+# Local agent config and reference material, not part of the package
+.claude/
+DNAshapeR.pdf
