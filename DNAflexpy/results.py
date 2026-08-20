@@ -13,12 +13,23 @@ class FlexProfile:
     than the window contributes only its ID.
     """
 
-    def __init__(self, rows, feature: str, window_size: int, kmer_len: int, y=None):
+    def __init__(self, rows, feature: str, window_size: int, kmer_len: int,
+                 y=None, seqs=None):
         self._rows = [list(r) for r in rows]
         self.feature = feature
         self.window_size = window_size
         self.kmer_len = kmer_len
         self.y = y
+        self._seqs = list(seqs) if seqs is not None else None
+
+    @property
+    def seqs(self) -> list[str] | None:
+        """The input sequences, aligned to `.seqids`, or None.
+
+        Only sequence one-hot encoding needs these; every other operation
+        works from the profile values alone.
+        """
+        return list(self._seqs) if self._seqs is not None else None
 
     @property
     def seqids(self) -> list[str]:
@@ -54,6 +65,12 @@ class FlexProfile:
         )
         long["feature"] = self.feature
         return long[["seqid", "position", "value", "feature"]]
+
+    def encode(self, feature_names, normalize: bool = True):
+        """Build a design matrix from this profile. See `DNAflexpy.encode`."""
+        from DNAflexpy.encode import encode
+
+        return encode(self, feature_names, normalize=normalize)
 
     def to_tsv(self, path) -> None:
         """Write the archive's exact format.

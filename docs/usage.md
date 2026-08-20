@@ -195,6 +195,112 @@ as masked only when *no* k-mer in that window resolved, so at window sizes
 above zero it under-reports; a window with some unusable k-mers is simply
 averaged over fewer of them.
 
+## Encoding for machine learning
+
+A profile is a table of numbers. To fit a model you usually want a *design
+matrix*: one row per sequence, one column per predictor, plus a target vector.
+`encode` builds one.
+
+```python
+p = FlexProfiler(feature="DNaseI", window_size=0)
+prof = p.profile_table("affinity.tsv", header=False)
+
+fm = prof.encode(["1-mer", "1-DNaseI"])
+print(fm.shape)          # (2, 48)
+print(fm.y)              # [1.5, 2.5] -- the labels, straight from the file
+```
+
+`fm.X` is a plain NumPy array and `fm.y` is the label list, so they go into
+scikit-learn directly:
+
+```python
+# from sklearn.linear_model import Ridge
+# Ridge().fit(fm.X, fm.y)
+```
+
+### What the names mean
+
+You pass a list. Each entry asks for one block of columns, and the blocks are
+joined left to right in the order you wrote them.
+
+| Name | What you get |
+|---|---|
+| `1-mer` | one-hot sequence, 4 binary columns per position |
+| `2-mer` | one-hot dinucleotides, 16 columns per position |
+| `3-mer` | one-hot trinucleotides, 64 columns per position |
+| `1-DNaseI` | the profile values themselves, one column per position |
+| `2-DNaseI` | products of the feature at two adjacent positions |
+| `3-DNaseI` | products at three adjacent positions |
+
+Higher orders capture interactions between neighbouring positions that a linear
+model would otherwise miss. `2-DNaseI` gives you *only* the second-order terms,
+so ask for both if you want both:
+
+```python
+fm = prof.encode(["1-DNaseI", "2-DNaseI"])
+```
+
+Any feature in the lookup table works, and you can mix features by profiling
+several at once:
+
+```python
+result = FlexProfiler(["gc", "stiffness"], window_size=0).profile_seqs(
+    ["ATGCGTACGT", "CGTAGCTAGT"]
+)
+fm = result.encode(["1-mer", "1-gc", "2-stiffness"])
+```
+
+### Column names
+
+Every column is named, so you can tell afterwards what a coefficient refers to:
+
+```python
+fm = prof.encode(["1-DNaseI"])
+print(fm.columns[:3])    # ['DNaseI.w0.o1.p1', 'DNaseI.w0.o1.p2', ...]
+```
+
+Read it as feature, window size, order, position. The window size is in there
+on purpose: at `window_size=10`, position 1 is the average over bases 1-10,
+while at `window_size=0` it is the k-mer starting at base 1. Two matrices built
+at different window sizes would otherwise carry the same column names for
+different things.
+
+`fm.to_frame()` gives a pandas DataFrame with those names, indexed by sequence
+ID. It is a convenience, not the default: 3-mer encoding of 500-base sequences
+is about 32,000 columns, and a DataFrame that wide is slow.
+
+### Normalising
+
+`normalize=True` is the default. It min-max scales each feature block to
+`[0, 1]`, on its own range. Each block separately, because the features are on
+wildly different scales -- `stiffness` runs to 5500 and `gc` to 1.0, so a single
+shared scale would squash `gc` to nothing. One-hot blocks are left alone; they
+are already 0 and 1.
+
+The scaling uses **your dataset's own** minimum and maximum. If you are going to
+split into train and test sets, that leaks the test set into the scaling. Pass
+`normalize=False` and scale inside a scikit-learn pipeline instead:
+
+```python
+fm = prof.encode(["1-DNaseI"], normalize=False)
+```
+
+### Two things that will stop you
+
+**Sequences must all be the same length.** Columns are positions, so unequal
+lengths have no meaning. `from_bed(..., width=200)` is the usual way to get
+fixed-width input.
+
+**Missing values stay missing.** A position covering an `N`, an ambiguity code,
+or `on_edge="pad"` padding comes out as `NaN` rather than 0, so it stays
+distinguishable from a real measurement of zero. Most scikit-learn estimators
+refuse `NaN`; use `sklearn.impute.SimpleImputer`, or a model that handles it
+such as `HistGradientBoostingRegressor`.
+
+One last thing: `DNAflexpy.profile()` returns a bare array, so there is nothing
+to encode from the one-liner. Start from `profile_seqs`, `profile_fasta`,
+`profile_table` or `from_bed`.
+
 ## Other things you can do
 
 ### A long (tidy) table instead of a wide one

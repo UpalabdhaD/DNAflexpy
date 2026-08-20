@@ -395,16 +395,22 @@ Requires the optional `DNAflexpy[bigwig]` extra (pyBigWig).
 
 ## ML encoding (`encode.py`)
 
+> **Shipped in Phase 4.** The grammar settled as a uniform `n-<feature>`, where
+> `<feature>` is any feature in the lookup table; there is no separate `flex`
+> token, since `flex` is not a feature name. See
+> `docs/superpowers/plans/2026-08-20-dnaflexpy-phase-4-encoding.md` for the
+> decisions taken during implementation.
+
 Modelled on DNAshapeR's `encodeSeqShape`, which is the function that makes that
 package useful for statistical learning.
 
 ```python
-X = prof.encode(["1-mer", "1-flex", "2-DNaseI"], normalize=True)
+X = prof.encode(["1-mer", "1-gc", "2-DNaseI"], normalize=True)
 ```
 
 - `1-mer` / `2-mer` / `3-mer` — one-hot sequence encoding, 4/16/64 binary columns
   per position (`encodeKMerSeq`)
-- `1-flex` — first-order flexibility values, one column per position
+- `1-<feature>` — first-order values for that feature, one column per position
 - `n-<feature>` — nth-order terms: products of the same feature at adjacent
   positions, capturing interactions a linear model would otherwise miss
   (`encodeNstOrderShape`)
@@ -484,7 +490,7 @@ file.
 prof = FlexProfiler("DNaseI", window_size=10).profile_table(
     "affinity.tsv", seq_col=0, value_col=1, header=False,
 )
-X, y = prof.encode(["1-mer", "1-flex"]), prof.y
+X, y = prof.encode(["1-mer", "1-DNaseI"]), prof.y
 ```
 
 - `header=True|False` is **required**, not guessed. Row 1 cannot be classified
@@ -541,7 +547,7 @@ DNAflexpy profile in.fa --feature DNaseI trx --window-size 10 --outfile out.tsv
 DNAflexpy profile affinity.tsv --seq-col 0 --value-col 1 --feature DNaseI
 DNAflexpy profile peaks.bed --genome TAIR10.fa --width 200 --feature DNaseI
 DNAflexpy profile --seq ATGCGTACGT --feature DNaseI       # bare string -> stdout
-DNAflexpy encode in.fa --features 1-mer 1-flex --out X.npz
+DNAflexpy encode in.fa --features 1-mer 1-DNaseI --out X.npz
 DNAflexpy plot heatmap out.tsv --nbins 20 --order-rows cv --out hm.png
 DNAflexpy plot meta out.tsv --background bg.tsv --out meta.png
 ```

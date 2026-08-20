@@ -76,6 +76,7 @@ What every profiling call returns.
 | `.frame` | wide DataFrame: one row per sequence, one column per position |
 | `.seqids` | sequence names, in input order |
 | `.y` | the labels from a table, or `None` |
+| `.seqs` | the input sequences, in the same order, or `None` |
 | `.n_masked` | `{name: count}` of positions that could not be scored |
 | `.feature`, `.window_size`, `.kmer_len` | what produced it |
 
@@ -87,6 +88,9 @@ Sequences shorter than the window become a name with no values.
 `tidy=False` returns `.frame`. `tidy=True` returns a long table with columns
 `seqid`, `position`, `value`, `feature`.
 
+### `.encode(feature_names, normalize=True)`
+Build a `FeatureMatrix`. Short for `DNAflexpy.encode.encode(self, ...)`.
+
 ---
 
 ## `ProfileSet`
@@ -97,6 +101,52 @@ numbers of values for the same sequence.
 
 ### `.to_tidy()`
 Every feature stacked into one long DataFrame.
+
+### `.encode(feature_names, normalize=True)`
+Build a `FeatureMatrix` spanning several features at once.
+
+---
+
+## `DNAflexpy.encode`
+
+### `encode(profiles, feature_names, normalize=True)`
+
+Turn a `FlexProfile` or a `ProfileSet` into a design matrix. `feature_names` is
+a list; each entry names one block of columns and the blocks are joined in the
+order given.
+
+| entry | block |
+|---|---|
+| `"{k}-mer"` | one-hot sequence encoding, `4**k` binary columns per position |
+| `"{n}-{feature}"` | the nth-order terms of a profiled feature: products at `n` adjacent positions. `n=1` is the values themselves |
+
+Column names are `seq.{k}mer.p{i}.{KMER}` and `{feature}.w{window}.o{n}.p{i}`,
+positions counted from 1. The window size is part of the name because it
+changes what a position means.
+
+`normalize=True` min-max scales each feature block to `[0, 1]` on its own
+range. One-hot blocks are never scaled. The range comes from the data you
+passed, so pass `normalize=False` and scale in a scikit-learn pipeline if you
+are splitting train and test.
+
+Raises if the sequences are not all the same length, if a name does not parse,
+if a requested feature was not profiled, if a name is repeated, or if a `k-mer`
+term is asked for on a profile that did not keep its sequences.
+
+`NaN` is preserved, never filled.
+
+### `FeatureMatrix`
+
+| member | meaning |
+|---|---|
+| `.X` | the matrix, a NumPy array of floats |
+| `.columns` | one name per column |
+| `.seqids` | one name per row, in input order |
+| `.y` | the labels, if the profile carried any |
+| `.window_size` | the window the profile was built with |
+| `.feature_names` | the request, as passed |
+| `.shape` | `(rows, columns)` |
+| `.to_frame()` | a pandas DataFrame with those names and index |
 
 ---
 
