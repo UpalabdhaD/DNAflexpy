@@ -223,3 +223,10 @@ def test_padded_bases_are_masked_not_zeroed(genome, tmp_path):
             bed, genome, width=20, on_edge="pad"
         )
     assert prof.n_masked["a"] > 0
+
+
+def test_from_bed_retains_the_extracted_sequences(tmp_path, genome):
+    p = write_bed(tmp_path, "chr1\t0\t8\tpeakA\nchr2\t0\t8\tpeakB\n")
+    prof = FlexProfiler("gc", window_size=0).from_bed(p, genome)
+    assert prof.seqids == ["peakA", "peakB"]
+    assert prof.seqs == ["ACGTACGT", "AAAACCCC"]

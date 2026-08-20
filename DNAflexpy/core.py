@@ -117,7 +117,11 @@ class FlexProfiler:
             feature: [[seqid, *values[feature]] for seqid, values in results]
             for feature in self._features
         }
-        return self._assemble(rows_by_feature)
+        # The workers return values only, never the sequences, so this is the
+        # one path where `seqs` has to be re-attached from the parent's copy
+        # of `records`. `to_tsv` ignores `seqs`, so the byte-equality gate
+        # cannot catch it going missing here.
+        return self._assemble(rows_by_feature, seqs=[s for _, s in records])
 
     def profile_table(self, path, seq_col=0, value_col=1, id_col=None,
                       header=None, sep="\t"):
@@ -162,9 +166,9 @@ class FlexProfiler:
             feature: [[sid, *self._values(feature, seq)] for sid, seq in pairs]
             for feature in self._features
         }
-        return self._assemble(rows_by_feature, y=y)
+        return self._assemble(rows_by_feature, y=y, seqs=[s for _, s in pairs])
 
-    def _assemble(self, rows_by_feature: dict[str, list[list]], y=None):
+    def _assemble(self, rows_by_feature: dict[str, list[list]], y=None, seqs=None):
         """Turn per-feature row lists into a FlexProfile or ProfileSet.
 
         Factored out of `_build` so Task 7's `profile_fasta` can reuse this
@@ -173,6 +177,11 @@ class FlexProfiler:
 
         `y` is the aligned label vector from labelled input, or None. Every
         profile in a multi-feature set shares the same labels.
+
+        `seqs` is the aligned input sequences, kept so `encode` can build
+        one-hot sequence features. It is a parameter here rather than only
+        on `_build` because the pooled `profile_fasta` branch calls this
+        directly and would otherwise leave it None on that path alone.
         """
         built = {
             feature: FlexProfile(
@@ -181,6 +190,7 @@ class FlexProfiler:
                 window_size=self.window_size,
                 kmer_len=self._table.kmer_len(feature),
                 y=y,
+                seqs=seqs,
             )
             for feature, rows in rows_by_feature.items()
         }
