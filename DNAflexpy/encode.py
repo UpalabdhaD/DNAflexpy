@@ -90,3 +90,78 @@ def _one_hot(seqs, k: int) -> tuple[np.ndarray, list[str]]:
         for kmer in kmers
     ]
     return X, columns
+
+
+def _feature_block(profile, order: int) -> tuple[np.ndarray, list[str]]:
+    """The `order`-th order terms of one profiled feature.
+
+    Following DNAshapeR's `encodeNstOrderShape`, the nth-order block holds
+    the products of the same feature at n adjacent positions, and nothing
+    else. Order 1 is the identity. A profile of `m` values per sequence
+    gives `m - n + 1` columns, column `i` being `prod(v[i : i + n])`.
+
+    So `n-<feature>` yields only the nth-order terms; ask for `1-gc` and
+    `2-gc` together if you want both.
+
+    NaN propagates through the product, which is right: a product involving
+    an unresolvable k-mer is itself unresolvable.
+
+    Column names are `{feature}.w{window_size}.o{order}.p{i}`, 1-based. The
+    window size is part of the name because it changes what a position
+    means - at `window_size=10`, `p1` is the mean over sequence positions
+    1-10; at `window_size=0` it is the k-mer starting at position 1. Without
+    it, two matrices built at different window sizes would carry identical
+    column names for different quantities.
+    """
+    if order < 1:
+        raise ValueError(f"order must be >= 1, got {order}")
+
+    widths = {len(row) - 1 for row in profile._rows}
+    if len(widths) > 1:
+        raise ValueError(
+            f"feature {profile.feature!r} has ragged rows with widths "
+            f"{sorted(widths)}; encoding needs one value per position for "
+            "every sequence"
+        )
+    values = np.array([row[1:] for row in profile._rows], dtype=float)
+    m = widths.pop() if widths else 0
+    if order > m:
+        raise ValueError(
+            f"order {order} exceeds the {m} value(s) per sequence in "
+            f"feature {profile.feature!r}; there are no {order} adjacent "
+            "positions to multiply"
+        )
+
+    block = values[:, : m - order + 1].copy()
+    for step in range(1, order):
+        block *= values[:, step : m - order + 1 + step]
+
+    columns = [
+        f"{profile.feature}.w{profile.window_size}.o{order}.p{i}"
+        for i in range(1, m - order + 2)
+    ]
+    return block, columns
+
+
+def _minmax(block: np.ndarray) -> np.ndarray:
+    """Min-max scale a whole block to [0, 1].
+
+    Scalar bounds for the entire block, matching DNAshapeR's
+    `normalize(x, max, min)` - not per column. Scaling each column
+    separately would erase the between-position differences that make a
+    profile a profile.
+
+    NaN stays NaN. A constant block becomes all zeros rather than dividing
+    by zero, and an all-NaN block is returned untouched: `np.nanmin` on one
+    would emit its own RuntimeWarning and return NaN.
+    """
+    finite = np.isfinite(block)
+    if not finite.any():
+        return block.astype(float, copy=True)
+    lo = float(block[finite].min())
+    hi = float(block[finite].max())
+    if hi == lo:
+        out = np.zeros_like(block, dtype=float)
+        out[~finite] = block[~finite]
+        return out
+    return (block - lo) / (hi - lo)
