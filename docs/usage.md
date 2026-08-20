@@ -388,9 +388,80 @@ position is not included.
 
 ## Command line
 
-The rewritten package has no command-line tool yet. The original one still
-works and is kept in the repository:
+`pip install -e .` gives you a `DNAflexpy` command.
+
+```bash
+DNAflexpy profile sequences.fa --feature DNaseI --window-size 10
+```
+
+That writes `sequences_w10nt_DNaseI.tsv`. The name follows the same pattern the
+original tool used.
+
+### Profiling
+
+Ask for several features and you get one file each:
+
+```bash
+DNAflexpy profile sequences.fa --feature DNaseI gc --window-size 10
+```
+
+Features have different k-mer lengths, so they cannot share one table. Use
+`--outfile` to name the file yourself, but only with a single feature.
+
+BED input needs a genome:
+
+```bash
+DNAflexpy profile peaks.bed --genome TAIR10.fa --width 200
+```
+
+A table needs you to say whether row 1 is a header. It is never guessed:
+
+```bash
+DNAflexpy profile affinity.tsv --no-header
+DNAflexpy profile labelled.tsv --header --seq-col sequence --value-col affinity
+```
+
+One sequence, straight to the screen:
+
+```bash
+DNAflexpy profile --seq ATGCGTACGTAGCTAGCGTAGCTAGT
+```
+
+The format comes from the file extension. Use `--format fasta|bed|table` if
+your file is named something unusual.
+
+`--threads` is left to the tool by default. Below 64 records it always runs
+serially, because starting processes costs more than it saves.
+
+### Encoding
+
+```bash
+DNAflexpy encode sequences.fa --features 1-mer 1-DNaseI --out X.npz
+```
+
+Which features get profiled is worked out from what you asked for, so there is
+no second flag to keep in step. Load it back with NumPy:
+
+```python
+import numpy as np
+data = np.load("X.npz")
+data["X"], data["columns"], data["seqids"]
+```
+
+Give it a labelled table and `y` comes along too:
+
+```bash
+DNAflexpy encode affinity.tsv --no-header --features 1-mer 1-DNaseI --out X.npz
+```
+
+Add `--no-normalize` to skip the min-max scaling.
+
+### The original tool
+
+The old command still works and is untouched:
 
 ```bash
 python -m rxv.DNAflexpy.cli sequences.fa --window-size 10 --feature DNaseI --outfile out.tsv
 ```
+
+Its output is byte-for-byte the same as the new one.

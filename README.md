@@ -33,8 +33,33 @@ pip install .
 
 ## Quick start (CLI)
 
-There is no command-line tool for the rewritten package yet. The original one
-still works and ships with the repository:
+```bash
+DNAflexpy profile sequences.fa --feature DNaseI --window-size 10
+```
+
+That writes `sequences_w10nt_DNaseI.tsv`.
+
+```bash
+DNAflexpy profile sequences.fa --feature DNaseI gc    # one file per feature
+DNAflexpy profile peaks.bed --genome TAIR10.fa --width 200
+DNAflexpy profile affinity.tsv --no-header
+DNAflexpy profile --seq ATGCGTACGT                    # straight to stdout
+DNAflexpy encode sequences.fa --features 1-mer 1-DNaseI --out X.npz
+```
+
+### CLI options (summary)
+
+- `input`: a FASTA, BED or table file. The format comes from the extension;
+  override with `--format`.
+- `--feature`: one or more feature names. Several means one file each.
+- `--window-size`: window length; `0` gives per-k-mer values.
+- `--threads`: worker processes. Left out, the tool decides.
+- `--outfile`: output path, for a single feature only.
+- `--genome`, `--width`, `--on-edge`: for BED input.
+- `--header` / `--no-header`, `--seq-col`, `--value-col`: for table input.
+
+The original command is untouched and still works. Its output is byte-for-byte
+identical to the new one:
 
 ```bash
 python -m rxv.DNAflexpy.cli "<path/to/fasta>" \
@@ -42,14 +67,6 @@ python -m rxv.DNAflexpy.cli "<path/to/fasta>" \
   --feature "DNaseI" \
   --outfile "<path/to/output.tsv>"
 ```
-
-### CLI options (summary)
-
-- `input_file`: Path to a FASTA or multi-FASTA file.
-- `--window-size`: Window length for overlapping windows (see behavior below).
-- `--feature`: Feature name from the supported list.
-- `--threads`: Number of worker processes.
-- `--outfile`: Output TSV path (optional).
 
 ## Python API
 

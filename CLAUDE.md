@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pip install -e .                    # editable install; see "No console script yet" below
+pip install -e .                    # editable install; also puts the DNAflexpy command on PATH
 pip install -e '.[dev]'             # test deps; BED tests need pyfaidx, included here
 python -m pytest -q                 # 448 passed (see "Testing" below)
 python -m pytest tests/test_differential.py -k byte_identical -q   # just the byte-equality gate
@@ -21,7 +21,19 @@ python scripts/plot_profiles.py --generate-random-fasta /tmp/r.fa \
   --window-sizes 0 5 10 --feature DNaseI --out /tmp/plot.png   # needs matplotlib (not a declared dep)
 ```
 
-**No console script yet.** There is no `DNAflexpy` CLI entry point today — `DNAflexpy.cli` does not exist. Phase 8 of the rewrite restores it. Until then the archive's CLI still works: `python -m rxv.DNAflexpy.cli <fasta> --window-size 10 --feature DNaseI --outfile out.tsv`.
+**The `DNAflexpy` command.** `pip install -e .` puts it on PATH via `[project.scripts]`. Subcommands only — there is no flat form, and no `plot` subcommand until Phase 5:
+
+```bash
+DNAflexpy profile in.fa --feature DNaseI gc --window-size 10
+DNAflexpy profile peaks.bed --genome TAIR10.fa --width 200
+DNAflexpy profile affinity.tsv --no-header --value-col 1
+DNAflexpy profile --seq ATGCGTACGT            # to stdout, no file needed
+DNAflexpy encode in.fa --features 1-mer 1-DNaseI --out X.npz
+```
+
+`DNAflexpy/cli.py` is a front end and nothing more: **every profile byte it writes goes through `FlexProfile.to_tsv()`**, because that method is what the 230-case gate covers. A CLI path that formatted values itself would be a path nothing verifies. Multi-feature runs therefore write one file per feature (`{base}_w{window}nt_{feature}.tsv`, the archive's own pattern) rather than one combined table, since `ProfileSet` has no `to_tsv` and adding one would mean new uncovered serialisation. `--threads` defaults to `None` ("decide automatically"), not `cpu_count()` as the archive did — passing a count explicitly bypasses `_MIN_RECORDS_FOR_POOL`. Table input requires `--header`/`--no-header`, mirroring `read_table`'s deliberate refusal to guess.
+
+The archive's CLI is untouched and still runs: `python -m rxv.DNAflexpy.cli <fasta> --window-size 10 --feature DNaseI --outfile out.tsv`. Verified byte-identical to `DNAflexpy profile` on the same input.
 
 ## Testing
 
@@ -50,7 +62,7 @@ The archive, `rxv/DNAflexpy/` (frozen, do not modify logic):
 
 - `rxv/DNAflexpy/utils.py` — `seq_to_numeric_profile` (windowing), `transform_seq_to_feat` (k-mer -> float lookup), `get_kmer_len` (hardcoded feature -> k map), `load_feature_data`, `read_fasta`.
 - `rxv/DNAflexpy/core.py` — `DNAflexpyMP` (file-level, pool-based) and `DNAflexpy` (per-sequence).
-- `rxv/DNAflexpy/cli.py` — the only working CLI right now (see "No console script yet" above).
+- `rxv/DNAflexpy/cli.py` — the archive's CLI, still runnable as `python -m rxv.DNAflexpy.cli`. Superseded by `DNAflexpy/cli.py`, and verified to produce byte-identical output.
 - `rxv/DNAflexpy/data/lookupNEW.yaml` — the archive's own copy of the feature table; byte-identical today to `DNAflexpy/data/lookupNEW.yaml`, but the two are loaded through separate `importlib.resources` calls and must stay that way.
 
 ## Conventions
