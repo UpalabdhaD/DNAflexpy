@@ -586,9 +586,6 @@ passes.
 
 ### Known issues left open at the end of Phase 4
 
-- **`FeatureMatrix.__repr__` reports `y='no'` for an all-zero label vector.**
-  It tests `if self.y`, so `y=[0.0, 0.0]` prints as absent. Cosmetic — `.y`
-  itself is correct — but it should test `is not None`.
 - **A one-hot block ignores `normalize` entirely, including when the caller
   wanted it.** That is deliberate (the columns are already 0/1), but there is
   no signal that part of the request was skipped. Fine today; worth a note if

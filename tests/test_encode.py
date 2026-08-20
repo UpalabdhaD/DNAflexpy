@@ -289,6 +289,14 @@ def test_feature_matrix_records_the_window_size_and_the_request():
     assert "1-gc" in repr(fm)
 
 
+def test_repr_reports_an_all_zero_label_vector_as_present(tmp_path):
+    """`if self.y` would call [0.0, 0.0] absent. Zero is a real label."""
+    tsv = tmp_path / "t.tsv"
+    tsv.write_text("ACGTACGT\t0.0\nTTTTTTTT\t0.0\n")
+    prof = FlexProfiler("gc", window_size=0).profile_table(tsv, header=False)
+    assert "y=yes" in repr(prof.encode(["1-gc"]))
+
+
 def test_to_frame_round_trips_the_columns():
     frame = _gc().encode(["1-gc"], normalize=False).to_frame()
     assert list(frame.columns) == [f"gc.w0.o1.p{i}" for i in range(1, 8)]

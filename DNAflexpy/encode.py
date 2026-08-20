@@ -196,8 +196,11 @@ class FeatureMatrix:
 
     def __repr__(self) -> str:
         rows, cols = self.X.shape
+        # `is not None`, not truthiness: an all-zero label vector is a
+        # real label vector.
         return (f"<FeatureMatrix {rows} x {cols}, "
-                f"features={self.feature_names}, y={'yes' if self.y else 'no'}>")
+                f"features={self.feature_names}, "
+                f"y={'yes' if self.y is not None else 'no'}>")
 
 
 def encode(profiles, feature_names, normalize: bool = True) -> FeatureMatrix:
