@@ -211,3 +211,163 @@ def test_minmax_does_not_mutate_its_input():
     block = np.array([[1.0, 3.0]])
     _minmax(block)
     np.testing.assert_allclose(block, [[1.0, 3.0]])
+
+
+# --- encode(): parsing, assembly, validation --------------------------------
+
+
+def _gc(window_size=0, seqs=SEQS):
+    return FlexProfiler("gc", window_size=window_size).profile_seqs(seqs)
+
+
+def test_encode_concatenates_blocks_in_the_order_requested():
+    fm = _gc().encode(["1-mer", "1-gc"], normalize=False)
+    assert fm.shape == (2, 4 * 8 + 7)
+    assert fm.columns[0] == "seq.1mer.p1.A"
+    assert fm.columns[32] == "gc.w0.o1.p1"
+    assert fm.seqids == ["s1", "s2"]
+
+
+def test_reversing_the_request_reverses_the_blocks():
+    fm = _gc().encode(["1-gc", "1-mer"], normalize=False)
+    assert fm.columns[0] == "gc.w0.o1.p1"
+    assert fm.columns[7] == "seq.1mer.p1.A"
+
+
+def test_one_hot_columns_are_never_normalized():
+    prof = FlexProfiler("wedge", window_size=0).profile_seqs(SEQS)
+    fm = prof.encode(["1-mer", "1-wedge"], normalize=True)
+    onehot, wedge = fm.X[:, :32], fm.X[:, 32:]
+    assert set(np.unique(onehot)) <= {0.0, 1.0}
+    assert wedge.min() == 0.0 and wedge.max() == 1.0
+
+
+def test_normalize_false_leaves_the_raw_values():
+    fm = FlexProfiler("wedge", window_size=0).profile_seqs(SEQS).encode(
+        ["1-wedge"], normalize=False)
+    np.testing.assert_allclose(fm.X[0][0], 1.1)
+
+
+def test_normalize_defaults_to_true():
+    fm = FlexProfiler("wedge", window_size=0).profile_seqs(SEQS).encode(["1-wedge"])
+    assert fm.X.max() == 1.0
+
+
+def test_each_block_is_normalized_on_its_own_scale():
+    """stiffness spans thousands, gc spans 0-1; one shared scale would
+    flatten gc to nothing."""
+    profiles = FlexProfiler(["gc", "stiffness"], window_size=0).profile_seqs(SEQS)
+    fm = profiles.encode(["1-gc", "1-stiffness"])
+    assert fm.X[:, :7].max() == 1.0
+    assert fm.X[:, 7:].max() == 1.0
+
+
+def test_encode_across_a_profile_set():
+    profiles = FlexProfiler(["gc", "DNaseI"], window_size=4).profile_seqs(SEQS)
+    fm = profiles.encode(["1-gc", "2-DNaseI"], normalize=False)
+    assert any(c.startswith("gc.w4.o1.") for c in fm.columns)
+    assert any(c.startswith("DNaseI.w4.o2.") for c in fm.columns)
+
+
+def test_encode_carries_the_label_vector(tmp_path):
+    tsv = tmp_path / "t.tsv"
+    tsv.write_text("ACGTACGT\t1.5\nTTTTTTTT\t2.5\n")
+    prof = FlexProfiler("gc", window_size=0).profile_table(tsv, header=False)
+    fm = prof.encode(["1-gc"])
+    assert fm.y == [1.5, 2.5]
+    assert fm.X.shape[0] == len(fm.y)
+
+
+def test_y_is_none_when_the_input_was_unlabelled():
+    assert _gc().encode(["1-gc"]).y is None
+
+
+def test_feature_matrix_records_the_window_size_and_the_request():
+    fm = _gc(window_size=4).encode(["1-gc"])
+    assert fm.window_size == 4
+    assert fm.feature_names == ["1-gc"]
+    assert "1-gc" in repr(fm)
+
+
+def test_to_frame_round_trips_the_columns():
+    frame = _gc().encode(["1-gc"], normalize=False).to_frame()
+    assert list(frame.columns) == [f"gc.w0.o1.p{i}" for i in range(1, 8)]
+    assert list(frame.index) == ["s1", "s2"]
+    np.testing.assert_allclose(frame.iloc[0].to_numpy(),
+                               [0.5, 1.0, 0.5, 0.0, 0.5, 1.0, 0.5])
+
+
+def test_unequal_sequence_lengths_raise_and_point_at_from_bed():
+    prof = _gc(seqs=["ACGTAC", "ACGT"])
+    with pytest.raises(ValueError, match="from_bed"):
+        prof.encode(["1-mer"])
+
+
+def test_two_short_sequences_have_equal_rows_but_unequal_lengths():
+    """Both rows come back empty, so a row-width check would wrongly pass."""
+    prof = _gc(window_size=10, seqs=["ACGTA", "ACG"])
+    assert [len(r) - 1 for r in prof._rows] == [0, 0]
+    with pytest.raises(ValueError, match=r"\[3, 5\]"):
+        prof.encode(["1-mer"])
+
+
+def test_unknown_feature_lists_what_is_available():
+    with pytest.raises(ValueError, match="gc"):
+        _gc().encode(["1-nosuch"])
+
+
+@pytest.mark.parametrize("bad", ["gc", "mer", "x-gc", "0-gc", "-gc", "1-", "1.5-gc"])
+def test_malformed_feature_name_raises(bad):
+    with pytest.raises(ValueError):
+        _gc().encode([bad])
+
+
+def test_duplicate_feature_names_raise():
+    with pytest.raises(ValueError, match="1-gc"):
+        _gc().encode(["1-gc", "1-gc"])
+
+
+def test_empty_request_raises():
+    with pytest.raises(ValueError, match="at least one"):
+        _gc().encode([])
+
+
+def test_a_bare_string_request_is_rejected_not_split_into_letters():
+    with pytest.raises(TypeError):
+        _gc().encode("1-gc")
+
+
+def test_a_feature_named_mer_is_reported_as_ambiguous():
+    table = {"mer": {a + b: 1.0 for a in "ACGT" for b in "ACGT"}}
+    prof = FlexProfiler("mer", window_size=0, lookup=table).profile_seqs(SEQS)
+    with pytest.raises(ValueError, match="ambiguous"):
+        prof.encode(["1-mer"])
+
+
+def test_encode_needs_sequences_only_for_a_kmer_term():
+    from DNAflexpy.results import FlexProfile
+
+    bare = FlexProfile([["a", 1.0, 2.0]], feature="gc", window_size=0, kmer_len=2)
+    assert bare.encode(["1-gc"], normalize=False).shape == (1, 2)
+    with pytest.raises(ValueError, match="profile_seqs"):
+        bare.encode(["1-mer"])
+
+
+def test_a_profile_set_with_mismatched_seqids_raises():
+    from DNAflexpy.core import ProfileSet
+    from DNAflexpy.results import FlexProfile
+
+    mixed = ProfileSet({
+        "gc": FlexProfile([["a", 1.0]], feature="gc", window_size=0, kmer_len=2),
+        "wedge": FlexProfile([["b", 1.0]], feature="wedge", window_size=0, kmer_len=2),
+    })
+    with pytest.raises(ValueError, match="same sequences"):
+        mixed.encode(["1-gc", "1-wedge"])
+
+
+def test_blocks_may_differ_in_width_at_window_size_zero():
+    """gc is a 2-mer table and DNaseI a 3-mer one, so at window_size=0 they
+    give 7 and 6 values for an 8-base sequence. Concatenation still works."""
+    profiles = FlexProfiler(["gc", "DNaseI"], window_size=0).profile_seqs(SEQS)
+    fm = profiles.encode(["1-gc", "1-DNaseI"], normalize=False)
+    assert fm.shape == (2, 7 + 6)

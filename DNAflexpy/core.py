@@ -30,6 +30,12 @@ class ProfileSet(dict):
         return pd.concat([p.to_frame(tidy=True) for p in self.values()],
                          ignore_index=True)
 
+    def encode(self, feature_names, normalize: bool = True):
+        """Build a design matrix across these features. See `DNAflexpy.encode`."""
+        from DNAflexpy.encode import encode
+
+        return encode(self, feature_names, normalize=normalize)
+
 
 class FlexProfiler:
     """Profiles sequences against one or more flexibility features.

@@ -66,6 +66,12 @@ class FlexProfile:
         long["feature"] = self.feature
         return long[["seqid", "position", "value", "feature"]]
 
+    def encode(self, feature_names, normalize: bool = True):
+        """Build a design matrix from this profile. See `DNAflexpy.encode`."""
+        from DNAflexpy.encode import encode
+
+        return encode(self, feature_names, normalize=normalize)
+
     def to_tsv(self, path) -> None:
         """Write the archive's exact format.
 
