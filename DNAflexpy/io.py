@@ -1,0 +1,312 @@
+"""Input readers."""
+from __future__ import annotations
+
+import math
+import warnings
+from pathlib import Path
+from typing import Iterator
+
+import pandas as pd
+
+
+def read_fasta(path) -> Iterator[tuple[str, str]]:
+    """Yield `(record_id, sequence)` for each record in a FASTA file.
+
+    Handles wrapped sequence lines and a missing trailing newline.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"FASTA file not found: {path}")
+    name, chunks = None, []
+    with path.open() as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith(">"):
+                if name is not None:
+                    yield name, "".join(chunks)
+                name, chunks = line[1:], []
+            else:
+                chunks.append(line)
+    if name is not None:
+        yield name, "".join(chunks)
+
+
+def read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t"):
+    """Read a labelled table of sequences and numeric values.
+
+    Returns `(seqid, sequence, value)` triples in file order. This is the
+    natural input for model fitting, since it carries X and y in one file.
+
+    A row whose value is missing or non-numeric raises rather than being
+    dropped: silently discarding labelled rows would corrupt a training set.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"table not found: {path}")
+
+    if header is None:
+        raise ValueError(
+            f"pass header=True or header=False for {path}: whether row 1 holds "
+            "column names or data cannot be guessed reliably, because words "
+            "like 'dna', 'rna' and 'tag' are made only of nucleotide letters"
+        )
+
+    try:
+        # skip_blank_lines=False keeps every physical line as a row (as NaN
+        # in every column), so the row's positional index stays the file's
+        # real line offset. Dropping blank rows ourselves afterwards, rather
+        # than letting pandas skip them before indexing, is what keeps
+        # line_no below accurate when the file has blank lines in it.
+        frame = pd.read_csv(
+            path, sep=sep, header=0 if header else None, dtype=str,
+            skip_blank_lines=False,
+        )
+    except pd.errors.EmptyDataError:
+        raise ValueError(f"table has no data rows: {path}") from None
+    frame = frame[~frame.isna().all(axis=1)]
+    if frame.empty:
+        raise ValueError(f"table has no data rows: {path}")
+
+    seqs = _pick_column(frame, seq_col, "seq_col")
+    values = _pick_column(frame, value_col, "value_col")
+    ids = _pick_column(frame, id_col, "id_col") if id_col is not None else None
+
+    def _is_missing(cell):
+        return (
+            cell is None
+            or (isinstance(cell, float) and math.isnan(cell))
+            or str(cell).strip() == ""
+        )
+
+    out = []
+    for pos, i in enumerate(frame.index):
+        line_no = i + 1 + (1 if header else 0)
+        seq_raw = seqs.loc[i]
+        if _is_missing(seq_raw):
+            raise ValueError(f"line {line_no} of {path} has a missing sequence in seq_col")
+        raw = values.loc[i]
+        if _is_missing(raw):
+            raise ValueError(f"line {line_no} of {path} has a missing value in value_col")
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"line {line_no} of {path} has non-numeric value {raw!r} in value_col"
+            ) from None
+        if not math.isfinite(value):
+            raise ValueError(
+                f"line {line_no} of {path} has a non-finite value {value!r} in value_col"
+            )
+        seqid = str(ids.loc[i]) if ids is not None else f"seq_{pos}"
+        out.append((seqid, str(seq_raw), value))
+    warn_if_ambiguous([(sid, seq) for sid, seq, _ in out], path)
+    return out
+
+
+def _pick_column(frame, col, argname):
+    """Select a column by position or by name, with a useful error."""
+    if isinstance(col, int):
+        if col >= len(frame.columns):
+            raise ValueError(
+                f"{argname}={col} is out of range; the table has "
+                f"{len(frame.columns)} column(s)"
+            )
+        return frame.iloc[:, col]
+    if col not in frame.columns:
+        raise ValueError(
+            f"{argname}={col!r} not found; columns are {list(frame.columns)}"
+        )
+    return frame[col]
+
+
+_ACGTN = frozenset("ACGTN")
+
+
+def warn_if_ambiguous(records, source):
+    """Warn when sequences carry IUPAC codes beyond ACGTN.
+
+    The feature tables hold only ACGT k-mers, so any k-mer covering one of
+    these resolves to NaN and is masked. N is an ordinary placeholder and
+    is not worth warning about; the rarer codes usually are.
+    """
+    found = {}
+    for seqid, sequence in records:
+        odd = sorted(set(sequence.upper()) - _ACGTN)
+        if odd:
+            found[seqid] = odd
+    if not found:
+        return
+    letters = sorted({c for codes in found.values() for c in codes})
+    examples = ", ".join(list(found)[:3])
+    warnings.warn(
+        f"{len(found)} sequence(s) in {source} contain non-ACGTN letters "
+        f"({', '.join(letters)}), for example {examples}. The feature tables "
+        "hold only ACGT k-mers, so windows containing these letters are "
+        "averaged over fewer k-mers. FlexProfile.n_masked only counts a "
+        "window as NaN when none of its k-mers resolve, so above "
+        "window_size=0 it under-reports how many windows are affected.",
+        UserWarning,
+        stacklevel=3,
+    )
+
+
+_COMPLEMENT = str.maketrans(
+    "ACGTUNRYSWKMBDHVacgtunryswkmbdhv",
+    "TGCAANYRSWMKVHDBtgcaanyrswmkvhdb",
+)
+
+
+def read_bed(path):
+    """Read a BED file into `(chrom, start, end, name, strand)` tuples.
+
+    Coordinates stay exactly as BED defines them: 0-based, half-open.
+    Blank lines and `#` comment lines are skipped. A `track` or `browser`
+    line is recognised by its first whitespace token, not by prefix, so a
+    contig genuinely named e.g. `trackXYZ` is kept rather than dropped.
+
+    A zero-length interval (`start == end`) is accepted: it is the normal
+    way to mark a point such as a TSS or motif midpoint, typically paired
+    with `width=` in `extract_intervals` to cut a fixed-size window centred
+    on it. `start > end` is rejected as malformed.
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"BED file not found: {path}")
+
+    out = []
+    with path.open() as handle:
+        for number, line in enumerate(handle, 1):
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.split()[0] in ("track", "browser"):
+                continue
+            fields = line.split("\t")
+            if len(fields) < 3:
+                raise ValueError(
+                    f"line {number} of {path} has {len(fields)} column(s); "
+                    "BED needs at least 3 (chrom, start, end)"
+                )
+            chrom = fields[0]
+            try:
+                start, end = int(fields[1]), int(fields[2])
+            except ValueError:
+                raise ValueError(
+                    f"line {number} of {path} has a non-integer start or end "
+                    f"({fields[1]!r}, {fields[2]!r}); a header row would also "
+                    "trigger this"
+                ) from None
+            if start > end:
+                raise ValueError(
+                    f"line {number} of {path} has start ({start}) > end "
+                    f"({end}); BED start must not be greater than end"
+                )
+            name = fields[3] if len(fields) > 3 and fields[3] != "." else None
+            strand = fields[5] if len(fields) > 5 and fields[5] in ("+", "-") else "+"
+            out.append((chrom, start, end, name, strand))
+    return out
+
+
+def extract_intervals(intervals, genome, width=None, on_edge="drop"):
+    """Pull sequences for BED intervals out of a reference genome FASTA.
+
+    With `width`, every interval is re-centred on its midpoint and cut to
+    exactly that many bases, so all outputs are the same length. That is
+    what makes position-wise comparison downstream meaningful.
+
+    A centred window can run off the end of a contig. `on_edge` decides:
+    `"drop"` skips it and warns with a count, `"error"` raises naming the
+    intervals, `"pad"` pads with `N`. Padded positions do not resolve to a
+    k-mer, so they are masked as NaN and counted in `FlexProfile.n_masked`
+    - they are not silently scored as zero.
+
+    A zero-length interval (`start == end`, e.g. a TSS or motif midpoint)
+    combined with `width` is the normal way to cut a fixed window centred
+    on a point. Without `width`, it has no bases to extract; rather than
+    silently returning an empty sequence, this warns with a count naming
+    the intervals, and still emits the row so no data goes missing without
+    a trace.
+    """
+    if on_edge not in ("drop", "error", "pad"):
+        raise ValueError(
+            f"on_edge must be 'drop', 'error' or 'pad', got {on_edge!r}"
+        )
+    try:
+        from pyfaidx import Fasta
+    except ImportError:
+        raise ImportError(
+            "reading BED input needs pyfaidx, which is an optional extra. "
+            "Install it with: pip install 'DNAflexpy[bed]'"
+        ) from None
+
+    fasta = Fasta(str(genome))
+    out, dropped, padded, zero_length = [], [], [], []
+
+    for chrom, start, end, name, strand in intervals:
+        if chrom not in fasta:
+            raise ValueError(
+                f"contig {chrom!r} is not in {genome}; "
+                f"it has {len(fasta.keys())} contig(s)"
+            )
+        length = len(fasta[chrom])
+
+        if width is not None:
+            centre = (start + end) // 2
+            start = centre - width // 2
+            end = start + width
+
+        seqid = name if name is not None else f"{chrom}:{start}-{end}"
+
+        if start < 0 or end > length:
+            if on_edge == "error":
+                raise ValueError(
+                    f"interval {seqid} runs past the bounds of {chrom} "
+                    f"(length {length}); pass on_edge='drop' or 'pad'"
+                )
+            if on_edge == "drop":
+                dropped.append(seqid)
+                continue
+            left = "N" * max(0, -start)
+            right = "N" * max(0, end - length)
+            body = str(fasta[chrom][max(0, start):min(end, length)])
+            sequence = left + body + right
+            padded.append(seqid)
+        else:
+            sequence = str(fasta[chrom][start:end])
+            if width is None and start == end:
+                zero_length.append(seqid)
+
+        if strand == "-":
+            sequence = sequence.translate(_COMPLEMENT)[::-1]
+        out.append((seqid, sequence))
+
+    if dropped:
+        warnings.warn(
+            f"{len(dropped)} interval(s) dropped for running past a contig "
+            f"boundary: {', '.join(dropped[:5])}"
+            + (" ..." if len(dropped) > 5 else ""),
+            UserWarning,
+            stacklevel=2,
+        )
+    if padded:
+        warnings.warn(
+            f"{len(padded)} interval(s) padded with N at a contig boundary. "
+            "Padded positions do not resolve to a k-mer and are masked as "
+            "NaN, so those windows average fewer values.",
+            UserWarning,
+            stacklevel=2,
+        )
+    if zero_length:
+        warnings.warn(
+            f"{len(zero_length)} interval(s) have zero length and produced "
+            f"an empty sequence: {', '.join(zero_length[:5])}"
+            + (" ..." if len(zero_length) > 5 else "")
+            + ". Pass width= to centre a fixed-size window on a point "
+            "interval such as a TSS or motif midpoint instead.",
+            UserWarning,
+            stacklevel=2,
+        )
+    warn_if_ambiguous(out, genome)
+    return out

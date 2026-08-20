@@ -1,1 +1,3 @@
 include DNAflexpy/data/lookupNEW.yaml
+include rxv/DNAflexpy/data/lookup.yaml
+include rxv/DNAflexpy/data/lookupNEW.yaml

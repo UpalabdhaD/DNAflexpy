@@ -3,6 +3,13 @@ site_url: https://upalabdhaD.github.io/dnaflexpy/
 site_description: A python package to calculate DNA flexibility from DNA sequences
 site_author: Upalabdha Dey
 
+# mkdocs renders every .md under docs/ regardless of what's listed in `nav`
+# below. Internal planning docs live under docs/superpowers/ (specs, plans)
+# and must never be published to GitHub Pages by `mkdocs gh-deploy` in CI --
+# exclude the whole tree from the build, not just from the nav.
+exclude_docs: |
+  superpowers/
+
 theme:
   name: material
   language: en  # Language code for syntax highlighting
@@ -32,7 +39,9 @@ extra:
 nav:
   - Home: index.md
   - Usage: usage.md
+  - API Reference: api_reference.md
   - Window Size Checks: window_size_checks.md
+  - Window Size Checks (long): window_size_long_checks.md
   - FAQ: faq.md
   - Installation: installation.md
   - Citation: citation.md
