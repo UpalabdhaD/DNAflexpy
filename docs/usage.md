@@ -301,6 +301,100 @@ One last thing: `DNAflexpy.profile()` returns a bare array, so there is nothing
 to encode from the one-liner. Start from `profile_seqs`, `profile_fasta`,
 `profile_table` or `from_bed`.
 
+## Plotting
+
+Needs matplotlib: `pip install -e '.[plot]'`.
+
+Three figures. Each returns a matplotlib object, so you save it yourself.
+
+### Heatmap
+
+Rows are sequences, columns are positions.
+
+```python
+import matplotlib
+matplotlib.use("Agg")
+
+p = FlexProfiler(feature="DNaseI", window_size=10)
+prof = p.profile_fasta("sequences.fa")
+
+ax = prof.heatmap(nbins=20)
+ax.figure.savefig("heatmap.png", dpi=150, bbox_inches="tight")
+```
+
+One feature per figure, always. `stiffness` runs to 5500 and `DNaseI` to 0.194
+— they cannot share a colour scale.
+
+`nbins` averages positions into bins so a wide matrix stays readable. Binning
+happens **before** scaling, so the colours describe what you are actually
+looking at.
+
+Rows are sorted with the most variable first. `order_rows="input"` keeps file
+order.
+
+### Metaprofile
+
+The position-wise average, as a line.
+
+```python
+ax = prof.metaprofile()
+ax.figure.savefig("meta.png", dpi=150, bbox_inches="tight")
+```
+
+**One option is refused, on purpose.** `zscale="column"` scales each position
+across sequences, then the average down that same position is exactly zero —
+every time, by arithmetic. The line would be flat and tell you nothing. Ask for
+it and you get an error explaining why, not a flat chart.
+
+To compare against a control, give it one:
+
+```python
+control = p.profile_fasta("shuffled.fa")
+ax = prof.metaprofile(background=control)
+ax.figure.savefig("meta_vs_control.png", dpi=150, bbox_inches="tight")
+```
+
+Now each position is scaled against the **background's** mean and spread. The
+control sits flat at zero and your foreground's distance from it is real, read
+in background standard deviations. The background has to be the same feature
+and the same window size, or it is refused.
+
+### Trackplot
+
+One sequence, every feature stacked.
+
+```python
+result = FlexProfiler(["DNaseI", "gc", "stiffness"],
+                      window_size=10).profile_fasta("sequences.fa")
+fig = result.trackplot(seqid="a")
+fig.savefig("tracks.png", dpi=150, bbox_inches="tight")
+```
+
+Each feature gets its own y-axis, because the units differ.
+
+### From the command line
+
+```bash
+DNAflexpy plot heatmap sequences.fa --feature DNaseI --nbins 20 --out heat.png
+DNAflexpy plot meta sequences.fa --background shuffled.fa --out meta.png
+DNAflexpy plot track sequences.fa --feature DNaseI gc stiffness --out tracks.png
+```
+
+All the reading options from `profile` work here too, so you can plot straight
+from a BED file:
+
+```bash
+DNAflexpy plot heatmap peaks.bed --genome TAIR10.fa --width 200 --out heat.png
+```
+
+### If it will not draw
+
+Every sequence has to give the same number of values, since the columns are
+positions. Unequal lengths raise, and point you at `from_bed(..., width=N)`.
+
+If every sequence is shorter than the window there is nothing to draw at all,
+and the error says so.
+
 ## Other things you can do
 
 ### A long (tidy) table instead of a wide one

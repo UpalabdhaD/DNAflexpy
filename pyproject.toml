@@ -19,7 +19,10 @@ DNAflexpy = "DNAflexpy.cli:main"
 
 [project.optional-dependencies]
 bed = ["pyfaidx>=0.7"]
-dev = ["pytest>=6.0", "DNAflexpy[bed]"]
+plot = ["matplotlib>=3.8"]
+# CI installs .[dev]; without [plot] here the plotting tests would silently
+# never run.
+dev = ["pytest>=6.0", "DNAflexpy[bed]", "DNAflexpy[plot]"]
 
 [tool.setuptools]
 # Explicit, never find_packages(): that would sweep the archive into the

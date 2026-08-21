@@ -72,6 +72,18 @@ class FlexProfile:
 
         return encode(self, feature_names, normalize=normalize)
 
+    def heatmap(self, **kwargs):
+        """Draw this profile as a heatmap. See `DNAflexpy.plotting.heatmap`."""
+        from DNAflexpy.plotting import heatmap
+
+        return heatmap(self, **kwargs)
+
+    def metaprofile(self, **kwargs):
+        """Draw the position-wise average. See `DNAflexpy.plotting.metaprofile`."""
+        from DNAflexpy.plotting import metaprofile
+
+        return metaprofile(self, **kwargs)
+
     def to_tsv(self, path) -> None:
         """Write the archive's exact format.
 

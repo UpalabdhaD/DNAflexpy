@@ -13,9 +13,19 @@ its fixture added here, or the checker reports a FileNotFoundError that looks
 like a broken example.
 """
 import pathlib
+import random
 import sys
 
 DINUCS = [a + b for a in "ACGT" for b in "ACGT"]
+
+# Seeded, so the fixtures are identical every run. 200 bases is long enough
+# for the plotting examples, which bin positions into 20 groups: the earlier
+# 26-base records gave only 17 positions and made `nbins=20` fail.
+_RNG = random.Random(0)
+
+
+def _seq(length: int = 200) -> str:
+    return "".join(_RNG.choice("ACGT") for _ in range(length))
 
 FIXTURES = {
     # docs/usage.md -- labelled tables
@@ -27,13 +37,12 @@ FIXTURES = {
         "p1\tATGCGTACGT\t1.5\n"
         "p2\tCGTAGCTAGT\t2.5\n"
     ),
-    # FASTA -- usage.md says "sequences.fa", README.md says "input.fasta".
-    # Both records are the same length on purpose: `DNAflexpy encode` needs
-    # equal-length sequences, and this file is used for that example too.
-    "sequences.fa": (
-        ">a\nATGCGTACGTAGCTAGCGTAGCTAGT\n"
-        ">b\nCGTAGCTAGTATGCGTACGTAGCTAG\n"
-    ),
+    # FASTA -- usage.md says "sequences.fa", README.md says "input.fasta",
+    # and the metaprofile example needs a control set in "shuffled.fa".
+    # Every record is the same length on purpose: both `encode` and the
+    # plots need equal-length sequences.
+    "sequences.fa": "".join(f">{name}\n{_seq()}\n" for name in "abcde"),
+    "shuffled.fa": "".join(f">bg{i}\n{_seq()}\n" for i in range(5)),
     "input.fasta": ">a\nATGCGTACGTAGCTAGCGTAGCTAGT\n",
     # BED against a reference genome
     "TAIR10.fa": ">chr1\n" + "ACGT" * 200 + "\n",
