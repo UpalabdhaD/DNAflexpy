@@ -14,6 +14,9 @@ dependencies = [
     "numpy>=1.24",
 ]
 
+[project.scripts]
+DNAflexpy = "DNAflexpy.cli:main"
+
 [project.optional-dependencies]
 bed = ["pyfaidx>=0.7"]
 dev = ["pytest>=6.0", "DNAflexpy[bed]"]

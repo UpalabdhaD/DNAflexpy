@@ -27,10 +27,12 @@ FIXTURES = {
         "p1\tATGCGTACGT\t1.5\n"
         "p2\tCGTAGCTAGT\t2.5\n"
     ),
-    # FASTA -- usage.md says "sequences.fa", README.md says "input.fasta"
+    # FASTA -- usage.md says "sequences.fa", README.md says "input.fasta".
+    # Both records are the same length on purpose: `DNAflexpy encode` needs
+    # equal-length sequences, and this file is used for that example too.
     "sequences.fa": (
         ">a\nATGCGTACGTAGCTAGCGTAGCTAGT\n"
-        ">b\nCGTAGCTAGTATGCGTACGTAGCTA\n"
+        ">b\nCGTAGCTAGTATGCGTACGTAGCTAG\n"
     ),
     "input.fasta": ">a\nATGCGTACGTAGCTAGCGTAGCTAGT\n",
     # BED against a reference genome
@@ -45,12 +47,28 @@ FIXTURES = {
 }
 
 
+def _make_npz(target: pathlib.Path) -> None:
+    """usage.md loads `X.npz` back with NumPy, so one has to exist.
+
+    Built through the real encode path rather than hand-written, so the
+    example is loading a genuine artefact of the documented command.
+    """
+    from DNAflexpy.cli import main as cli_main
+
+    cli_main([
+        "encode", str(target / "sequences.fa"),
+        "--features", "1-mer", "1-DNaseI",
+        "--out", str(target / "X.npz"),
+    ])
+
+
 def main() -> None:
     target = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".")
     target.mkdir(parents=True, exist_ok=True)
     for name, text in FIXTURES.items():
         (target / name).write_text(text)
-    print(f"wrote {len(FIXTURES)} fixture(s) to {target}")
+    _make_npz(target)
+    print(f"wrote {len(FIXTURES) + 1} fixture(s) to {target}")
 
 
 if __name__ == "__main__":

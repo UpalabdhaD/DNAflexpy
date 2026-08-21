@@ -21,8 +21,10 @@ Repository: https://github.com/upalabdhaD/DNAflexpy.git
 
 - **Python Library**: Import DNAflexpy as a library in Jupyter notebooks or other scripts.
 
-> The rewritten package has no command-line tool yet. The original one still
-> works: `python -m rxv.DNAflexpy.cli`.
+> `pip install -e .` gives you a `DNAflexpy` command:
+> `DNAflexpy profile sequences.fa --feature DNaseI --window-size 10`.
+> The original one still works too, and produces byte-identical output:
+> `python -m rxv.DNAflexpy.cli`.
 
 ---
 
