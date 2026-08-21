@@ -190,6 +190,22 @@ def _cmd_encode(args) -> int:
     return 0
 
 
+def _zscale_for(kind: str, chosen: str):
+    """Translate --zscale into what the plot function expects.
+
+    The two figures want different defaults, and this is the only place
+    that knows it: a heatmap scales per position, while a metaprofile
+    decides from whether it was given a background. Keeping the mapping
+    here rather than mutating args in main() means the next subcommand does
+    not inherit a rewrite it never asked for.
+    """
+    if chosen == "none":
+        return None
+    if chosen != "auto":
+        return chosen
+    return "column" if kind == "heatmap" else "auto"
+
+
 def _cmd_plot(args) -> int:
     features = args.feature
     if args.kind != "track" and len(features) > 1:
@@ -217,13 +233,13 @@ def _cmd_plot(args) -> int:
         elif args.kind == "heatmap":
             axes = profiles[features[0]].heatmap(
                 nbins=args.nbins, order_rows=args.order_rows,
-                zscale=args.zscale,
+                zscale=_zscale_for("heatmap", args.zscale),
             )
             figure = axes.figure
         else:
             axes = profiles[features[0]].metaprofile(
                 background=background, nbins=args.nbins,
-                zscale=args.zscale if args.zscale != "auto" else "auto",
+                zscale=_zscale_for("meta", args.zscale),
             )
             figure = axes.figure
     except (ValueError, ImportError) as exc:
@@ -341,15 +357,6 @@ def main(argv=None) -> int:
             "citing this.", file=sys.stderr,
         )
         return 0
-
-    if args.command == "plot":
-        if args.zscale == "none":
-            args.zscale = None
-        elif args.zscale == "auto":
-            # The two figures want different defaults: a heatmap is scaled
-            # per position, a metaprofile decides from whether it was given
-            # a background.
-            args.zscale = "column" if args.kind == "heatmap" else "auto"
 
     if not args.command:
         parser.print_help()

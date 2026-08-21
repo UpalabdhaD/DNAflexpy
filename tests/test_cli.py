@@ -341,3 +341,24 @@ def test_plot_works_from_bed_input(tmp_path, genome):
     assert main(["plot", "heatmap", str(bed), "--genome", str(genome),
                  "--width", "20", "--out", str(out)]) == 0
     assert out.exists()
+
+
+def test_zscale_none_draws_an_unscaled_metaprofile(fasta, tmp_path):
+    """--zscale none is not the refused case: an unscaled mean is a real
+    figure. Only column scaling cancels to a flat line."""
+    out = tmp_path / "meta.png"
+    assert main(["plot", "meta", str(fasta), "--zscale", "none",
+                 "--out", str(out)]) == 0
+    assert out.exists()
+
+
+def test_zscale_global_reaches_the_heatmap(fasta, tmp_path):
+    from DNAflexpy.cli import _zscale_for
+
+    assert _zscale_for("heatmap", "auto") == "column"
+    assert _zscale_for("meta", "auto") == "auto"
+    assert _zscale_for("heatmap", "none") is None
+    assert _zscale_for("heatmap", "global") == "global"
+    out = tmp_path / "hm.png"
+    assert main(["plot", "heatmap", str(fasta), "--zscale", "global",
+                 "--out", str(out)]) == 0

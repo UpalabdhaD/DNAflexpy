@@ -80,7 +80,7 @@
 
 ## Outcome
 
-`python -m pytest -q` reports **537 passed** (486 before, 51 new). The 230
+`python -m pytest -q` reports **542 passed** (486 before, 56 new). The 230
 byte-equality cases are unchanged. `mkdocs build --strict` passes and 34/34
 documentation examples run clean under `MPLBACKEND=Agg`.
 
@@ -107,10 +107,23 @@ install hint rather than an ImportError traceback.
 - **The heatmap x-axis is 0-based** (matplotlib `imshow` index), while
   positions are 1-based everywhere else in the package. Cosmetic, but
   inconsistent.
-- **`trackplot` reads `profiles[feature]._rows` per feature** and assumes the
-  same row order across the set. That holds for anything built by a single
-  `FlexProfiler`, which is the only way to get a `ProfileSet` today, but a
-  hand-assembled set could break it silently. `encode` validates this;
-  `trackplot` does not.
 - **No `metaprofile` significance shading.** `mark_significant=` needs the
   per-position testing from Phase 6.
+
+### Fixed during review
+
+- **`--zscale` had its default resolved in two places** — a mutation of `args`
+  in `main()` plus a no-op conditional in `_cmd_plot`. Collapsed into one
+  `_zscale_for(kind, chosen)` helper, so the next subcommand cannot inherit a
+  rewrite it never asked for. `--zscale none` on a metaprofile correctly draws
+  an unscaled mean; only `column` is refused.
+- **`_bin` had a dead empty-bin branch** that would have returned fewer columns
+  than `nbins` while the axis label still claimed the full count. Verified
+  unreachable for every `nbins` from 1 to the width, then removed, with a test
+  pinning the column count across that whole range.
+- **`trackplot` did not check that the profiles cover the same sequences.**
+  `encode` refuses that input; `trackplot` would have drawn rows from different
+  sequences on one figure. Now refused with the same message.
+- **The `cv` refusal gained a test that measures rather than asserts**: a grid
+  where the more variable row ranks *lower* under `std/mean` because both means
+  are negative, showing the inverted order the refusal prevents.

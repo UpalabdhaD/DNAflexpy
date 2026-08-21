@@ -65,10 +65,14 @@ def _bin(matrix: np.ndarray, nbins: int | None) -> np.ndarray:
             f"nbins={nbins} exceeds the {positions} position(s) available; "
             "binning can only make the matrix narrower"
         )
+    # nbins <= positions is guaranteed above, so linspace steps by at least
+    # one and no bin can come out empty. No empty-bin branch here on
+    # purpose: one would silently return fewer columns than nbins, and the
+    # axis label would then disagree with the figure.
     edges = np.linspace(0, positions, nbins + 1).astype(int)
     with np.errstate(invalid="ignore"):
         return np.column_stack([
-            np.nanmean(matrix[:, lo:hi], axis=1) if hi > lo else matrix[:, lo:lo]
+            np.nanmean(matrix[:, lo:hi], axis=1)
             for lo, hi in zip(edges[:-1], edges[1:])
         ])
 
@@ -291,6 +295,13 @@ def trackplot(profiles, seqid=None, nbins=None, figsize=None):
         raise ValueError("there is nothing to plot: no features were given")
     features = list(profiles)
     first = profiles[features[0]]
+    for name in features[1:]:
+        if profiles[name].seqids != first.seqids:
+            raise ValueError(
+                f"every profile must cover the same sequences in the same "
+                f"order; {name!r} does not match {first.feature!r}. Stacking "
+                "them would draw rows from different sequences on one figure."
+            )
     if seqid is None:
         seqid = first.seqids[0]
     if seqid not in first.seqids:

@@ -327,3 +327,42 @@ def test_importing_dnaflexpy_does_not_import_matplotlib():
         "sys.exit(1 if 'matplotlib' in sys.modules else 0)"
     )
     assert subprocess.run([sys.executable, "-c", code]).returncode == 0
+
+
+# --- the two refusals, measured rather than asserted ------------------------
+
+
+def test_cv_would_invert_the_order_on_negative_means():
+    """Why `cv` raises instead of sorting. Row 0 varies far more than row 1,
+    but both have negative means, so std/mean comes back negative and the
+    sort puts the *least* variable row first."""
+    grid = np.array([[-10.0, -1.0], [-5.0, -4.0]])
+    spread = np.nanstd(grid, axis=1)
+    assert spread[0] > spread[1]                       # row 0 is more variable
+    cv = spread / np.nanmean(grid, axis=1)
+    assert cv[0] < cv[1]                               # ... but ranks lower
+    assert list(np.argsort(-cv)) == [1, 0]             # the inverted order
+    with pytest.raises(ValueError, match="strictly positive"):
+        _order(grid, "cv")
+
+
+def test_binning_always_returns_exactly_nbins_columns():
+    """An empty bin would give fewer columns than the axis label claims."""
+    grid = np.zeros((2, 17))
+    for nbins in range(1, 18):
+        assert _bin(grid, nbins).shape[1] == nbins
+
+
+def test_trackplot_refuses_a_set_with_mismatched_sequences():
+    """Stacking these would draw rows from different sequences as if they
+    were one. `encode` already refuses the same input."""
+    from DNAflexpy.core import ProfileSet
+
+    mixed = ProfileSet({
+        "gc": FlexProfile([["a", 1.0, 2.0]], feature="gc",
+                          window_size=0, kmer_len=2),
+        "wedge": FlexProfile([["b", 1.0, 2.0]], feature="wedge",
+                             window_size=0, kmer_len=2),
+    })
+    with pytest.raises(ValueError, match="same sequences"):
+        trackplot(mixed)
