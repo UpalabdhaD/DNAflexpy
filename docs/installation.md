@@ -61,3 +61,29 @@ pip install .
 
 
 
+
+## Container
+
+If you would rather not install anything, or you need this on a cluster, build
+the image:
+
+```bash
+docker build -t dnaflexpy:dev -f Docker/Dockerfile .
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/data dnaflexpy:dev \
+  profile in.fa --feature DNaseI --window-size 10
+```
+
+It has every optional extra already installed, so plotting and BED input work
+out of the box.
+
+On an HPC cluster, Apptainer runs it without root:
+
+```bash
+apptainer build dnaflexpy.sif docker-daemon://dnaflexpy:dev
+apptainer exec --bind "$PWD":/data dnaflexpy.sif \
+  DNAflexpy profile /data/in.fa --feature DNaseI --outfile /data/out.tsv
+```
+
+Nothing is published to a registry, so there is no image to pull — you build
+it from the repository. Full instructions, including why it works unprivileged,
+are in [`Docker/README.md`](https://github.com/UpalabdhaD/DNAflexpy/blob/main/Docker/README.md).

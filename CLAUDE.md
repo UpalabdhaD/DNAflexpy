@@ -68,6 +68,16 @@ The archive, `rxv/DNAflexpy/` (frozen, do not modify logic):
 - `rxv/DNAflexpy/cli.py` — the archive's CLI, still runnable as `python -m rxv.DNAflexpy.cli`. Superseded by `DNAflexpy/cli.py`, and verified to produce byte-identical output.
 - `rxv/DNAflexpy/data/lookupNEW.yaml` — the archive's own copy of the feature table; byte-identical today to `DNAflexpy/data/lookupNEW.yaml`, but the two are loaded through separate `importlib.resources` calls and must stay that way.
 
+## Container
+
+`Docker/Dockerfile` builds one full-analysis image with the `plot` and `bed` extras installed. **Nothing is published to any registry** — it is built from the repository, because DNAflexpy is not on PyPI and the builder installs it from the build context, never by name from an index.
+
+**There is no Docker on the maintainer's machine.** The `container` CI job is therefore the only thing that verifies the Dockerfile, and it runs on pull requests as well as pushes. Never claim the image builds without pointing at a green run of that job.
+
+Four Dockerfile decisions exist for Apptainer, where the container runs as the invoking user (who may have no passwd entry and no writable home) against a read-only filesystem: no `USER` directive, packages in system site-packages rather than user site, `MPLCONFIGDIR=/tmp/mpl` (matplotlib otherwise writes under `$HOME`), and `PYTHONDONTWRITEBYTECODE=1`. `Docker/smoke_test.sh` pins this by running one case as UID 12345 with `HOME=/nonexistent`.
+
+`.dockerignore` excludes `tests/`, `docs/` and `Notebooks/`, but **must never exclude `rxv/`, `pyproject.toml` or `README.md`** — `pyproject.toml` lists `rxv` and `rxv.DNAflexpy` as shipped packages and reads `README.md` at build time.
+
 ## Conventions
 
 - Version is declared once, in `DNAflexpy/__init__.py` (`__version__`); `pyproject.toml` resolves it dynamically via `[tool.setuptools.dynamic] version = { attr = "DNAflexpy.__version__" }`. There is no `setup.py` — it was deleted; `setup.py` beside a `[project]` table in `pyproject.toml` makes setuptools error, which `tests/test_packaging.py::test_setup_py_is_gone` guards.

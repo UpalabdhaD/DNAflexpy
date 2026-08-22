@@ -29,6 +29,20 @@ jobs:
       - name: Re-run the byte-equality gate on its own, so a failure is obvious
         run: python -m pytest tests/test_differential.py -k byte_identical -q
 
+  container:
+    # Builds the image and runs every subcommand inside it. There is no Docker
+    # on the maintainer's machine, so this job is the only thing that actually
+    # verifies the Dockerfile -- it runs on pull requests too, not just pushes.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t dnaflexpy:ci -f Docker/Dockerfile .
+      - name: Report the image size
+        run: docker image ls dnaflexpy:ci
+      - name: Run every subcommand inside the image
+        run: ./Docker/smoke_test.sh dnaflexpy:ci
+
   deploy-docs:
     # Only on push to main. gh-deploy pushes to the gh-pages branch, which a
     # pull request has no permission to do -- running it on pull_request is

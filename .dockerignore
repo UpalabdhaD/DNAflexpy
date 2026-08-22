@@ -1,0 +1,39 @@
+# Keep the build context small and reproducible.
+#
+# Do NOT add DNAflexpy/, rxv/, pyproject.toml or README.md here: the builder
+# installs the package from this context, pyproject lists `rxv` and
+# `rxv.DNAflexpy` as shipped packages, and `readme = "README.md"` is read at
+# build time. Excluding any of them breaks the build.
+
+.git
+.github
+.gitignore
+.claude
+
+# Not needed to build or run, and large. The image installs no test
+# dependencies, so shipping tests/ would give a suite that cannot be run.
+Notebooks/
+docs/
+tests/
+scripts/
+site/
+*.pdf
+
+# Build and test leftovers
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+*.whl
+htmlcov/
+.coverage
+
+# Environments
+.venv/
+venv/
+env/
+
+# The image builds itself; it does not need its own recipe in the context
+Docker/
