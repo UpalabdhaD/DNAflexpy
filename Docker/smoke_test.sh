@@ -28,7 +28,11 @@ check() {  # check <file> <description> [magic-bytes]
   local path="$WORK/$1"
   [ -s "$path" ] || { echo "FAIL: $2 produced nothing at $1"; exit 1; }
   if [ $# -ge 3 ]; then
-    head -c "${#3}" "$path" | grep -q "$3" || { echo "FAIL: $1 is not a $3 file"; exit 1; }
+    # Read a fixed 16 bytes, not ${#3}. A PNG header is \x89PNG\r\n\x1a\n, so
+    # the literal "PNG" starts at byte 2 -- reading only as many bytes as the
+    # pattern is long would cut it off and fail on a perfectly good file.
+    # grep -a because the input is binary.
+    head -c 16 "$path" | grep -qa "$3" || { echo "FAIL: $1 is not a $3 file"; exit 1; }
   fi
   echo "  ok: $2"
 }
