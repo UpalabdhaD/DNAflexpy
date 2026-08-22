@@ -84,6 +84,12 @@ print('  ok: rxv.DNAflexpy loads its own lookup table')
 "
 
 echo "--- unprivileged, no writable home: the Apptainer case ---"
+# mktemp -d creates the directory 0700, owned by whoever runs this script, and
+# the runs above wrote into it as root. An arbitrary UID could not even stat
+# in.fa. Open it up first: that is a property of the host bind mount, not of
+# the image, and under Apptainer the user owns their own data directory
+# anyway. Without this the check fails on a perfectly good image.
+chmod -R a+rwX "$WORK"
 docker run --rm --user 12345:12345 -e HOME=/nonexistent -v "$WORK":/data "$IMAGE" \
   plot heatmap in.fa --feature DNaseI --out asuser.png
 check asuser.png "heatmap as an arbitrary UID with no home" "PNG"
