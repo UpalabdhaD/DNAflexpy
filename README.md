@@ -1,142 +1,185 @@
-# Welcome to DNAflexpy
+<h1 align="center">DNAflexpy</h1>
 
-Git URL: https://github.com/upalabdhaD/DNAflexpy.git
+<p align="center">
+  <strong>DNA flexibility profiling from sequence</strong><br>
+  Sliding-window profiles, machine-learning features and publication figures,
+  from di- and trinucleotide parameter tables.
+</p>
 
-DNAflexpy is a Python package for computing DNA flexibility profiles from sequence
-data using published di- and tri-nucleotide feature lookup tables. It provides
-both a command-line interface and a Python API, supports sliding-window
-averaging, and outputs results in a tabular format that is easy to integrate
-with downstream analyses.
+<p align="center">
+  <a href="https://github.com/UpalabdhaD/DNAflexpy/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/UpalabdhaD/DNAflexpy/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://upalabdhad.github.io/DNAflexpy/">
+    <img alt="Documentation" src="https://img.shields.io/badge/docs-online-14b8a6"></a>
+  <img alt="Python" src="https://img.shields.io/badge/python-3.12%20%7C%203.13-3776ab?logo=python&logoColor=white">
+  <a href="LICENSE">
+    <img alt="License" src="https://img.shields.io/badge/license-BSD--3--Clause-blue"></a>
+</p>
 
-## Key features
+<p align="center">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-552%20passing-brightgreen">
+  <img alt="Byte-equality gate" src="https://img.shields.io/badge/output-byte--identical%20to%20v1-8b5cf6">
+  <img alt="Container" src="https://img.shields.io/badge/container-Docker%20%7C%20Apptainer-2496ed?logo=docker&logoColor=white">
+  <img alt="Platform" src="https://img.shields.io/badge/platform-linux%20%7C%20macOS-lightgrey">
+</p>
 
-- Fast profile generation from multi-FASTA inputs.
-- CLI and Python API for scripts, notebooks, or pipelines.
-- Sliding-window averaging for local flexibility estimates.
-- Multiple supported features from lookup tables.
+---
 
-## Installation
+## What it does
 
-### With pip (GitHub)
+DNA is not uniformly stiff. Some sequences bend easily, others resist — and
+that varies along a sequence in ways that matter for nucleosome positioning,
+promoter architecture and protein binding.
 
-```bash
-pip install git+https://github.com/upalabdhaD/DNAflexpy.git
-```
+DNAflexpy turns a sequence into a **flexibility profile**: one number per
+position, computed from published experimental parameter tables. Thirteen of
+them ship with the package, covering bendability, propeller twist, free
+energy, stiffness and more.
 
-### From source
+From there you can plot it, compare it against a control, or turn it into a
+design matrix and fit a model.
 
-```bash
-git clone https://github.com/upalabdhaD/DNAflexpy.git
-cd DNAflexpy
-pip install .
-```
-
-## Quick start (CLI)
-
-```bash
-DNAflexpy profile sequences.fa --feature DNaseI --window-size 10
-```
-
-That writes `sequences_w10nt_DNaseI.tsv`.
-
-```bash
-DNAflexpy profile sequences.fa --feature DNaseI gc    # one file per feature
-DNAflexpy profile peaks.bed --genome TAIR10.fa --width 200
-DNAflexpy profile affinity.tsv --no-header
-DNAflexpy profile --seq ATGCGTACGT                    # straight to stdout
-DNAflexpy encode sequences.fa --features 1-mer 1-DNaseI --out X.npz
-```
-
-### CLI options (summary)
-
-- `input`: a FASTA, BED or table file. The format comes from the extension;
-  override with `--format`.
-- `--feature`: one or more feature names. Several means one file each.
-- `--window-size`: window length; `0` gives per-k-mer values.
-- `--threads`: worker processes. Left out, the tool decides.
-- `--outfile`: output path, for a single feature only.
-- `--genome`, `--width`, `--on-edge`: for BED input.
-- `--header` / `--no-header`, `--seq-col`, `--value-col`: for table input.
-
-The original command is untouched and still works. Its output is byte-for-byte
-identical to the new one:
-
-```bash
-python -m rxv.DNAflexpy.cli "<path/to/fasta>" \
-  --window-size 10 \
-  --feature "DNaseI" \
-  --outfile "<path/to/output.tsv>"
-```
-
-## Python API
-
-```py
-from DNAflexpy import FlexProfiler
-
-p = FlexProfiler(feature="DNaseI", window_size=10)
-
-p.profile("ATGCGTACGTAGCTAGCGTAGCTAGT")   # one sequence -> array of values
-prof = p.profile_fasta("input.fasta")      # a whole file
-prof.to_tsv("out.tsv")
-```
-
-Or for a single sequence, without building anything:
-
-```py
+```python
 import DNAflexpy
 
-DNAflexpy.profile("ATGCGTACGTAGCTAGCGTAGCTAGT", feature="DNaseI", window_size=10)
+DNAflexpy.profile("ATGCGTACGTAGCTAGCGTAGCTAGT")
+# array([ 0.011, -0.003, -0.001,  0.01 ,  0.017, ... ])
 ```
 
-Sequences can also come from a labelled table or from a BED file plus a
-reference genome. See [docs/usage.md](docs/usage.md).
+## Install
 
-## Supported features
+```bash
+pip install git+https://github.com/UpalabdhaD/DNAflexpy.git
+```
 
-Thirteen features. Four use 3-mers:
+For plotting and BED input:
 
-- DNaseI, NPP, bendabilityDNase, bendabilityConcensus
+```bash
+pip install "DNAflexpy[plot,bed] @ git+https://github.com/UpalabdhaD/DNAflexpy.git"
+```
 
-Nine use 2-mers:
+Python 3.12 or newer. From a clone: `pip install -e '.[plot,bed]'`.
 
-- wedge, prop, freeen, gc, twistDisp, stiffness, bendingStiffness, mechen, trx
+There is also a [container](Docker/README.md) with everything already
+installed, which runs under Apptainer on a cluster without root.
 
-## Window-size behavior
+## Sixty-second tour
 
-- `window_size == 0` disables windowing and returns per-kmer feature values for
-  the full sequence.
-- `window_size == N` generates overlapping windows of length `N` (step size 1),
-  computes per-kmer feature values within each window, and reports the mean
-  value per window.
-- Note: `window_size > 0` shortens the feature vector compared to per-kmer output
-  because windows collapse multiple k-mer values into one mean per window.
-- If `N` equals the feature k-mer length (e.g., `N=3` for `DNaseI`), each window
-  contains a single k-mer value, so outputs match the per-kmer values.
-- If `N` is larger than the sequence length, no windows are generated and only
-  the sequence ID is returned for that record.
-- If `N` is smaller than the feature k-mer length, window averages are 0.0
-  because no k-mers fit inside the window.
+Example data ships with the package, so this runs as written:
 
-## Input and output format
+```python
+from DNAflexpy import FlexProfiler, example_path
 
-Input must be a FASTA or multi-FASTA file. Output is a tab-separated file with
-one row per input record. The first column is the sequence identifier followed
-by either:
+p = FlexProfiler(feature="DNaseI", window_size=10)
+prof = p.profile_fasta(example_path("promoters.fa"))
 
-- per-kmer feature values (`window_size == 0`), or
-- per-window mean feature values (`window_size > 0`).
+prof.frame          # 12 sequences x 111 positions, as a DataFrame
+prof.to_tsv("profiles.tsv")
+```
+
+Draw it:
+
+```python
+ax = prof.heatmap(nbins=30)
+ax.figure.savefig("heatmap.png", dpi=150, bbox_inches="tight")
+```
+
+Compare it against a matched control:
+
+```python
+control = p.profile_fasta(example_path("control.fa"))
+ax = prof.metaprofile(background=control)
+```
+
+Build a design matrix for scikit-learn:
+
+```python
+labelled = p.profile_table(example_path("affinity.tsv"),
+                           seq_col="sequence", value_col="binding_score",
+                           header=True)
+fm = labelled.encode(["1-mer", "1-DNaseI"])
+fm.X, fm.y          # features and targets, from one file
+```
+
+Or from the shell:
+
+```bash
+DNAflexpy profile promoters.fa --feature DNaseI --window-size 10
+DNAflexpy plot heatmap promoters.fa --nbins 30 --out heat.png
+DNAflexpy encode promoters.fa --features 1-mer 1-DNaseI --out X.npz
+```
+
+## Features
+
+| | |
+|---|---|
+| **Five ways in** | a bare string, a list or dict, a FASTA file, a labelled table, or BED intervals against a reference genome |
+| **Thirteen parameter tables** | bendability, stiffness, propeller twist, free energy, GC content and more — or supply your own |
+| **Machine-learning encoding** | one-hot sequence blocks and nth-order interaction terms, straight into scikit-learn |
+| **Three figures** | heatmap, metaprofile with a background, stacked trackplot |
+| **Command line and API** | the same five inputs from either |
+| **Parallel** | multiprocessing for large FASTA files, with a threshold so small inputs stay fast |
+| **Containerised** | Docker and Apptainer, unprivileged, for HPC |
+
+### The parameter tables
+
+Four use trinucleotides:
+
+`DNaseI` · `NPP` · `bendabilityDNase` · `bendabilityConcensus`
+
+Nine use dinucleotides:
+
+`wedge` · `prop` · `freeen` · `gc` · `twistDisp` · `stiffness` ·
+`bendingStiffness` · `mechen` · `trx`
+
+k-mer length is read from each table's own keys, so adding a table to
+`lookupNEW.yaml` is the only step needed to use it.
+
+## Two things it deliberately refuses
+
+Both are cases where it would be easy to return a plausible-looking answer.
+
+**A column-scaled metaprofile with no background.** Standardising each position
+across sequences and then averaging down that same position cancels to exactly
+zero, at every position, by construction. The line would be flat and carry no
+information, so it raises and explains why.
+
+**Sorting heatmap rows by coefficient of variation on signed data.** CV is
+`std/mean`; several tables take negative values, which inverts the sort. It
+raises rather than showing you a confidently wrong order.
+
+## Output is byte-identical to the original
+
+This package is a rewrite. The original is preserved, frozen, at
+`rxv/DNAflexpy/`, and **230 tests compare the new output against it byte for
+byte** on every push — three FASTA files, ten features, seven window sizes,
+plus the parallel code path.
+
+Byte comparison, not value comparison. That distinction caught a real bug:
+six tables hold integers, and coercing them to float wrote `18.0` where the
+original writes `18`. `assert a == b` passes on `18 == 18.0`; only
+serialisation exposes it.
+
+The rewrite is also **133× faster per sequence** — the original re-parsed its
+400-entry YAML table on every call.
 
 ## Documentation
 
-See the documentation in `docs/` or build the site with MkDocs.
+**[upalabdhad.github.io/DNAflexpy](https://upalabdhad.github.io/DNAflexpy/)**
+
+- [Tutorial](https://upalabdhad.github.io/DNAflexpy/tutorial/) — a full worked
+  analysis using the packaged example data
+- [Usage](https://upalabdhad.github.io/DNAflexpy/usage/) — every input, option
+  and output format
+- [Feature tables](https://upalabdhad.github.io/DNAflexpy/features/) — what
+  each of the thirteen measures
+- [API reference](https://upalabdhad.github.io/DNAflexpy/api_reference/)
+- [FAQ](https://upalabdhad.github.io/DNAflexpy/faq/)
 
 ## Citation
 
-Please refer to `docs/citation.md` for the current citation information, or run
-`DNAflexpy --citation` to print the BibTeX placeholder.
-
-
-Print the citation:
+If DNAflexpy is useful in your work, please cite it. See
+[docs/citation.md](docs/citation.md), or run:
 
 ```bash
 DNAflexpy --citation
@@ -144,4 +187,4 @@ DNAflexpy --citation
 
 ## License
 
-See `LICENSE`.
+BSD 3-Clause. See [LICENSE](LICENSE).

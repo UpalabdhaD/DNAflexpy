@@ -253,12 +253,24 @@ def test_no_subcommand_prints_help_and_fails(capsys):
     assert "profile" in capsys.readouterr().out
 
 
-def test_citation_prints_a_template_and_flags_it(capsys):
+def test_citation_prints_a_usable_bibtex_entry(capsys):
+    """No placeholders: the entry must be paste-ready."""
+    from DNAflexpy import __version__
+
     assert main(["--citation"]) == 0
-    captured = capsys.readouterr()
-    assert "@software{DNAflexpy" in captured.out
-    assert "ADD_AUTHOR_LIST" in captured.out
-    assert "placeholder" in captured.err
+    out = capsys.readouterr().out
+    assert "@software{DNAflexpy" in out
+    assert "Upalabdha Dey" in out
+    assert __version__ in out
+    assert "ADD_" not in out, "the citation still has a placeholder in it"
+
+
+def test_citation_version_tracks_the_package(capsys):
+    """A hardcoded version would go stale on the next release."""
+    from DNAflexpy import __version__
+    from DNAflexpy.citation import bibtex
+
+    assert f"version   = {{{__version__}}}" in bibtex(__version__)
 
 
 def test_version_is_the_package_version(capsys):

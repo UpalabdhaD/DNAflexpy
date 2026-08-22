@@ -13,17 +13,7 @@ import sys
 from pathlib import Path
 
 from DNAflexpy import __version__
-
-# Author and title are still placeholders. The rest is filled in from the
-# package itself, so at least the version and URL are never stale.
-CITATION_TEMPLATE = """@software{{DNAflexpy,
-  author    = {{ADD_AUTHOR_LIST}},
-  title     = {{ADD_TITLE}},
-  year      = {{ADD_YEAR}},
-  publisher = {{GitHub}},
-  version   = {{{version}}},
-  url       = {{https://github.com/UpalabdhaD/DNAflexpy}}
-}}"""
+from DNAflexpy.citation import bibtex, plain
 
 _FASTA_SUFFIXES = {".fa", ".fasta", ".fna", ".fas"}
 _TABLE_SUFFIXES = {".tsv", ".csv", ".txt", ".tab"}
@@ -351,11 +341,9 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     if args.citation:
-        print(CITATION_TEMPLATE.format(version=__version__))
-        print(
-            "\nNote: author and title are placeholders. Fill them in before "
-            "citing this.", file=sys.stderr,
-        )
+        print(bibtex(__version__))
+        print()
+        print(plain(__version__))
         return 0
 
     if not args.command:
