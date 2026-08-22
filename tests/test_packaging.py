@@ -24,7 +24,10 @@ def test_pyproject_ships_both_lookup_tables():
     cfg = tomllib.loads((ROOT / "pyproject.toml").read_text())
     data = cfg["tool"]["setuptools"]["package-data"]
     assert data["rxv.DNAflexpy"] == ["data/*.yaml"]
-    assert data["DNAflexpy"] == ["data/*.yaml"]
+    # The new package also ships example data; the archive deliberately does
+    # not, so the two entries are not expected to match.
+    assert "data/*.yaml" in data["DNAflexpy"]
+    assert "data/examples/*" in data["DNAflexpy"]
 
 
 def test_manifest_points_at_the_archive():
