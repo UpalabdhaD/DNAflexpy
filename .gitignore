@@ -83,3 +83,7 @@ tests/*.log
 # Local agent config and reference material, not part of the package
 .claude/
 DNAshapeR.pdf
+
+# pyfaidx writes this next to the genome it indexes
+*.fa.fai
+*.fasta.fai

@@ -30,7 +30,7 @@ dev = ["pytest>=6.0", "DNAflexpy[bed]", "DNAflexpy[plot]"]
 packages = ["DNAflexpy", "rxv", "rxv.DNAflexpy"]
 
 [tool.setuptools.package-data]
-DNAflexpy = ["data/*.yaml"]
+DNAflexpy = ["data/*.yaml", "data/examples/*"]
 "rxv.DNAflexpy" = ["data/*.yaml"]
 
 [tool.setuptools.dynamic]

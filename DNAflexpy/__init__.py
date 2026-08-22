@@ -3,6 +3,7 @@
 from DNAflexpy import lookup
 from DNAflexpy.core import FlexProfiler, ProfileSet
 from DNAflexpy.encode import FeatureMatrix
+from DNAflexpy.examples import describe_examples, example_files, example_path
 from DNAflexpy.lookup import FeatureTable, default_table
 from DNAflexpy.results import FlexProfile
 
@@ -20,6 +21,9 @@ __all__ = [
     "FeatureTable",
     "FeatureMatrix",
     "default_table",
+    "example_path",
+    "example_files",
+    "describe_examples",
     "profile",
     "lookup",
     "__version__",
