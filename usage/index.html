@@ -1,0 +1,2002 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A python package to calculate DNA flexibility from DNA sequences">
+      
+      
+        <meta name="author" content="Upalabdha Dey">
+      
+      
+        <link rel="canonical" href="https://upalabdhaD.github.io/dnaflexpy/usage/">
+      
+      
+        <link rel="prev" href="../tutorial/">
+      
+      
+        <link rel="next" href="../features/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Usage - DNAflexpy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="DNAflexpy" class="md-header__button md-logo" aria-label="DNAflexpy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DNAflexpy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple"  aria-label="Switch to Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="lime"  aria-label="Toggle Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Toggle Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/upalabdhaD/dnaflexpy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="DNAflexpy" class="md-nav__button md-logo" aria-label="DNAflexpy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    DNAflexpy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/upalabdhaD/dnaflexpy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-quickest-thing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The quickest thing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling-many-sequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiling many sequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Profiling many sequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-a-single-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. A single string
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-a-list-or-a-dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. A list or a dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-a-fasta-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. A FASTA file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-a-table-of-sequences-and-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. A table of sequences and labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-a-bed-file-and-a-reference-genome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. A BED file and a reference genome
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#window-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window size
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#letters-that-are-not-a-c-g-or-t" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Letters that are not A, C, G or T
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#encoding-for-machine-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encoding for machine learning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Encoding for machine learning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-names-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the names mean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#column-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Column names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalising" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalising
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-things-that-will-stop-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two things that will stop you
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plotting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heatmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heatmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metaprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metaprofile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trackplot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trackplot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From the command line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-it-will-not-draw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If it will not draw
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-things-you-can-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other things you can do
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Other things you can do">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-long-tidy-table-instead-of-a-wide-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A long (tidy) table instead of a wide one
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#csv-instead-of-tab-separated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CSV instead of tab-separated
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keeping-your-own-row-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keeping your own row names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-lookup-table-from-your-own-yaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A lookup table from your own YAML file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-a-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting a table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-files-without-profiling-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading files without profiling them
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command line
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#profiling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encoding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encoding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-original-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The original tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature tables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../window_size_checks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Window size behaviour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../window_size_long_checks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Window size, long form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../citation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Citation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-quickest-thing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The quickest thing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling-many-sequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiling many sequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Profiling many sequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-a-single-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. A single string
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-a-list-or-a-dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. A list or a dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-a-fasta-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. A FASTA file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-a-table-of-sequences-and-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. A table of sequences and labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-a-bed-file-and-a-reference-genome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. A BED file and a reference genome
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get-back" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get back
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#window-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Window size
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#letters-that-are-not-a-c-g-or-t" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Letters that are not A, C, G or T
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#encoding-for-machine-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encoding for machine learning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Encoding for machine learning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-names-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the names mean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#column-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Column names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalising" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalising
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-things-that-will-stop-you" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two things that will stop you
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plotting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heatmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heatmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metaprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metaprofile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trackplot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trackplot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From the command line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-it-will-not-draw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If it will not draw
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-things-you-can-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other things you can do
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Other things you can do">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-long-tidy-table-instead-of-a-wide-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A long (tidy) table instead of a wide one
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#csv-instead-of-tab-separated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CSV instead of tab-separated
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keeping-your-own-row-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keeping your own row names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-lookup-table-from-your-own-yaml-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A lookup table from your own YAML file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-a-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting a table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-files-without-profiling-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading files without profiling them
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command line
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#profiling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encoding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encoding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-original-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The original tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h1>
+<h2 id="installing">Installing<a class="headerlink" href="#installing" title="Permanent link">&para;</a></h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="w">            </span><span class="c1"># the package</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">'.[bed]'</span><span class="w">     </span><span class="c1"># plus BED / reference-genome input (needs pyfaidx)</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">'.[dev]'</span><span class="w">     </span><span class="c1"># plus the test suite</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="the-quickest-thing">The quickest thing<a class="headerlink" href="#the-quickest-thing" title="Permanent link">&para;</a></h2>
+<p>One sequence, no setup:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">DNAflexpy</span>
+
+<span class="n">DNAflexpy</span><span class="o">.</span><span class="n">profile</span><span class="p">(</span><span class="s2">"ATGCGTACGTAGCTAGCGTAGCTAGT"</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>That returns a NumPy array of values, one per window.</p>
+<h2 id="profiling-many-sequences">Profiling many sequences<a class="headerlink" href="#profiling-many-sequences" title="Permanent link">&para;</a></h2>
+<p>Build a <code>FlexProfiler</code> once and reuse it. The lookup table is read from disk
+only when you construct it, so reusing the profiler is roughly 130x faster than
+paying for the table on every call.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FlexProfiler</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>There are five ways to give it sequences.</p>
+<h3 id="1-a-single-string">1. A single string<a class="headerlink" href="#1-a-single-string" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">values</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile</span><span class="p">(</span><span class="s2">"ATGCGTACGTAGCTAGCGTAGCTAGT"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Returns a 1-D array. Use this when you just want the numbers.</p>
+<h3 id="2-a-list-or-a-dict">2. A list or a dict<a class="headerlink" href="#2-a-list-or-a-dict" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_seqs</span><span class="p">([</span><span class="s2">"ATGCGTACGT"</span><span class="p">,</span> <span class="s2">"CGTAGCTAGT"</span><span class="p">])</span>       <span class="c1"># ids become seq_0, seq_1</span>
+<span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_seqs</span><span class="p">({</span><span class="s2">"promoter"</span><span class="p">:</span> <span class="s2">"ATGCGTACGT"</span><span class="p">})</span>          <span class="c1"># or name them yourself</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="3-a-fasta-file">3. A FASTA file<a class="headerlink" href="#3-a-fasta-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="s2">"sequences.fa"</span><span class="p">)</span>
+<span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="s2">"sequences.fa"</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>          <span class="c1"># use several processes</span>
+</code></pre></div></td></tr></table></div>
+<p><code>threads</code> spawns processes, not threads. Below 64 records it always runs
+serially anyway, because starting processes costs more than the work saves.</p>
+<h3 id="4-a-table-of-sequences-and-labels">4. A table of sequences and labels<a class="headerlink" href="#4-a-table-of-sequences-and-labels" title="Permanent link">&para;</a></h3>
+<p>For model fitting. Each row holds a sequence and a number, such as a binding
+affinity:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>ATGCGTACGT  1.5
+CGTAGCTAGT  2.5
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_table</span><span class="p">(</span><span class="s2">"affinity.tsv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">prof</span><span class="o">.</span><span class="n">y</span>
+</code></pre></div></td></tr></table></div>
+<p><code>header</code> is required. It is not guessed, because words like <code>dna</code>, <code>rna</code> and
+<code>tag</code> are spelled with nucleotide letters, so a header row cannot reliably be
+told apart from a sequence.</p>
+<p>Columns can be named instead of positional. That needs a file with a header
+row, like this one:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>sequence    affinity
+ATGCGTACGT  1.5
+CGTAGCTAGT  2.5
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_table</span><span class="p">(</span>
+    <span class="s2">"labelled.tsv"</span><span class="p">,</span> <span class="n">seq_col</span><span class="o">=</span><span class="s2">"sequence"</span><span class="p">,</span> <span class="n">value_col</span><span class="o">=</span><span class="s2">"affinity"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>A row whose label is missing or not a number raises an error naming the line.
+It is never skipped: silently dropping labelled rows would corrupt a training
+set without telling you.</p>
+<h3 id="5-a-bed-file-and-a-reference-genome">5. A BED file and a reference genome<a class="headerlink" href="#5-a-bed-file-and-a-reference-genome" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">from_bed</span><span class="p">(</span><span class="s2">"peaks.bed"</span><span class="p">,</span> <span class="n">genome</span><span class="o">=</span><span class="s2">"TAIR10.fa"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p><code>width</code> re-centres every interval on its midpoint and cuts it to exactly that
+many bases, so all rows come out the same length. That is what makes
+position-by-position comparison meaningful. A zero-length BED entry marking a
+TSS works fine with <code>width</code>.</p>
+<p>Near the start or end of a chromosome a centred window can run off the edge.
+<code>on_edge</code> decides what happens:</p>
+<ul>
+<li><code>"drop"</code> (the default) skips the interval and warns you how many went</li>
+<li><code>"error"</code> stops and names them</li>
+<li><code>"pad"</code> pads with <code>N</code> and warns</li>
+</ul>
+<p>Needs <code>pip install -e '.[bed]'</code>.</p>
+<h2 id="what-you-get-back">What you get back<a class="headerlink" href="#what-you-get-back" title="Permanent link">&para;</a></h2>
+<p>All five return the same object, a <code>FlexProfile</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span><span class="o">.</span><span class="n">frame</span>          <span class="c1"># a pandas DataFrame, one row per sequence</span>
+<span class="n">prof</span><span class="o">.</span><span class="n">seqids</span>         <span class="c1"># the sequence names, in input order</span>
+<span class="n">prof</span><span class="o">.</span><span class="n">y</span>              <span class="c1"># the labels, or None if the input had none</span>
+<span class="n">prof</span><span class="o">.</span><span class="n">n_masked</span>       <span class="c1"># how many positions could not be scored</span>
+<span class="n">prof</span><span class="o">.</span><span class="n">to_tsv</span><span class="p">(</span><span class="s2">"out.tsv"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Ask for several features at once and you get a <code>ProfileSet</code>, which behaves
+like a dictionary:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">ps</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="p">[</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="s2">"trx"</span><span class="p">],</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">profile_seqs</span><span class="p">([</span><span class="s2">"ATGCGTACGT"</span><span class="p">])</span>
+<span class="n">result</span><span class="p">[</span><span class="s2">"DNaseI"</span><span class="p">]</span><span class="o">.</span><span class="n">frame</span>
+</code></pre></div></td></tr></table></div>
+<p>Each feature is kept separate because they use different k-mer lengths, so
+their value counts differ for the same sequence.</p>
+<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
+<p>Thirteen features are available. Four use 3-mers:</p>
+<p><code>DNaseI</code>, <code>NPP</code>, <code>bendabilityDNase</code>, <code>bendabilityConcensus</code></p>
+<p>Nine use 2-mers:</p>
+<p><code>wedge</code>, <code>prop</code>, <code>freeen</code>, <code>gc</code>, <code>twistDisp</code>, <code>stiffness</code>, <code>bendingStiffness</code>,
+<code>mechen</code>, <code>trx</code></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_table</span>
+
+<span class="n">default_table</span><span class="p">()</span><span class="o">.</span><span class="n">features</span>            <span class="c1"># all thirteen names</span>
+<span class="n">default_table</span><span class="p">()</span><span class="o">.</span><span class="n">kmer_len</span><span class="p">(</span><span class="s2">"DNaseI"</span><span class="p">)</span>  <span class="c1"># 3</span>
+</code></pre></div></td></tr></table></div>
+<p>You can supply your own table instead of the packaged one:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">p</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">(</span>
+    <span class="n">feature</span><span class="o">=</span><span class="s2">"mine"</span><span class="p">,</span>
+    <span class="n">lookup</span><span class="o">=</span><span class="p">{</span><span class="s2">"mine"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"AA"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">"AT"</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">"TA"</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span> <span class="s2">"TT"</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">}},</span>
+<span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The k-mer length is worked out from the keys, so there is nothing else to keep
+in step.</p>
+<h2 id="window-size">Window size<a class="headerlink" href="#window-size" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>window_size=0</code> gives one value per k-mer, with no averaging.</li>
+<li><code>window_size=N</code> slides a window of <code>N</code> bases one step at a time and gives the
+  mean of the k-mer values inside it. You get <code>len(sequence) - N + 1</code> values.</li>
+<li>If <code>N</code> equals the feature's k-mer length, each window holds exactly one
+  k-mer, so the output matches <code>window_size=0</code>.</li>
+<li>If <code>N</code> is larger than the sequence, no windows fit and only the sequence name
+  is returned.</li>
+<li>If <code>N</code> is smaller than the k-mer length, no k-mer fits and every window is
+  <code>0.0</code>.</li>
+</ul>
+<h2 id="letters-that-are-not-a-c-g-or-t">Letters that are not A, C, G or T<a class="headerlink" href="#letters-that-are-not-a-c-g-or-t" title="Permanent link">&para;</a></h2>
+<p>The feature tables only hold ACGT k-mers. Any k-mer covering an <code>N</code> or an
+ambiguity code such as <code>R</code> cannot be looked up, so it is masked rather than
+scored as zero — zero is a real value in these tables, so scoring a gap as zero
+would be indistinguishable from a measurement.</p>
+<p>You get a warning naming the letters found. <code>prof.n_masked</code> counts a position
+as masked only when <em>no</em> k-mer in that window resolved, so at window sizes
+above zero it under-reports; a window with some unusable k-mers is simply
+averaged over fewer of them.</p>
+<h2 id="encoding-for-machine-learning">Encoding for machine learning<a class="headerlink" href="#encoding-for-machine-learning" title="Permanent link">&para;</a></h2>
+<p>A profile is a table of numbers. To fit a model you usually want a <em>design
+matrix</em>: one row per sequence, one column per predictor, plus a target vector.
+<code>encode</code> builds one.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">p</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_table</span><span class="p">(</span><span class="s2">"affinity.tsv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">fm</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="s2">"1-mer"</span><span class="p">,</span> <span class="s2">"1-DNaseI"</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>          <span class="c1"># (2, 48)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>              <span class="c1"># [1.5, 2.5] -- the labels, straight from the file</span>
+</code></pre></div></td></tr></table></div>
+<p><code>fm.X</code> is a plain NumPy array and <code>fm.y</code> is the label list, so they go into
+scikit-learn directly:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># from sklearn.linear_model import Ridge</span>
+<span class="c1"># Ridge().fit(fm.X, fm.y)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="what-the-names-mean">What the names mean<a class="headerlink" href="#what-the-names-mean" title="Permanent link">&para;</a></h3>
+<p>You pass a list. Each entry asks for one block of columns, and the blocks are
+joined left to right in the order you wrote them.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>What you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1-mer</code></td>
+<td>one-hot sequence, 4 binary columns per position</td>
+</tr>
+<tr>
+<td><code>2-mer</code></td>
+<td>one-hot dinucleotides, 16 columns per position</td>
+</tr>
+<tr>
+<td><code>3-mer</code></td>
+<td>one-hot trinucleotides, 64 columns per position</td>
+</tr>
+<tr>
+<td><code>1-DNaseI</code></td>
+<td>the profile values themselves, one column per position</td>
+</tr>
+<tr>
+<td><code>2-DNaseI</code></td>
+<td>products of the feature at two adjacent positions</td>
+</tr>
+<tr>
+<td><code>3-DNaseI</code></td>
+<td>products at three adjacent positions</td>
+</tr>
+</tbody>
+</table>
+<p>Higher orders capture interactions between neighbouring positions that a linear
+model would otherwise miss. <code>2-DNaseI</code> gives you <em>only</em> the second-order terms,
+so ask for both if you want both:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">fm</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="s2">"1-DNaseI"</span><span class="p">,</span> <span class="s2">"2-DNaseI"</span><span class="p">])</span>
+</code></pre></div></td></tr></table></div>
+<p>Any feature in the lookup table works, and you can mix features by profiling
+several at once:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">([</span><span class="s2">"gc"</span><span class="p">,</span> <span class="s2">"stiffness"</span><span class="p">],</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">profile_seqs</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">"ATGCGTACGT"</span><span class="p">,</span> <span class="s2">"CGTAGCTAGT"</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">fm</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="s2">"1-mer"</span><span class="p">,</span> <span class="s2">"1-gc"</span><span class="p">,</span> <span class="s2">"2-stiffness"</span><span class="p">])</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="column-names">Column names<a class="headerlink" href="#column-names" title="Permanent link">&para;</a></h3>
+<p>Every column is named, so you can tell afterwards what a coefficient refers to:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">fm</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="s2">"1-DNaseI"</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>    <span class="c1"># ['DNaseI.w0.o1.p1', 'DNaseI.w0.o1.p2', ...]</span>
+</code></pre></div></td></tr></table></div>
+<p>Read it as feature, window size, order, position. The window size is in there
+on purpose: at <code>window_size=10</code>, position 1 is the average over bases 1-10,
+while at <code>window_size=0</code> it is the k-mer starting at base 1. Two matrices built
+at different window sizes would otherwise carry the same column names for
+different things.</p>
+<p><code>fm.to_frame()</code> gives a pandas DataFrame with those names, indexed by sequence
+ID. It is a convenience, not the default: 3-mer encoding of 500-base sequences
+is about 32,000 columns, and a DataFrame that wide is slow.</p>
+<h3 id="normalising">Normalising<a class="headerlink" href="#normalising" title="Permanent link">&para;</a></h3>
+<p><code>normalize=True</code> is the default. It min-max scales each feature block to
+<code>[0, 1]</code>, on its own range. Each block separately, because the features are on
+wildly different scales -- <code>stiffness</code> runs to 5500 and <code>gc</code> to 1.0, so a single
+shared scale would squash <code>gc</code> to nothing. One-hot blocks are left alone; they
+are already 0 and 1.</p>
+<p>The scaling uses <strong>your dataset's own</strong> minimum and maximum. If you are going to
+split into train and test sets, that leaks the test set into the scaling. Pass
+<code>normalize=False</code> and scale inside a scikit-learn pipeline instead:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">fm</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="s2">"1-DNaseI"</span><span class="p">],</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="two-things-that-will-stop-you">Two things that will stop you<a class="headerlink" href="#two-things-that-will-stop-you" title="Permanent link">&para;</a></h3>
+<p><strong>Sequences must all be the same length.</strong> Columns are positions, so unequal
+lengths have no meaning. <code>from_bed(..., width=200)</code> is the usual way to get
+fixed-width input.</p>
+<p><strong>Missing values stay missing.</strong> A position covering an <code>N</code>, an ambiguity code,
+or <code>on_edge="pad"</code> padding comes out as <code>NaN</code> rather than 0, so it stays
+distinguishable from a real measurement of zero. Most scikit-learn estimators
+refuse <code>NaN</code>; use <code>sklearn.impute.SimpleImputer</code>, or a model that handles it
+such as <code>HistGradientBoostingRegressor</code>.</p>
+<p>One last thing: <code>DNAflexpy.profile()</code> returns a bare array, so there is nothing
+to encode from the one-liner. Start from <code>profile_seqs</code>, <code>profile_fasta</code>,
+<code>profile_table</code> or <code>from_bed</code>.</p>
+<h2 id="plotting">Plotting<a class="headerlink" href="#plotting" title="Permanent link">&para;</a></h2>
+<p>Needs matplotlib: <code>pip install -e '.[plot]'</code>.</p>
+<p>Three figures. Each returns a matplotlib object, so you save it yourself.</p>
+<h3 id="heatmap">Heatmap<a class="headerlink" href="#heatmap" title="Permanent link">&para;</a></h3>
+<p>Rows are sequences, columns are positions.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="s2">"sequences.fa"</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">nbins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"heatmap.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>One feature per figure, always. <code>stiffness</code> runs to 5500 and <code>DNaseI</code> to 0.194
+— they cannot share a colour scale.</p>
+<p><code>nbins</code> averages positions into bins so a wide matrix stays readable. Binning
+happens <strong>before</strong> scaling, so the colours describe what you are actually
+looking at.</p>
+<p>Rows are sorted with the most variable first. <code>order_rows="input"</code> keeps file
+order.</p>
+<h3 id="metaprofile">Metaprofile<a class="headerlink" href="#metaprofile" title="Permanent link">&para;</a></h3>
+<p>The position-wise average, as a line.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">ax</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">metaprofile</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"meta.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>One option is refused, on purpose.</strong> <code>zscale="column"</code> scales each position
+across sequences, then the average down that same position is exactly zero —
+every time, by arithmetic. The line would be flat and tell you nothing. Ask for
+it and you get an error explaining why, not a flat chart.</p>
+<p>To compare against a control, give it one:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">control</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="s2">"shuffled.fa"</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">prof</span><span class="o">.</span><span class="n">metaprofile</span><span class="p">(</span><span class="n">background</span><span class="o">=</span><span class="n">control</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"meta_vs_control.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Now each position is scaled against the <strong>background's</strong> mean and spread. The
+control sits flat at zero and your foreground's distance from it is real, read
+in background standard deviations. The background has to be the same feature
+and the same window size, or it is refused.</p>
+<h3 id="trackplot">Trackplot<a class="headerlink" href="#trackplot" title="Permanent link">&para;</a></h3>
+<p>One sequence, every feature stacked.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">([</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="s2">"gc"</span><span class="p">,</span> <span class="s2">"stiffness"</span><span class="p">],</span>
+                      <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="s2">"sequences.fa"</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">trackplot</span><span class="p">(</span><span class="n">seqid</span><span class="o">=</span><span class="s2">"a"</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"tracks.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Each feature gets its own y-axis, because the units differ.</p>
+<h3 id="from-the-command-line">From the command line<a class="headerlink" href="#from-the-command-line" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>plot<span class="w"> </span>heatmap<span class="w"> </span>sequences.fa<span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>--nbins<span class="w"> </span><span class="m">20</span><span class="w"> </span>--out<span class="w"> </span>heat.png
+DNAflexpy<span class="w"> </span>plot<span class="w"> </span>meta<span class="w"> </span>sequences.fa<span class="w"> </span>--background<span class="w"> </span>shuffled.fa<span class="w"> </span>--out<span class="w"> </span>meta.png
+DNAflexpy<span class="w"> </span>plot<span class="w"> </span>track<span class="w"> </span>sequences.fa<span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>gc<span class="w"> </span>stiffness<span class="w"> </span>--out<span class="w"> </span>tracks.png
+</code></pre></div></td></tr></table></div>
+<p>All the reading options from <code>profile</code> work here too, so you can plot straight
+from a BED file:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>plot<span class="w"> </span>heatmap<span class="w"> </span>peaks.bed<span class="w"> </span>--genome<span class="w"> </span>TAIR10.fa<span class="w"> </span>--width<span class="w"> </span><span class="m">200</span><span class="w"> </span>--out<span class="w"> </span>heat.png
+</code></pre></div></td></tr></table></div>
+<h3 id="if-it-will-not-draw">If it will not draw<a class="headerlink" href="#if-it-will-not-draw" title="Permanent link">&para;</a></h3>
+<p>Every sequence has to give the same number of values, since the columns are
+positions. Unequal lengths raise, and point you at <code>from_bed(..., width=N)</code>.</p>
+<p>If every sequence is shorter than the window there is nothing to draw at all,
+and the error says so.</p>
+<h2 id="other-things-you-can-do">Other things you can do<a class="headerlink" href="#other-things-you-can-do" title="Permanent link">&para;</a></h2>
+<h3 id="a-long-tidy-table-instead-of-a-wide-one">A long (tidy) table instead of a wide one<a class="headerlink" href="#a-long-tidy-table-instead-of-a-wide-one" title="Permanent link">&para;</a></h3>
+<p><code>frame</code> is wide: one row per sequence, one column per position. For plotting
+libraries you usually want it long instead:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">tidy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>That gives one row per value, with columns <code>seqid</code>, <code>position</code>, <code>value</code> and
+<code>feature</code>. For several features at once:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">result</span><span class="o">.</span><span class="n">to_tidy</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p>which stacks every feature into a single long table.</p>
+<h3 id="csv-instead-of-tab-separated">CSV instead of tab-separated<a class="headerlink" href="#csv-instead-of-tab-separated" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_table</span><span class="p">(</span><span class="s2">"affinity.csv"</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">","</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="keeping-your-own-row-names">Keeping your own row names<a class="headerlink" href="#keeping-your-own-row-names" title="Permanent link">&para;</a></h3>
+<p>If your table has a name column, point at it and those names are used instead
+of <code>seq_0</code>, <code>seq_1</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>name    sequence    affinity
+p1  ATGCGTACGT  1.5
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">prof</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">profile_table</span><span class="p">(</span>
+    <span class="s2">"named.tsv"</span><span class="p">,</span>
+    <span class="n">id_col</span><span class="o">=</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">seq_col</span><span class="o">=</span><span class="s2">"sequence"</span><span class="p">,</span> <span class="n">value_col</span><span class="o">=</span><span class="s2">"affinity"</span><span class="p">,</span>
+    <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="a-lookup-table-from-your-own-yaml-file">A lookup table from your own YAML file<a class="headerlink" href="#a-lookup-table-from-your-own-yaml-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FeatureTable</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">FeatureTable</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s2">"my_features.yaml"</span><span class="p">)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="s2">"my_feature"</span><span class="p">,</span> <span class="n">lookup</span><span class="o">=</span><span class="n">table</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The file has the same shape as the packaged one: each feature name maps to
+k-mers, and each k-mer to a number. Mixed k-mer lengths inside one feature are
+rejected, because the length is inferred from the keys. An incomplete table is
+allowed but warns you, since missing k-mers become masked values.</p>
+<h3 id="inspecting-a-table">Inspecting a table<a class="headerlink" href="#inspecting-a-table" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">table</span> <span class="o">=</span> <span class="n">FeatureTable</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">()</span>      <span class="c1"># the packaged one</span>
+<span class="n">table</span><span class="o">.</span><span class="n">features</span>                        <span class="c1"># every feature name</span>
+<span class="n">table</span><span class="o">.</span><span class="n">kmer_len</span><span class="p">(</span><span class="s2">"trx"</span><span class="p">)</span>                 <span class="c1"># 2</span>
+<span class="n">table</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">"trx"</span><span class="p">)[</span><span class="s2">"AA"</span><span class="p">]</span>              <span class="c1"># the value for one k-mer</span>
+</code></pre></div></td></tr></table></div>
+<p><code>table()</code> hands back a read-only view, so you cannot corrupt the shared copy
+by accident.</p>
+<h3 id="reading-files-without-profiling-them">Reading files without profiling them<a class="headerlink" href="#reading-files-without-profiling-them" title="Permanent link">&para;</a></h3>
+<p>The readers are useful on their own:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_fasta</span><span class="p">,</span> <span class="n">read_table</span><span class="p">,</span> <span class="n">read_bed</span>
+
+<span class="nb">list</span><span class="p">(</span><span class="n">read_fasta</span><span class="p">(</span><span class="s2">"sequences.fa"</span><span class="p">))</span>              <span class="c1"># [(id, sequence), ...]</span>
+<span class="n">read_table</span><span class="p">(</span><span class="s2">"affinity.tsv"</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>      <span class="c1"># [(id, sequence, value), ...]</span>
+<span class="n">read_bed</span><span class="p">(</span><span class="s2">"peaks.bed"</span><span class="p">)</span>                         <span class="c1"># [(chrom, start, end, name, strand), ...]</span>
+</code></pre></div></td></tr></table></div>
+<p><code>read_bed</code> keeps BED's own numbering: counting starts at zero, and the end
+position is not included.</p>
+<h2 id="command-line">Command line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h2>
+<p><code>pip install -e .</code> gives you a <code>DNAflexpy</code> command.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>profile<span class="w"> </span>sequences.fa<span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>--window-size<span class="w"> </span><span class="m">10</span>
+</code></pre></div></td></tr></table></div>
+<p>That writes <code>sequences_w10nt_DNaseI.tsv</code>. The name follows the same pattern the
+original tool used.</p>
+<h3 id="profiling">Profiling<a class="headerlink" href="#profiling" title="Permanent link">&para;</a></h3>
+<p>Ask for several features and you get one file each:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>profile<span class="w"> </span>sequences.fa<span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>gc<span class="w"> </span>--window-size<span class="w"> </span><span class="m">10</span>
+</code></pre></div></td></tr></table></div>
+<p>Features have different k-mer lengths, so they cannot share one table. Use
+<code>--outfile</code> to name the file yourself, but only with a single feature.</p>
+<p>BED input needs a genome:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>profile<span class="w"> </span>peaks.bed<span class="w"> </span>--genome<span class="w"> </span>TAIR10.fa<span class="w"> </span>--width<span class="w"> </span><span class="m">200</span>
+</code></pre></div></td></tr></table></div>
+<p>A table needs you to say whether row 1 is a header. It is never guessed:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>profile<span class="w"> </span>affinity.tsv<span class="w"> </span>--no-header
+DNAflexpy<span class="w"> </span>profile<span class="w"> </span>labelled.tsv<span class="w"> </span>--header<span class="w"> </span>--seq-col<span class="w"> </span>sequence<span class="w"> </span>--value-col<span class="w"> </span>affinity
+</code></pre></div></td></tr></table></div>
+<p>One sequence, straight to the screen:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>profile<span class="w"> </span>--seq<span class="w"> </span>ATGCGTACGTAGCTAGCGTAGCTAGT
+</code></pre></div></td></tr></table></div>
+<p>The format comes from the file extension. Use <code>--format fasta|bed|table</code> if
+your file is named something unusual.</p>
+<p><code>--threads</code> is left to the tool by default. Below 64 records it always runs
+serially, because starting processes costs more than it saves.</p>
+<h3 id="encoding">Encoding<a class="headerlink" href="#encoding" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>encode<span class="w"> </span>sequences.fa<span class="w"> </span>--features<span class="w"> </span><span class="m">1</span>-mer<span class="w"> </span><span class="m">1</span>-DNaseI<span class="w"> </span>--out<span class="w"> </span>X.npz
+</code></pre></div></td></tr></table></div>
+<p>Which features get profiled is worked out from what you asked for, so there is
+no second flag to keep in step. Load it back with NumPy:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"X.npz"</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">"X"</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">"seqids"</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+<p>Give it a labelled table and <code>y</code> comes along too:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>DNAflexpy<span class="w"> </span>encode<span class="w"> </span>affinity.tsv<span class="w"> </span>--no-header<span class="w"> </span>--features<span class="w"> </span><span class="m">1</span>-mer<span class="w"> </span><span class="m">1</span>-DNaseI<span class="w"> </span>--out<span class="w"> </span>X.npz
+</code></pre></div></td></tr></table></div>
+<p>Add <code>--no-normalize</code> to skip the min-max scaling.</p>
+<h3 id="the-original-tool">The original tool<a class="headerlink" href="#the-original-tool" title="Permanent link">&para;</a></h3>
+<p>The old command still works and is untouched:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>rxv.DNAflexpy.cli<span class="w"> </span>sequences.fa<span class="w"> </span>--window-size<span class="w"> </span><span class="m">10</span><span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>--outfile<span class="w"> </span>out.tsv
+</code></pre></div></td></tr></table></div>
+<p>Its output is byte-for-byte the same as the new one.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

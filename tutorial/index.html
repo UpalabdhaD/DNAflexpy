@@ -1,0 +1,1270 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A python package to calculate DNA flexibility from DNA sequences">
+      
+      
+        <meta name="author" content="Upalabdha Dey">
+      
+      
+        <link rel="canonical" href="https://upalabdhaD.github.io/dnaflexpy/tutorial/">
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../usage/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Tutorial - DNAflexpy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tutorial" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="DNAflexpy" class="md-header__button md-logo" aria-label="DNAflexpy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DNAflexpy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Tutorial
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple"  aria-label="Switch to Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="lime"  aria-label="Toggle Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Toggle Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/upalabdhaD/dnaflexpy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="DNAflexpy" class="md-nav__button md-logo" aria-label="DNAflexpy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    DNAflexpy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/upalabdhaD/dnaflexpy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-example-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The example data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-profile-the-sequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — profile the sequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1 — profile the sequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-a-profile-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a profile is
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-look-at-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — look at it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-compare-against-a-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — compare against a control
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-several-features-at-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — several features at once
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-fit-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — fit a model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-start-from-genomic-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6 — start from genomic intervals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-same-thing-from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The same thing from the command line
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature tables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../window_size_checks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Window size behaviour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../window_size_long_checks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Window size, long form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../citation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Citation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-example-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The example data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-profile-the-sequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — profile the sequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1 — profile the sequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-a-profile-is" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a profile is
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-look-at-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — look at it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-compare-against-a-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — compare against a control
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-several-features-at-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — several features at once
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-fit-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — fit a model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-start-from-genomic-intervals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6 — start from genomic intervals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-same-thing-from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The same thing from the command line
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="tutorial">Tutorial<a class="headerlink" href="#tutorial" title="Permanent link">&para;</a></h1>
+<p>A complete analysis, start to finish, using data that ships with the package.
+Nothing to download. Every block on this page is executed as part of the test
+suite, so it runs as written.</p>
+<p>The question we will answer: <strong>do these promoters have a flexible region that
+control sequences do not?</strong></p>
+<h2 id="the-example-data">The example data<a class="headerlink" href="#the-example-data" title="Permanent link">&para;</a></h2>
+<p>Five files come with the package:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">describe_examples</span><span class="p">,</span> <span class="n">example_path</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">what</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">describe_examples</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">16</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>affinity.tsv     the same promoters with a binding score, for model fitting (has a header)
+control.fa       12 matched controls: same length and base composition, no positioned element
+genome.fa        a two-contig toy genome, chr1 (2000 bp) and chr2 (1200 bp)
+peaks.bed        5 intervals into that genome, named and stranded
+promoters.fa     12 synthetic promoters, 120 bp each, with an AT-rich element at 40-60
+</code></pre></div></td></tr></table></div>
+<p><code>example_path(name)</code> gives you the full path, wherever the package is
+installed. It is the equivalent of DNAshapeR's <code>system.file("extdata", ...)</code>.</p>
+<p>The sequences are synthetic, but built to behave like real ones. Each promoter
+carries an AT-rich stretch at bases 40–60 — what a TATA-box region looks like
+to a flexibility profile — and <code>control.fa</code> holds sequences of the same length
+and the same base composition with no positioned element. So any difference we
+find is about <strong>where</strong> the bases are, not how many of each there are.</p>
+<h2 id="step-1-profile-the-sequences">Step 1 — profile the sequences<a class="headerlink" href="#step-1-profile-the-sequences" title="Permanent link">&para;</a></h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">FlexProfiler</span><span class="p">,</span> <span class="n">example_path</span>
+
+<span class="n">profiler</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">promoters</span> <span class="o">=</span> <span class="n">profiler</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="n">example_path</span><span class="p">(</span><span class="s2">"promoters.fa"</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">promoters</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">promoters</span><span class="o">.</span><span class="n">seqids</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>(12, 111)
+['promoter_1', 'promoter_2', 'promoter_3']
+</code></pre></div></td></tr></table></div>
+<p>Twelve sequences, 111 positions each. The sequences are 120 bases and the
+window is 10, so there are <code>120 - 10 + 1 = 111</code> window positions.</p>
+<p><code>DNaseI</code> is one of thirteen tables — see <a href="../features/">Feature tables</a>. Build
+the profiler once and reuse it: it reads the table at construction, which is
+why reusing it is about 130× faster than a fresh one per sequence.</p>
+<h3 id="what-a-profile-is">What a profile is<a class="headerlink" href="#what-a-profile-is" title="Permanent link">&para;</a></h3>
+<p>Each row is one sequence; each column is one position. The value is the mean
+of the k-mer parameter values inside the window starting there.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">promoters</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>{1: -0.03, 2: 0.005, 3: 0.026, 4: 0.008, 5: -0.004, 6: 0.011}
+</code></pre></div></td></tr></table></div>
+<p>Set <code>window_size=0</code> to skip the averaging and get one value per k-mer instead.</p>
+<h2 id="step-2-look-at-it">Step 2 — look at it<a class="headerlink" href="#step-2-look-at-it" title="Permanent link">&para;</a></h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">promoters</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">nbins</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"tutorial_heatmap.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Rows are sequences, columns are positions. <code>nbins=30</code> averages the 111
+positions into 30 bins so the picture stays readable; without it you get one
+column per position.</p>
+<p>Rows come back sorted with the most variable sequence first. Pass
+<code>order_rows="input"</code> to keep file order.</p>
+<p>One feature per figure, always. <code>stiffness</code> runs to 5500 and <code>DNaseI</code> to
+0.194 — they cannot share a colour scale, so the function will not try.</p>
+<h2 id="step-3-compare-against-a-control">Step 3 — compare against a control<a class="headerlink" href="#step-3-compare-against-a-control" title="Permanent link">&para;</a></h2>
+<p>A single heatmap tells you what the sequences look like. It does not tell you
+whether that is unusual. For that you need something to compare against.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">controls</span> <span class="o">=</span> <span class="n">profiler</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="n">example_path</span><span class="p">(</span><span class="s2">"control.fa"</span><span class="p">))</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">promoters</span><span class="o">.</span><span class="n">metaprofile</span><span class="p">(</span><span class="n">background</span><span class="o">=</span><span class="n">controls</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"tutorial_meta.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The y-axis is now <strong>background standard deviations</strong>. Each position is
+standardised against the control set's own mean and spread at that position,
+so the grey control line sits flat at zero and the promoter line shows how far
+it departs.</p>
+<p>Where does it depart most?</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">_matrix</span>
+
+<span class="n">fg</span><span class="p">,</span> <span class="n">bg</span> <span class="o">=</span> <span class="n">_matrix</span><span class="p">(</span><span class="n">promoters</span><span class="p">),</span> <span class="n">_matrix</span><span class="p">(</span><span class="n">controls</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">fg</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">bg</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">bg</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">peak</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"largest departure at position </span><span class="si">{</span><span class="n">peak</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">z</span><span class="p">[</span><span class="n">peak</span><span class="p">]</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2"> SDs"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>largest departure at position 49: -1.88 SDs
+</code></pre></div></td></tr></table></div>
+<p>Position 49, which is inside the AT-rich element we planted at 40–60. The
+window is 10 bases wide, so an element at 40–60 shows up between positions 31
+and 60. The sign is negative because AT-rich DNA has lower <code>DNaseI</code> values in
+this table.</p>
+<p>That is the analysis working: the difference is positional, since the two sets
+have matched base composition.</p>
+<div class="admonition note">
+<p class="admonition-title">One option is refused here</p>
+<p><code>metaprofile(zscale="column")</code> <strong>without</strong> a background raises rather than
+drawing. Standardising each position across sequences and then averaging
+down that same position cancels to exactly zero — the line would be flat by
+construction, at every position. Rather than hand you a meaningless chart,
+it explains the problem. With a background, as above, the comparison is
+well defined.</p>
+</div>
+<h2 id="step-4-several-features-at-once">Step 4 — several features at once<a class="headerlink" href="#step-4-several-features-at-once" title="Permanent link">&para;</a></h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">several</span> <span class="o">=</span> <span class="n">FlexProfiler</span><span class="p">([</span><span class="s2">"DNaseI"</span><span class="p">,</span> <span class="s2">"gc"</span><span class="p">,</span> <span class="s2">"stiffness"</span><span class="p">],</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">several</span><span class="o">.</span><span class="n">profile_fasta</span><span class="p">(</span><span class="n">example_path</span><span class="p">(</span><span class="s2">"promoters.fa"</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">trackplot</span><span class="p">(</span><span class="n">seqid</span><span class="o">=</span><span class="s2">"promoter_1"</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"tutorial_tracks.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>['DNaseI', 'gc', 'stiffness']
+</code></pre></div></td></tr></table></div>
+<p>You get a <code>ProfileSet</code> — a dict of <code>{feature: profile}</code>. They are kept apart
+because different tables use different k-mer lengths, so their vectors differ
+in length for the same sequence.</p>
+<p><code>trackplot</code> stacks one sequence's features on a shared x-axis, each with its
+own y-axis.</p>
+<h2 id="step-5-fit-a-model">Step 5 — fit a model<a class="headerlink" href="#step-5-fit-a-model" title="Permanent link">&para;</a></h2>
+<p><code>affinity.tsv</code> holds the same promoters with a binding score. One file gives
+you both the predictors and the target.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">labelled</span> <span class="o">=</span> <span class="n">profiler</span><span class="o">.</span><span class="n">profile_table</span><span class="p">(</span>
+    <span class="n">example_path</span><span class="p">(</span><span class="s2">"affinity.tsv"</span><span class="p">),</span>
+    <span class="n">seq_col</span><span class="o">=</span><span class="s2">"sequence"</span><span class="p">,</span> <span class="n">value_col</span><span class="o">=</span><span class="s2">"binding_score"</span><span class="p">,</span> <span class="n">id_col</span><span class="o">=</span><span class="s2">"name"</span><span class="p">,</span>
+    <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labelled</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">labelled</span><span class="o">.</span><span class="n">y</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>12 [7.801, 7.945, 7.987]
+</code></pre></div></td></tr></table></div>
+<p>Turn it into a design matrix:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">fm</span> <span class="o">=</span> <span class="n">labelled</span><span class="o">.</span><span class="n">encode</span><span class="p">([</span><span class="s2">"1-mer"</span><span class="p">,</span> <span class="s2">"1-DNaseI"</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"..."</span><span class="p">,</span> <span class="n">fm</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>(12, 591) 12
+seq.1mer.p1.A ... DNaseI.w10.o1.p111
+</code></pre></div></td></tr></table></div>
+<p><code>fm.X</code> is a NumPy array and <code>fm.y</code> is the target list, so they go straight
+into scikit-learn:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># from sklearn.linear_model import Ridge</span>
+<span class="c1"># from sklearn.model_selection import cross_val_score</span>
+<span class="c1">#</span>
+<span class="c1"># model = Ridge()</span>
+<span class="c1"># cross_val_score(model, fm.X, fm.y, cv=3)</span>
+</code></pre></div></td></tr></table></div>
+<p><code>1-mer</code> gives four binary columns per base. <code>1-DNaseI</code> gives the profile
+values. Add <code>2-DNaseI</code> for products of adjacent positions — the interaction
+terms a linear model would otherwise miss.</p>
+<div class="admonition warning">
+<p class="admonition-title">Normalisation and train/test splits</p>
+<p><code>normalize=True</code> (the default) min-max scales each feature block using
+<strong>this dataset's</strong> range. If you are going to split into train and test
+sets, that leaks. Pass <code>normalize=False</code> and scale inside a scikit-learn
+pipeline instead.</p>
+</div>
+<h2 id="step-6-start-from-genomic-intervals">Step 6 — start from genomic intervals<a class="headerlink" href="#step-6-start-from-genomic-intervals" title="Permanent link">&para;</a></h2>
+<p>Real peak sets come as BED files. <code>from_bed</code> reads them against a reference
+genome. Needs the <code>bed</code> extra: <code>pip install 'DNAflexpy[bed]'</code>.</p>
+<p>First copy the example data somewhere you can write:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">example_files</span><span class="p">,</span> <span class="n">example_path</span>
+
+<span class="n">work</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">"dnaflexpy_examples"</span><span class="p">)</span>
+<span class="n">work</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">example_files</span><span class="p">():</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">example_path</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">work</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<div class="admonition warning">
+<p class="admonition-title">Why copy, rather than read the packaged genome directly</p>
+<p><code>pyfaidx</code> writes an index file (<code>genome.fa.fai</code>) <strong>next to the genome</strong> the
+first time it reads it. Point it at the installed package and it will try
+to write into your <code>site-packages</code>, which fails on a read-only install —
+a container, a system-wide install, or an HPC module. This applies to any
+genome, not just this example: make sure the directory holding your FASTA
+is writable, or pre-build the index with <code>samtools faidx</code>.</p>
+</div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">peaks</span> <span class="o">=</span> <span class="n">profiler</span><span class="o">.</span><span class="n">from_bed</span><span class="p">(</span>
+    <span class="n">work</span> <span class="o">/</span> <span class="s2">"peaks.bed"</span><span class="p">,</span>
+    <span class="n">genome</span><span class="o">=</span><span class="n">work</span> <span class="o">/</span> <span class="s2">"genome.fa"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">peaks</span><span class="o">.</span><span class="n">seqids</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">peaks</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>['peak_1', 'peak_2', 'peak_3', 'peak_4', 'peak_5']
+(5, 111)
+</code></pre></div></td></tr></table></div>
+<p><code>width=120</code> re-centres every interval on its midpoint and cuts it to exactly
+120 bases, so all rows are the same length. That is what makes position-wise
+comparison meaningful — and it is required by both <code>encode</code> and the plots.</p>
+<p>Intervals on the minus strand are reverse-complemented automatically. An
+interval whose centred window runs off the end of a contig is dropped with a
+warning; <code>on_edge="pad"</code> or <code>on_edge="error"</code> change that.</p>
+<h2 id="the-same-thing-from-the-command-line">The same thing from the command line<a class="headerlink" href="#the-same-thing-from-the-command-line" title="Permanent link">&para;</a></h2>
+<p>Every step above has a command-line equivalent:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># profile</span>
+DNAflexpy<span class="w"> </span>profile<span class="w"> </span>promoters.fa<span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>--window-size<span class="w"> </span><span class="m">10</span>
+
+<span class="c1"># several features -&gt; one file each</span>
+DNAflexpy<span class="w"> </span>profile<span class="w"> </span>promoters.fa<span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>gc<span class="w"> </span>stiffness
+
+<span class="c1"># plots</span>
+DNAflexpy<span class="w"> </span>plot<span class="w"> </span>heatmap<span class="w"> </span>promoters.fa<span class="w"> </span>--nbins<span class="w"> </span><span class="m">30</span><span class="w"> </span>--out<span class="w"> </span>heatmap.png
+DNAflexpy<span class="w"> </span>plot<span class="w"> </span>meta<span class="w"> </span>promoters.fa<span class="w"> </span>--background<span class="w"> </span>control.fa<span class="w"> </span>--out<span class="w"> </span>meta.png
+DNAflexpy<span class="w"> </span>plot<span class="w"> </span>track<span class="w"> </span>promoters.fa<span class="w"> </span>--feature<span class="w"> </span>DNaseI<span class="w"> </span>gc<span class="w"> </span>stiffness<span class="w"> </span>--out<span class="w"> </span>tracks.png
+
+<span class="c1"># design matrix</span>
+DNAflexpy<span class="w"> </span>encode<span class="w"> </span>affinity.tsv<span class="w"> </span>--header<span class="w"> </span>--seq-col<span class="w"> </span>sequence<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--value-col<span class="w"> </span>binding_score<span class="w"> </span>--features<span class="w"> </span><span class="m">1</span>-mer<span class="w"> </span><span class="m">1</span>-DNaseI<span class="w"> </span>--out<span class="w"> </span>X.npz
+
+<span class="c1"># from BED</span>
+DNAflexpy<span class="w"> </span>profile<span class="w"> </span>peaks.bed<span class="w"> </span>--genome<span class="w"> </span>genome.fa<span class="w"> </span>--width<span class="w"> </span><span class="m">120</span>
+</code></pre></div></td></tr></table></div>
+<p>Run them from the <code>dnaflexpy_examples</code> directory created in step 6:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">".fai"</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>['affinity.tsv', 'control.fa', 'genome.fa', 'peaks.bed', 'promoters.fa']
+</code></pre></div></td></tr></table></div>
+<h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../usage/">Usage</a> — every option, every input format, in detail</li>
+<li><a href="../features/">Feature tables</a> — what each of the thirteen measures</li>
+<li><a href="../api_reference/">API reference</a> — every class and function</li>
+<li><a href="../faq/">FAQ</a> — masked values, window sizes, ambiguous bases</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

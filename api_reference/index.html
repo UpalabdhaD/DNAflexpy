@@ -1,0 +1,1916 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A python package to calculate DNA flexibility from DNA sequences">
+      
+      
+        <meta name="author" content="Upalabdha Dey">
+      
+      
+        <link rel="canonical" href="https://upalabdhaD.github.io/dnaflexpy/api_reference/">
+      
+      
+        <link rel="prev" href="../features/">
+      
+      
+        <link rel="next" href="../faq/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>API Reference - DNAflexpy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="DNAflexpy" class="md-header__button md-logo" aria-label="DNAflexpy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DNAflexpy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple"  aria-label="Switch to Dark Mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to Dark Mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="lime"  aria-label="Toggle Light Mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Toggle Light Mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/upalabdhaD/dnaflexpy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="DNAflexpy" class="md-nav__button md-logo" aria-label="DNAflexpy" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    DNAflexpy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/upalabdhaD/dnaflexpy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature tables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#profileseq-featurednasei-window_size10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        profile(seq, feature="DNaseI", window_size=10)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flexprofilerfeature-window_size10-lookupnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FlexProfiler(feature, window_size=10, lookup=None)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FlexProfiler(feature, window_size=10, lookup=None)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#profileseq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile(seq)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile_seqsseqs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile_seqs(seqs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile_fastapath-threadsnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile_fasta(path, threads=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile_tablepath-seq_col0-value_col1-id_colnone-headernone-sept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from_bedbed-genome-widthnone-on_edgedrop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .from_bed(bed, genome, width=None, on_edge="drop")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kmer_lenfeaturenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .kmer_len(feature=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flexprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FlexProfile
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FlexProfile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to_tsvpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .to_tsv(path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to_frametidyfalse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .to_frame(tidy=False)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encodefeature_names-normalizetrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .encode(feature_names, normalize=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#heatmapkwargs-metaprofilekwargs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .heatmap(**kwargs) / .metaprofile(**kwargs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profileset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ProfileSet
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ProfileSet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to_tidy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .to_tidy()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encodefeature_names-normalizetrue_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .encode(feature_names, normalize=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trackplotseqidnone-nbinsnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .trackplot(seqid=None, nbins=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dnaflexpyencode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNAflexpy.encode
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DNAflexpy.encode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#encodeprofiles-feature_names-normalizetrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        encode(profiles, feature_names, normalize=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#featurematrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureMatrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#featuretable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureTable
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FeatureTable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#featuretablefrom_yamlpathnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureTable.from_yaml(path=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#featuretablefrom_dictmapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureTable.from_dict(mapping)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kmer_lenfeature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .kmer_len(feature)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tablefeature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .table(feature)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        default_table()
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dnaflexpyio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNAflexpy.io
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DNAflexpy.io">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read_fastapath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_fasta(path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_tablepath-seq_col0-value_col1-id_colnone-headernone-sept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_bedpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_bed(path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extract_intervalsintervals-genome-widthnone-on_edgedrop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        extract_intervals(intervals, genome, width=None, on_edge="drop")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warn_if_ambiguousrecords-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warn_if_ambiguous(records, source)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dnaflexpyplotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNAflexpy.plotting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DNAflexpy.plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heatmapprofile-nbinsnone-order_rowsstd-zscalecolumn-cmapnone-axnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        heatmap(profile, nbins=None, order_rows="std", zscale="column", cmap=None, ax=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metaprofileprofile-backgroundnone-nbinsnone-zscaleauto-axnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metaprofile(profile, background=None, nbins=None, zscale="auto", ax=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trackplotprofiles-seqidnone-nbinsnone-figsizenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trackplot(profiles, seqid=None, nbins=None, figsize=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../window_size_checks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Window size behaviour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../window_size_long_checks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Window size, long form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../citation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Citation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#profileseq-featurednasei-window_size10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        profile(seq, feature="DNaseI", window_size=10)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flexprofilerfeature-window_size10-lookupnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FlexProfiler(feature, window_size=10, lookup=None)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FlexProfiler(feature, window_size=10, lookup=None)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#profileseq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile(seq)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile_seqsseqs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile_seqs(seqs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile_fastapath-threadsnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile_fasta(path, threads=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile_tablepath-seq_col0-value_col1-id_colnone-headernone-sept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .profile_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from_bedbed-genome-widthnone-on_edgedrop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .from_bed(bed, genome, width=None, on_edge="drop")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kmer_lenfeaturenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .kmer_len(feature=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flexprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FlexProfile
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FlexProfile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to_tsvpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .to_tsv(path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to_frametidyfalse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .to_frame(tidy=False)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encodefeature_names-normalizetrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .encode(feature_names, normalize=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#heatmapkwargs-metaprofilekwargs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .heatmap(**kwargs) / .metaprofile(**kwargs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profileset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ProfileSet
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ProfileSet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to_tidy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .to_tidy()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encodefeature_names-normalizetrue_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .encode(feature_names, normalize=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trackplotseqidnone-nbinsnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .trackplot(seqid=None, nbins=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dnaflexpyencode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNAflexpy.encode
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DNAflexpy.encode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#encodeprofiles-feature_names-normalizetrue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        encode(profiles, feature_names, normalize=True)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#featurematrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureMatrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#featuretable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureTable
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FeatureTable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#featuretablefrom_yamlpathnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureTable.from_yaml(path=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#featuretablefrom_dictmapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FeatureTable.from_dict(mapping)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kmer_lenfeature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .kmer_len(feature)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tablefeature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .table(feature)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#default_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        default_table()
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dnaflexpyio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNAflexpy.io
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DNAflexpy.io">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read_fastapath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_fasta(path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_tablepath-seq_col0-value_col1-id_colnone-headernone-sept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_bedpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_bed(path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extract_intervalsintervals-genome-widthnone-on_edgedrop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        extract_intervals(intervals, genome, width=None, on_edge="drop")
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warn_if_ambiguousrecords-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        warn_if_ambiguous(records, source)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dnaflexpyplotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNAflexpy.plotting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DNAflexpy.plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heatmapprofile-nbinsnone-order_rowsstd-zscalecolumn-cmapnone-axnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        heatmap(profile, nbins=None, order_rows="std", zscale="column", cmap=None, ax=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metaprofileprofile-backgroundnone-nbinsnone-zscaleauto-axnone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metaprofile(profile, background=None, nbins=None, zscale="auto", ax=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trackplotprofiles-seqidnone-nbinsnone-figsizenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trackplot(profiles, seqid=None, nbins=None, figsize=None)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
+<p>Everything importable from <code>DNAflexpy</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">DNAflexpy</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FlexProfiler</span><span class="p">,</span> <span class="n">FlexProfile</span><span class="p">,</span> <span class="n">ProfileSet</span><span class="p">,</span> <span class="n">FeatureTable</span><span class="p">,</span> <span class="n">default_table</span><span class="p">,</span> <span class="n">profile</span>
+<span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<hr />
+<h2 id="profileseq-featurednasei-window_size10"><code>profile(seq, feature="DNaseI", window_size=10)</code><a class="headerlink" href="#profileseq-featurednasei-window_size10" title="Permanent link">&para;</a></h2>
+<p>Profile one sequence without building anything. Returns a 1-D NumPy array.</p>
+<p>The packaged lookup table is cached, so calling this in a loop does not re-read
+it from disk.</p>
+<hr />
+<h2 id="flexprofilerfeature-window_size10-lookupnone"><code>FlexProfiler(feature, window_size=10, lookup=None)</code><a class="headerlink" href="#flexprofilerfeature-window_size10-lookupnone" title="Permanent link">&para;</a></h2>
+<p>The engine. Reads the lookup table once, when you construct it.</p>
+<table>
+<thead>
+<tr>
+<th>argument</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feature</code></td>
+<td>one feature name, or a list of them</td>
+</tr>
+<tr>
+<td><code>window_size</code></td>
+<td><code>0</code> for per-k-mer values, otherwise the sliding window width</td>
+</tr>
+<tr>
+<td><code>lookup</code></td>
+<td><code>None</code> for the packaged table, or a path, a dict, or a <code>FeatureTable</code></td>
+</tr>
+</tbody>
+</table>
+<p>An unknown feature name raises straight away, rather than after reading your
+whole file. A negative <code>window_size</code> raises.</p>
+<h3 id="profileseq"><code>.profile(seq)</code><a class="headerlink" href="#profileseq" title="Permanent link">&para;</a></h3>
+<p>One sequence as a string. Returns a 1-D array. Only for single-feature
+profilers.</p>
+<h3 id="profile_seqsseqs"><code>.profile_seqs(seqs)</code><a class="headerlink" href="#profile_seqsseqs" title="Permanent link">&para;</a></h3>
+<p>A list of sequences (named <code>seq_0</code>, <code>seq_1</code>, …) or a <code>{name: sequence}</code> dict.</p>
+<h3 id="profile_fastapath-threadsnone"><code>.profile_fasta(path, threads=None)</code><a class="headerlink" href="#profile_fastapath-threadsnone" title="Permanent link">&para;</a></h3>
+<p>Every record in a FASTA file. <code>threads</code> spawns processes. Files under 64
+records always run serially, whatever you pass.</p>
+<h3 id="profile_tablepath-seq_col0-value_col1-id_colnone-headernone-sept"><code>.profile_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")</code><a class="headerlink" href="#profile_tablepath-seq_col0-value_col1-id_colnone-headernone-sept" title="Permanent link">&para;</a></h3>
+<p>A table of sequences and numeric labels. The labels become <code>FlexProfile.y</code>.</p>
+<p><code>header</code> must be <code>True</code> or <code>False</code>. It is not guessed. Columns may be given by
+position or by name; names require a header. A missing or non-numeric label
+raises, naming the line in the file.</p>
+<h3 id="from_bedbed-genome-widthnone-on_edgedrop"><code>.from_bed(bed, genome, width=None, on_edge="drop")</code><a class="headerlink" href="#from_bedbed-genome-widthnone-on_edgedrop" title="Permanent link">&para;</a></h3>
+<p>Intervals from a BED file, with sequences taken from a reference genome FASTA.</p>
+<p><code>width</code> re-centres each interval and cuts it to that many bases, so every row
+is the same length. <code>on_edge</code> handles windows that run past the end of a
+chromosome: <code>"drop"</code>, <code>"error"</code> or <code>"pad"</code>.</p>
+<p>Needs the <code>bed</code> extra (<code>pip install -e '.[bed]'</code>).</p>
+<h3 id="features"><code>.features</code><a class="headerlink" href="#features" title="Permanent link">&para;</a></h3>
+<p>The feature names this profiler was built with.</p>
+<h3 id="kmer_lenfeaturenone"><code>.kmer_len(feature=None)</code><a class="headerlink" href="#kmer_lenfeaturenone" title="Permanent link">&para;</a></h3>
+<p>The k-mer length for a feature, defaulting to the first one.</p>
+<hr />
+<h2 id="flexprofile"><code>FlexProfile</code><a class="headerlink" href="#flexprofile" title="Permanent link">&para;</a></h2>
+<p>What every profiling call returns.</p>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.frame</code></td>
+<td>wide DataFrame: one row per sequence, one column per position</td>
+</tr>
+<tr>
+<td><code>.seqids</code></td>
+<td>sequence names, in input order</td>
+</tr>
+<tr>
+<td><code>.y</code></td>
+<td>the labels from a table, or <code>None</code></td>
+</tr>
+<tr>
+<td><code>.seqs</code></td>
+<td>the input sequences, in the same order, or <code>None</code></td>
+</tr>
+<tr>
+<td><code>.n_masked</code></td>
+<td><code>{name: count}</code> of positions that could not be scored</td>
+</tr>
+<tr>
+<td><code>.feature</code>, <code>.window_size</code>, <code>.kmer_len</code></td>
+<td>what produced it</td>
+</tr>
+</tbody>
+</table>
+<h3 id="to_tsvpath"><code>.to_tsv(path)</code><a class="headerlink" href="#to_tsvpath" title="Permanent link">&para;</a></h3>
+<p>Write the tab-separated format the original package produced, exactly.
+Sequences shorter than the window become a name with no values.</p>
+<h3 id="to_frametidyfalse"><code>.to_frame(tidy=False)</code><a class="headerlink" href="#to_frametidyfalse" title="Permanent link">&para;</a></h3>
+<p><code>tidy=False</code> returns <code>.frame</code>. <code>tidy=True</code> returns a long table with columns
+<code>seqid</code>, <code>position</code>, <code>value</code>, <code>feature</code>.</p>
+<h3 id="encodefeature_names-normalizetrue"><code>.encode(feature_names, normalize=True)</code><a class="headerlink" href="#encodefeature_names-normalizetrue" title="Permanent link">&para;</a></h3>
+<p>Build a <code>FeatureMatrix</code>. Short for <code>DNAflexpy.encode.encode(self, ...)</code>.</p>
+<h3 id="heatmapkwargs-metaprofilekwargs"><code>.heatmap(**kwargs)</code> / <code>.metaprofile(**kwargs)</code><a class="headerlink" href="#heatmapkwargs-metaprofilekwargs" title="Permanent link">&para;</a></h3>
+<p>Draw this profile. See <code>DNAflexpy.plotting</code> below.</p>
+<hr />
+<h2 id="profileset"><code>ProfileSet</code><a class="headerlink" href="#profileset" title="Permanent link">&para;</a></h2>
+<p>A dict of <code>{feature: FlexProfile}</code>, returned when you ask for several features
+at once. Features are kept apart because different k-mer lengths give different
+numbers of values for the same sequence.</p>
+<h3 id="to_tidy"><code>.to_tidy()</code><a class="headerlink" href="#to_tidy" title="Permanent link">&para;</a></h3>
+<p>Every feature stacked into one long DataFrame.</p>
+<h3 id="encodefeature_names-normalizetrue_1"><code>.encode(feature_names, normalize=True)</code><a class="headerlink" href="#encodefeature_names-normalizetrue_1" title="Permanent link">&para;</a></h3>
+<p>Build a <code>FeatureMatrix</code> spanning several features at once.</p>
+<h3 id="trackplotseqidnone-nbinsnone"><code>.trackplot(seqid=None, nbins=None)</code><a class="headerlink" href="#trackplotseqidnone-nbinsnone" title="Permanent link">&para;</a></h3>
+<p>Stack every feature for one sequence. Returns a <code>Figure</code>.</p>
+<hr />
+<h2 id="dnaflexpyencode"><code>DNAflexpy.encode</code><a class="headerlink" href="#dnaflexpyencode" title="Permanent link">&para;</a></h2>
+<h3 id="encodeprofiles-feature_names-normalizetrue"><code>encode(profiles, feature_names, normalize=True)</code><a class="headerlink" href="#encodeprofiles-feature_names-normalizetrue" title="Permanent link">&para;</a></h3>
+<p>Turn a <code>FlexProfile</code> or a <code>ProfileSet</code> into a design matrix. <code>feature_names</code> is
+a list; each entry names one block of columns and the blocks are joined in the
+order given.</p>
+<table>
+<thead>
+<tr>
+<th>entry</th>
+<th>block</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"{k}-mer"</code></td>
+<td>one-hot sequence encoding, <code>4**k</code> binary columns per position</td>
+</tr>
+<tr>
+<td><code>"{n}-{feature}"</code></td>
+<td>the nth-order terms of a profiled feature: products at <code>n</code> adjacent positions. <code>n=1</code> is the values themselves</td>
+</tr>
+</tbody>
+</table>
+<p>Column names are <code>seq.{k}mer.p{i}.{KMER}</code> and <code>{feature}.w{window}.o{n}.p{i}</code>,
+positions counted from 1. The window size is part of the name because it
+changes what a position means.</p>
+<p><code>normalize=True</code> min-max scales each feature block to <code>[0, 1]</code> on its own
+range. One-hot blocks are never scaled. The range comes from the data you
+passed, so pass <code>normalize=False</code> and scale in a scikit-learn pipeline if you
+are splitting train and test.</p>
+<p>Raises if the sequences are not all the same length, if a name does not parse,
+if a requested feature was not profiled, if a name is repeated, or if a <code>k-mer</code>
+term is asked for on a profile that did not keep its sequences.</p>
+<p><code>NaN</code> is preserved, never filled.</p>
+<h3 id="featurematrix"><code>FeatureMatrix</code><a class="headerlink" href="#featurematrix" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>member</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.X</code></td>
+<td>the matrix, a NumPy array of floats</td>
+</tr>
+<tr>
+<td><code>.columns</code></td>
+<td>one name per column</td>
+</tr>
+<tr>
+<td><code>.seqids</code></td>
+<td>one name per row, in input order</td>
+</tr>
+<tr>
+<td><code>.y</code></td>
+<td>the labels, if the profile carried any</td>
+</tr>
+<tr>
+<td><code>.window_size</code></td>
+<td>the window the profile was built with</td>
+</tr>
+<tr>
+<td><code>.feature_names</code></td>
+<td>the request, as passed</td>
+</tr>
+<tr>
+<td><code>.shape</code></td>
+<td><code>(rows, columns)</code></td>
+</tr>
+<tr>
+<td><code>.to_frame()</code></td>
+<td>a pandas DataFrame with those names and index</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="featuretable"><code>FeatureTable</code><a class="headerlink" href="#featuretable" title="Permanent link">&para;</a></h2>
+<p>A validated set of lookup tables.</p>
+<h3 id="featuretablefrom_yamlpathnone"><code>FeatureTable.from_yaml(path=None)</code><a class="headerlink" href="#featuretablefrom_yamlpathnone" title="Permanent link">&para;</a></h3>
+<p>Load from a YAML file. <code>None</code> loads the packaged table.</p>
+<h3 id="featuretablefrom_dictmapping"><code>FeatureTable.from_dict(mapping)</code><a class="headerlink" href="#featuretablefrom_dictmapping" title="Permanent link">&para;</a></h3>
+<p>Load from <code>{feature: {kmer: value}}</code>.</p>
+<p>Both check the table as they load it. Mixed k-mer lengths inside one feature
+are rejected, because the k-mer length is read from the keys themselves. Keys
+outside A, C, G, T are rejected. Non-numeric values are rejected. A table with
+fewer k-mers than it should have is allowed but warns.</p>
+<h3 id="features_1"><code>.features</code><a class="headerlink" href="#features_1" title="Permanent link">&para;</a></h3>
+<p>Every feature name.</p>
+<h3 id="kmer_lenfeature"><code>.kmer_len(feature)</code><a class="headerlink" href="#kmer_lenfeature" title="Permanent link">&para;</a></h3>
+<p>The k-mer length, worked out from the keys.</p>
+<h3 id="tablefeature"><code>.table(feature)</code><a class="headerlink" href="#tablefeature" title="Permanent link">&para;</a></h3>
+<p>The <code>{kmer: value}</code> mapping, read-only.</p>
+<hr />
+<h2 id="default_table"><code>default_table()</code><a class="headerlink" href="#default_table" title="Permanent link">&para;</a></h2>
+<p>The packaged lookup table, parsed at most once per session.</p>
+<hr />
+<h2 id="dnaflexpyio"><code>DNAflexpy.io</code><a class="headerlink" href="#dnaflexpyio" title="Permanent link">&para;</a></h2>
+<p>The readers, usable on their own.</p>
+<h3 id="read_fastapath"><code>read_fasta(path)</code><a class="headerlink" href="#read_fastapath" title="Permanent link">&para;</a></h3>
+<p>Yields <code>(name, sequence)</code>. Handles wrapped lines and a missing final newline.</p>
+<h3 id="read_tablepath-seq_col0-value_col1-id_colnone-headernone-sept"><code>read_table(path, seq_col=0, value_col=1, id_col=None, header=None, sep="\t")</code><a class="headerlink" href="#read_tablepath-seq_col0-value_col1-id_colnone-headernone-sept" title="Permanent link">&para;</a></h3>
+<p>Returns <code>(name, sequence, value)</code> triples.</p>
+<h3 id="read_bedpath"><code>read_bed(path)</code><a class="headerlink" href="#read_bedpath" title="Permanent link">&para;</a></h3>
+<p>Returns <code>(chrom, start, end, name, strand)</code> tuples, keeping BED's own
+zero-based numbering with the end position excluded. <code>track</code>, <code>browser</code> and
+<code>#</code> lines are skipped; a contig whose name merely begins with those words is
+not.</p>
+<h3 id="extract_intervalsintervals-genome-widthnone-on_edgedrop"><code>extract_intervals(intervals, genome, width=None, on_edge="drop")</code><a class="headerlink" href="#extract_intervalsintervals-genome-widthnone-on_edgedrop" title="Permanent link">&para;</a></h3>
+<p>Turns those tuples into <code>(name, sequence)</code> pairs using a reference genome.
+Intervals on the minus strand are reverse-complemented. Imports <code>pyfaidx</code> only
+when called, so the rest of the package works without it.</p>
+<h3 id="warn_if_ambiguousrecords-source"><code>warn_if_ambiguous(records, source)</code><a class="headerlink" href="#warn_if_ambiguousrecords-source" title="Permanent link">&para;</a></h3>
+<p>Warns when sequences contain letters outside A, C, G, T, N. Every profiling
+entry point calls this once already.</p>
+<hr />
+<h2 id="dnaflexpyplotting"><code>DNAflexpy.plotting</code><a class="headerlink" href="#dnaflexpyplotting" title="Permanent link">&para;</a></h2>
+<p>Needs matplotlib, the optional <code>DNAflexpy[plot]</code> extra. Imported inside each
+function, so the rest of the package works without it.</p>
+<h3 id="heatmapprofile-nbinsnone-order_rowsstd-zscalecolumn-cmapnone-axnone"><code>heatmap(profile, nbins=None, order_rows="std", zscale="column", cmap=None, ax=None)</code><a class="headerlink" href="#heatmapprofile-nbinsnone-order_rowsstd-zscalecolumn-cmapnone-axnone" title="Permanent link">&para;</a></h3>
+<p>Rows are sequences, columns are positions. One feature per figure: features
+have different units and cannot share a colour scale. Signed features get a
+diverging colormap centred at zero. Returns the <code>Axes</code>.</p>
+<p><code>nbins</code> averages positions into equal-width bins, applied <strong>before</strong> scaling.</p>
+<p><code>order_rows</code> is <code>"std"</code> (most variable first, the default), <code>"input"</code>, or
+<code>"cv"</code>. <code>"cv"</code> raises unless every value is strictly positive: it is
+<code>std/mean</code>, which inverts on negative means and blows up near zero, and
+<code>DNaseI</code>, <code>prop</code>, <code>freeen</code> and <code>mechen</code> all take negative values.</p>
+<h3 id="metaprofileprofile-backgroundnone-nbinsnone-zscaleauto-axnone"><code>metaprofile(profile, background=None, nbins=None, zscale="auto", ax=None)</code><a class="headerlink" href="#metaprofileprofile-backgroundnone-nbinsnone-zscaleauto-axnone" title="Permanent link">&para;</a></h3>
+<p>The position-wise average as a line. Returns the <code>Axes</code>.</p>
+<p>Without a background, <code>zscale="column"</code> <strong>raises</strong>: scaling each position
+across sequences and then averaging down that position cancels to exactly zero,
+so the line would be flat by construction. The default is <code>"global"</code>.</p>
+<p>With a background, each column is standardised against the background's own
+mean and standard deviation. The background then sits flat at zero and the
+foreground reads in background standard deviations. The background must match
+on feature and window size.</p>
+<h3 id="trackplotprofiles-seqidnone-nbinsnone-figsizenone"><code>trackplot(profiles, seqid=None, nbins=None, figsize=None)</code><a class="headerlink" href="#trackplotprofiles-seqidnone-nbinsnone-figsizenone" title="Permanent link">&para;</a></h3>
+<p>One sequence, every feature stacked on a shared x-axis, each with its own
+y-axis. Returns the <code>Figure</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
