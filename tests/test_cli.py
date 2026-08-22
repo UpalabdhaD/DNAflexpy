@@ -269,7 +269,96 @@ def test_version_is_the_package_version(capsys):
     assert __version__ in capsys.readouterr().out
 
 
-def test_there_is_no_plot_subcommand_yet():
-    """A subcommand that exists and errors is worse than one that does not."""
-    with pytest.raises(SystemExit):
-        main(["plot", "out.tsv"])
+# --- plot -------------------------------------------------------------------
+
+
+def test_plot_heatmap_writes_an_image(fasta, tmp_path):
+    out = tmp_path / "hm.png"
+    assert main(["plot", "heatmap", str(fasta), "--feature", "DNaseI",
+                 "--out", str(out)]) == 0
+    assert out.stat().st_size > 1000
+    assert out.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_plot_meta_writes_an_image(fasta, tmp_path):
+    out = tmp_path / "meta.png"
+    assert main(["plot", "meta", str(fasta), "--out", str(out)]) == 0
+    assert out.exists()
+
+
+def test_plot_track_stacks_several_features(fasta, tmp_path):
+    out = tmp_path / "track.png"
+    assert main(["plot", "track", str(fasta), "--feature", "DNaseI", "gc",
+                 "--out", str(out)]) == 0
+    assert out.exists()
+
+
+def test_heatmap_refuses_several_features(fasta, tmp_path):
+    """Features have different units and cannot share a colour scale."""
+    with pytest.raises(SystemExit, match="plot track"):
+        main(["plot", "heatmap", str(fasta), "--feature", "DNaseI", "gc",
+              "--out", str(tmp_path / "x.png")])
+
+
+def test_plot_meta_takes_a_background(fasta, tmp_path):
+    control = tmp_path / "bg.fa"
+    control.write_text(f">c1\n{SEQ}\n>c2\n{SEQ}\n")
+    out = tmp_path / "meta.png"
+    assert main(["plot", "meta", str(fasta), "--background", str(control),
+                 "--out", str(out)]) == 0
+    assert out.exists()
+
+
+def test_a_background_on_the_wrong_kind_is_refused(fasta, tmp_path):
+    with pytest.raises(SystemExit, match="plot meta"):
+        main(["plot", "heatmap", str(fasta), "--background", str(fasta),
+              "--out", str(tmp_path / "x.png")])
+
+
+def test_the_cli_surfaces_the_flat_line_refusal(fasta, tmp_path):
+    with pytest.raises(SystemExit, match="flat line at zero"):
+        main(["plot", "meta", str(fasta), "--zscale", "column",
+              "--out", str(tmp_path / "x.png")])
+
+
+def test_the_cli_surfaces_the_cv_refusal(fasta, tmp_path):
+    with pytest.raises(SystemExit, match="strictly positive"):
+        main(["plot", "heatmap", str(fasta), "--feature", "DNaseI",
+              "--order-rows", "cv", "--out", str(tmp_path / "x.png")])
+
+
+def test_plot_binning_reaches_the_figure(fasta, tmp_path):
+    out = tmp_path / "hm.png"
+    assert main(["plot", "heatmap", str(fasta), "--nbins", "4",
+                 "--out", str(out)]) == 0
+    assert out.exists()
+
+
+def test_plot_works_from_bed_input(tmp_path, genome):
+    bed = tmp_path / "peaks.bed"
+    bed.write_text("chr1\t10\t30\tpeakA\nchr1\t50\t70\tpeakB\n")
+    out = tmp_path / "hm.png"
+    assert main(["plot", "heatmap", str(bed), "--genome", str(genome),
+                 "--width", "20", "--out", str(out)]) == 0
+    assert out.exists()
+
+
+def test_zscale_none_draws_an_unscaled_metaprofile(fasta, tmp_path):
+    """--zscale none is not the refused case: an unscaled mean is a real
+    figure. Only column scaling cancels to a flat line."""
+    out = tmp_path / "meta.png"
+    assert main(["plot", "meta", str(fasta), "--zscale", "none",
+                 "--out", str(out)]) == 0
+    assert out.exists()
+
+
+def test_zscale_global_reaches_the_heatmap(fasta, tmp_path):
+    from DNAflexpy.cli import _zscale_for
+
+    assert _zscale_for("heatmap", "auto") == "column"
+    assert _zscale_for("meta", "auto") == "auto"
+    assert _zscale_for("heatmap", "none") is None
+    assert _zscale_for("heatmap", "global") == "global"
+    out = tmp_path / "hm.png"
+    assert main(["plot", "heatmap", str(fasta), "--zscale", "global",
+                 "--out", str(out)]) == 0

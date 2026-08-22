@@ -12,6 +12,15 @@ import pathlib
 
 import pandas as pd
 
+try:  # pragma: no cover - matplotlib is an optional extra
+    import matplotlib
+
+    # Must happen before anything imports pyplot: the default backend on
+    # macOS opens a window, which hangs a headless test run.
+    matplotlib.use("Agg")
+except ImportError:
+    pass
+
 from rxv.DNAflexpy.utils import (
     get_kmer_len,
     load_feature_data,

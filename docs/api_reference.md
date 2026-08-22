@@ -91,6 +91,9 @@ Sequences shorter than the window become a name with no values.
 ### `.encode(feature_names, normalize=True)`
 Build a `FeatureMatrix`. Short for `DNAflexpy.encode.encode(self, ...)`.
 
+### `.heatmap(**kwargs)` / `.metaprofile(**kwargs)`
+Draw this profile. See `DNAflexpy.plotting` below.
+
 ---
 
 ## `ProfileSet`
@@ -104,6 +107,9 @@ Every feature stacked into one long DataFrame.
 
 ### `.encode(feature_names, normalize=True)`
 Build a `FeatureMatrix` spanning several features at once.
+
+### `.trackplot(seqid=None, nbins=None)`
+Stack every feature for one sequence. Returns a `Figure`.
 
 ---
 
@@ -206,3 +212,41 @@ when called, so the rest of the package works without it.
 ### `warn_if_ambiguous(records, source)`
 Warns when sequences contain letters outside A, C, G, T, N. Every profiling
 entry point calls this once already.
+
+---
+
+## `DNAflexpy.plotting`
+
+Needs matplotlib, the optional `DNAflexpy[plot]` extra. Imported inside each
+function, so the rest of the package works without it.
+
+### `heatmap(profile, nbins=None, order_rows="std", zscale="column", cmap=None, ax=None)`
+
+Rows are sequences, columns are positions. One feature per figure: features
+have different units and cannot share a colour scale. Signed features get a
+diverging colormap centred at zero. Returns the `Axes`.
+
+`nbins` averages positions into equal-width bins, applied **before** scaling.
+
+`order_rows` is `"std"` (most variable first, the default), `"input"`, or
+`"cv"`. `"cv"` raises unless every value is strictly positive: it is
+`std/mean`, which inverts on negative means and blows up near zero, and
+`DNaseI`, `prop`, `freeen` and `mechen` all take negative values.
+
+### `metaprofile(profile, background=None, nbins=None, zscale="auto", ax=None)`
+
+The position-wise average as a line. Returns the `Axes`.
+
+Without a background, `zscale="column"` **raises**: scaling each position
+across sequences and then averaging down that position cancels to exactly zero,
+so the line would be flat by construction. The default is `"global"`.
+
+With a background, each column is standardised against the background's own
+mean and standard deviation. The background then sits flat at zero and the
+foreground reads in background standard deviations. The background must match
+on feature and window size.
+
+### `trackplot(profiles, seqid=None, nbins=None, figsize=None)`
+
+One sequence, every feature stacked on a shared x-axis, each with its own
+y-axis. Returns the `Figure`.

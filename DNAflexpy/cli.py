@@ -190,6 +190,77 @@ def _cmd_encode(args) -> int:
     return 0
 
 
+def _zscale_for(kind: str, chosen: str):
+    """Translate --zscale into what the plot function expects.
+
+    The two figures want different defaults, and this is the only place
+    that knows it: a heatmap scales per position, while a metaprofile
+    decides from whether it was given a background. Keeping the mapping
+    here rather than mutating args in main() means the next subcommand does
+    not inherit a rewrite it never asked for.
+    """
+    if chosen == "none":
+        return None
+    if chosen != "auto":
+        return chosen
+    return "column" if kind == "heatmap" else "auto"
+
+
+def _cmd_plot(args) -> int:
+    features = args.feature
+    if args.kind != "track" and len(features) > 1:
+        raise SystemExit(
+            f"{args.kind} draws one feature per figure, but "
+            f"{len(features)} were given. Features have different units and "
+            "cannot share one scale. Use `plot track` to stack them."
+        )
+    try:
+        _, profiles = _profile_input(args, features)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from None
+
+    background = None
+    if args.background:
+        if args.kind != "meta":
+            raise SystemExit("--background only applies to `plot meta`")
+        bg_args = _copy_for_background(args)
+        _, bg_profiles = _profile_input(bg_args, features)
+        background = bg_profiles[features[0]]
+
+    try:
+        if args.kind == "track":
+            figure = profiles.trackplot(seqid=args.seqid, nbins=args.nbins)
+        elif args.kind == "heatmap":
+            axes = profiles[features[0]].heatmap(
+                nbins=args.nbins, order_rows=args.order_rows,
+                zscale=_zscale_for("heatmap", args.zscale),
+            )
+            figure = axes.figure
+        else:
+            axes = profiles[features[0]].metaprofile(
+                background=background, nbins=args.nbins,
+                zscale=_zscale_for("meta", args.zscale),
+            )
+            figure = axes.figure
+    except (ValueError, ImportError) as exc:
+        raise SystemExit(str(exc)) from None
+
+    figure.savefig(args.out, dpi=args.dpi, bbox_inches="tight")
+    print(f"wrote {args.out}", file=sys.stderr)
+    return 0
+
+
+def _copy_for_background(args):
+    """The same reader settings, pointed at the control file."""
+    import copy
+
+    other = copy.copy(args)
+    other.input = args.background
+    other.seq = None
+    other.format = None
+    return other
+
+
 def _add_input_arguments(parser) -> None:
     """Arguments shared by every subcommand that reads sequences."""
     parser.add_argument("input", nargs="?", help="FASTA, BED or table file")
@@ -251,6 +322,26 @@ def build_parser() -> argparse.ArgumentParser:
     encode.add_argument("--no-normalize", action="store_true",
                         help="skip min-max scaling of feature blocks")
     encode.set_defaults(func=_cmd_encode)
+
+    plot = subparsers.add_parser("plot", help="draw a figure")
+    plot.add_argument("kind", choices=("heatmap", "meta", "track"),
+                      help="heatmap, metaprofile or stacked tracks")
+    _add_input_arguments(plot)
+    plot.add_argument("--feature", nargs="+", default=["DNaseI"],
+                      help="feature(s); heatmap and meta take exactly one")
+    plot.add_argument("--out", default="plot.png", help="output image [default: plot.png]")
+    plot.add_argument("--dpi", type=int, default=150, help="image resolution [default: 150]")
+    plot.add_argument("--nbins", type=int, default=None,
+                      help="average positions into this many bins")
+    plot.add_argument("--order-rows", choices=("input", "std", "cv"), default="std",
+                      help="heatmap row order [default: std]")
+    plot.add_argument("--zscale", default="auto",
+                      choices=("column", "global", "none", "auto"),
+                      help="how to standardise before drawing")
+    plot.add_argument("--background",
+                      help="control file for `plot meta`, read the same way as the input")
+    plot.add_argument("--seqid", help="which sequence `plot track` should draw")
+    plot.set_defaults(func=_cmd_plot)
 
     return parser
 

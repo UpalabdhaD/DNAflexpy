@@ -36,6 +36,12 @@ class ProfileSet(dict):
 
         return encode(self, feature_names, normalize=normalize)
 
+    def trackplot(self, **kwargs):
+        """Stack every feature for one sequence. See `DNAflexpy.plotting`."""
+        from DNAflexpy.plotting import trackplot
+
+        return trackplot(self, **kwargs)
+
 
 class FlexProfiler:
     """Profiles sequences against one or more flexibility features.
